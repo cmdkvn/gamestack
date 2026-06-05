@@ -38,23 +38,37 @@ You:    /skill-feedback - <skill>        # log when a skill output was wrong; ag
 
 ## Install
 
+Clone the gamestack repo somewhere outside your AI agent host's skill directory, then run `./setup`. The recommended location is `~/.gamestack/`:
+
 ```bash
-git clone --single-branch --depth 1 https://github.com/cmdkvn/gamestack.git ~/.claude/skills/gamestack
-cd ~/.claude/skills/gamestack
+git clone --single-branch --depth 1 https://github.com/cmdkvn/gamestack.git ~/.gamestack
+cd ~/.gamestack
 ./setup
 ```
 
-`./setup` auto-detects Claude Code and symlinks every shipped skill into the host's discovery path. Subsequent runs are idempotent. Then in any project directory: `/gamestack`.
+`./setup` auto-detects Claude Code and symlinks every shipped skill into the host's discovery path (`~/.claude/skills/<name>/`). Subsequent runs are idempotent. Then in any project directory, open Claude Code and type `/gamestack`.
 
 ```bash
 ./setup --status              # what's installed
 ./setup --check-updates       # compare local commit to origin/main
 ./setup --uninstall           # remove gamestack symlinks
-./setup --host codex          # other host (codex, cursor — verified)
+./setup --host codex          # other host (codex, cursor, opencode — verified)
                               # factory, slate, kiro, hermes, gbrain — community / unverified
 ```
 
 The CLIs (`gamestack-asset-audit`, `gamestack-skill-feedback`, etc.) require Bun: `brew install bun` once. Skills work without it.
+
+> **Why not clone directly into `~/.claude/skills/`?** That directory is the host's skill discovery path. gamestack ships a `/gamestack` router skill that needs to install at `~/.claude/skills/gamestack/`, which collides if the repo itself is the target. Keep the checkout separate so `./setup` can manage the symlinks cleanly.
+
+### Updating
+
+When new gamestack releases land, pull and re-run setup. The setup script removes stale symlinks for skills that were deleted upstream:
+
+```bash
+cd ~/.gamestack && git pull --ff-only && ./setup
+```
+
+`./setup --check-updates` (no `git pull`) shows whether you're behind origin/main.
 
 Full first-session walkthrough: [`docs/howto/first-30-minutes.md`](docs/howto/first-30-minutes.md).
 

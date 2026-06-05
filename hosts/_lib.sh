@@ -85,9 +85,43 @@ _gamestack_skill_status() {
   fi
 }
 
+# Remove symlinks in target_dir that point into this gamestack checkout's
+# skills/ directory but whose target no longer exists (e.g. a skill that was
+# consolidated or deleted upstream). Idempotent. Never touches symlinks
+# pointing somewhere else, and never touches real directories or files.
+_gamestack_clean_stale_symlinks() {
+  local target_dir="$1"
+  local source_prefix="$GAMESTACK_DIR/skills/"
+  local cleaned=0
+  if [[ ! -d "$target_dir" ]]; then
+    return 0
+  fi
+  while IFS= read -r entry; do
+    [[ -z "$entry" ]] && continue
+    local link_target
+    link_target="$(readlink "$entry" 2>/dev/null || true)"
+    [[ -z "$link_target" ]] && continue
+    # Only consider symlinks pointing into this gamestack checkout.
+    case "$link_target" in
+      "$source_prefix"*) ;;
+      *) continue ;;
+    esac
+    # If the symlink target no longer exists, the skill was deleted upstream.
+    if [[ ! -e "$link_target" ]]; then
+      rm "$entry"
+      echo "  - $(basename "$entry") (stale; removed)"
+      cleaned=$((cleaned+1))
+    fi
+  done < <(find "$target_dir" -mindepth 1 -maxdepth 1 -type l)
+  if [[ $cleaned -gt 0 ]]; then
+    echo "  (cleaned $cleaned stale symlink(s))"
+  fi
+}
+
 _gamestack_install_to() {
   local target_dir="$1"
   mkdir -p "$target_dir"
+  _gamestack_clean_stale_symlinks "$target_dir"
   local added=0 reused=0 skipped=0
   while IFS= read -r name; do
     [[ -z "$name" ]] && continue

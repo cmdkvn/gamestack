@@ -4,13 +4,17 @@ The point of this doc is to get you from `git clone` to your first useful artifa
 
 ## 0:00 — Install (≈3 min)
 
+Clone gamestack to a host-agnostic location, then run setup:
+
 ```bash
-git clone --single-branch --depth 1 https://github.com/cmdkvn/gamestack.git ~/.claude/skills/gamestack
-cd ~/.claude/skills/gamestack
+git clone --single-branch --depth 1 https://github.com/cmdkvn/gamestack.git ~/.gamestack
+cd ~/.gamestack
 ./setup
 ```
 
-`./setup` auto-detects Claude Code (or pass `--host codex` / `--host cursor` for those). It symlinks every shipped skill into the host's discovery directory and prints what landed.
+`./setup` auto-detects Claude Code (or pass `--host codex` / `--host cursor` for those). It symlinks every shipped skill into the host's discovery directory (`~/.claude/skills/<name>/`) and prints what landed.
+
+(Don't clone into `~/.claude/skills/gamestack/` — the `/gamestack` router skill needs that exact path for its symlink. The repo and the install target stay separate.)
 
 Sanity check:
 

@@ -49,6 +49,7 @@ _gamestack_skill_status() {
 
 gamestack_install() {
   mkdir -p "$CLAUDE_SKILLS_DIR"
+  _gamestack_clean_stale_symlinks "$CLAUDE_SKILLS_DIR"
   local added=0 reused=0 skipped=0
   while IFS= read -r name; do
     [[ -z "$name" ]] && continue
