@@ -18,7 +18,7 @@
     "feedback": "bun run skill-feedback/index.ts"
   },
   "dependencies": {
-    "image-size": "1.2.0",
+    "image-size": "1.2.1",
     "@anthropic-ai/sdk": "^0.27.0"
   },
   "devDependencies": {
