@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Alliance.Gamestack
+namespace Gamestack
 {
     /// <summary>
     /// Captures the current frame as a PNG or JPEG byte stream.

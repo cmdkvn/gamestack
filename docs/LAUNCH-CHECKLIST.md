@@ -81,7 +81,7 @@ Every checked item is verifiable today by running the command in the **Verify** 
 | Cursor plugin manifest forward-compat | `hosts/cursor.sh` symlinks like the other hosts. If Cursor's production plugin loader requires a per-skill manifest, the script will need an emit step. |
 | Power tools are skills, not hooks | `/careful`, `/freeze`, etc. are behavioral skills Claude reads each turn. A Stop/PreToolUse hook implementation would enforce the discipline at the harness level. Pull request welcome. |
 | No CI integration for engine-SDK self-tests | Unity TestRunner + Godot scene-attach tests are self-tests today. CI integration is post-v1. |
-| No alliance studio games yet | The alliance studio scaffolding ships separately; once the first game is added, the SDKs will get their first real exercise. |
+| No first-party shipped game yet using the SDKs | The Unity + Godot SDKs are validated against an in-process fake engine, not a shipped title. The first game built end-to-end against either SDK will surface engine-specific issues; patch in v1.0.x as they're found. |
 
 ## Re-verification
 

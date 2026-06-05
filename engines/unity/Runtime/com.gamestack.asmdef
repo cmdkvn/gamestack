@@ -1,6 +1,6 @@
 {
-    "name": "Alliance.Gamestack",
-    "rootNamespace": "Alliance.Gamestack",
+    "name": "Gamestack",
+    "rootNamespace": "Gamestack",
     "references": [
         "Newtonsoft.Json"
     ],

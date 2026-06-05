@@ -11,7 +11,7 @@ This Unity Package Manager (UPM) package exposes a loopback-only HTTP server tha
 In Unity, open **Window → Package Manager → + → Add package from git URL** and paste:
 
 ```
-https://github.com/alliance/gamestack.git?path=engines/unity
+https://github.com/cmdkvn/gamestack.git?path=engines/unity
 ```
 
 ### Option B — Vendor into your project
@@ -43,7 +43,7 @@ Decorate any field or property on a `MonoBehaviour` with `[GameStackState("key")
 
 ```csharp
 using UnityEngine;
-using Alliance.Gamestack;
+using Gamestack;
 
 public class PlayerController : MonoBehaviour
 {

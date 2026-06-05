@@ -40,10 +40,11 @@ gamestack/
 
 ## When developing a new skill
 
-1. Read the gamestack design spec (lives at `alliance/docs/superpowers/specs/2026-06-03-gamestack-design.md` in the companion alliance studio).
-2. Read the implementation plan (`alliance/docs/superpowers/plans/2026-06-04-gamestack-implementation-plan.md`) to see which group this skill belongs to.
-3. Pattern-match against the closest already-shipped skill — keep voice and shape consistent.
+1. Read [`../README.md`](../README.md) and [`../docs/skills.md`](../docs/skills.md) to see how shipped skills present themselves — voice, structure, when-to-fire framing.
+2. Pattern-match against the closest already-shipped skill in `skills/<closest>/SKILL.md`. Keep voice and shape consistent across the catalog.
+3. Decide which phase of the Pitch → Plan → Build → Review → Playtest → Ship → Reflect pipeline the skill belongs to; add it to the right table in `README.md` and add a deep-dive entry in `docs/skills.md`.
 4. Iterate on the prompt content until invoking the skill produces useful results across at least 3 example scenarios.
+5. Run `bin/gamestack-skill-lint --warn-as-error` to validate frontmatter and link integrity before opening a PR.
 
 ## Reference
 

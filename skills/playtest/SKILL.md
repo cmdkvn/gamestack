@@ -20,7 +20,7 @@ If there's no build (just a prototype, just code), the right skill is `/find-the
 
 ## The phase decides everything
 
-`/playtest` behaves differently based on the game's current production phase. Read the phase from the game's `CLAUDE.md` line `## Current production phase` (the alliance studio template uses this convention). If absent, ask the developer.
+`/playtest` behaves differently based on the game's current production phase. Read the phase from the game's `CLAUDE.md` line `## Current production phase` if the project uses that convention. If absent, ask the developer.
 
 | Phase | What `/playtest` is hunting | Default scenarios |
 |---|---|---|

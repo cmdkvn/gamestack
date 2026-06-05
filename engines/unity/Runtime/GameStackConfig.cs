@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Alliance.Gamestack
+namespace Gamestack
 {
     public enum ScreenshotFormat
     {

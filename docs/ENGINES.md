@@ -57,7 +57,7 @@ The mechanism to populate `tagged` is the only thing that differs.
 
 ```csharp
 using UnityEngine;
-using Alliance.Gamestack;
+using Gamestack;
 
 public class PlayerController : MonoBehaviour
 {

@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.TestTools;
 using Object = UnityEngine.Object;
 
-namespace Alliance.Gamestack.Tests
+namespace Gamestack.Tests
 {
     public class SnapshotProviderTests
     {

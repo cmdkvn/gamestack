@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using UnityEngine;
 
-namespace Alliance.Gamestack
+namespace Gamestack
 {
     /// <summary>
     /// Hosts a loopback HTTP server exposing /state, /screenshot, and /health

@@ -14,7 +14,7 @@ Engine-side packages that expose a localhost state/action API for gamestack's `/
 
 ```
 engines/
-├── unity/      # UPM package (com.alliance.gamestack)
+├── unity/      # UPM package (com.gamestack)
 │   ├── package.json
 │   ├── Runtime/
 │   └── Editor/

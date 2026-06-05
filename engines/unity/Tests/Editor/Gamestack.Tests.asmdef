@@ -1,8 +1,8 @@
 {
-    "name": "Alliance.Gamestack.Tests",
-    "rootNamespace": "Alliance.Gamestack.Tests",
+    "name": "Gamestack.Tests",
+    "rootNamespace": "Gamestack.Tests",
     "references": [
-        "Alliance.Gamestack",
+        "Gamestack",
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner"
     ],

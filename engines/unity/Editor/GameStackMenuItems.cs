@@ -2,7 +2,7 @@ using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 
-namespace Alliance.Gamestack.Editor
+namespace Gamestack.Editor
 {
     public static class GameStackMenuItems
     {
@@ -45,6 +45,6 @@ namespace Alliance.Gamestack.Editor
         }
 
         [MenuItem(MenuRoot + "Open Docs", priority = 200)]
-        public static void OpenDocs() => Application.OpenURL("https://github.com/alliance/gamestack");
+        public static void OpenDocs() => Application.OpenURL("https://github.com/cmdkvn/gamestack");
     }
 }

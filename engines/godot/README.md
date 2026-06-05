@@ -13,7 +13,7 @@ Copy `addons/gamestack/` from this directory into your Godot project's `addons/`
 ### Option B — clone the gamestack repo and symlink
 
 ```bash
-git clone https://github.com/alliance/gamestack.git ~/src/gamestack
+git clone https://github.com/cmdkvn/gamestack.git ~/src/gamestack
 cd YOUR_GODOT_PROJECT
 ln -s ~/src/gamestack/engines/godot/addons/gamestack addons/gamestack
 ```

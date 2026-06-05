@@ -1,7 +1,7 @@
 using UnityEditor;
 using UnityEngine;
 
-namespace Alliance.Gamestack.Editor
+namespace Gamestack.Editor
 {
     public class GameStackEditorWindow : EditorWindow
     {

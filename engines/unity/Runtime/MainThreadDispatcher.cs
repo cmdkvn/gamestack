@@ -3,7 +3,7 @@ using System.Collections.Concurrent;
 using System.Threading;
 using UnityEngine;
 
-namespace Alliance.Gamestack
+namespace Gamestack
 {
     /// <summary>
     /// Marshals work from background threads (the HTTP listener) back to the Unity main thread.

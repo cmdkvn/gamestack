@@ -1,7 +1,7 @@
 using NUnit.Framework;
 using UnityEngine;
 
-namespace Alliance.Gamestack.Tests
+namespace Gamestack.Tests
 {
     public class BreakpointProviderTests
     {

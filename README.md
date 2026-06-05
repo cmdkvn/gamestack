@@ -56,12 +56,12 @@ That's the loop. Every command is a real specialist with real opinions; gamestac
 
 Open Claude Code and paste this:
 
-> Install gamestack: run `git clone --single-branch --depth 1 https://github.com/alliance/gamestack.git ~/.claude/skills/gamestack && cd ~/.claude/skills/gamestack && ./setup`. Then tell me which gamestack skills are now available.
+> Install gamestack: run `git clone --single-branch --depth 1 https://github.com/cmdkvn/gamestack.git ~/.claude/skills/gamestack && cd ~/.claude/skills/gamestack && ./setup`. Then tell me which gamestack skills are now available.
 
 Or manually:
 
 ```bash
-git clone --single-branch --depth 1 https://github.com/alliance/gamestack.git ~/.claude/skills/gamestack
+git clone --single-branch --depth 1 https://github.com/cmdkvn/gamestack.git ~/.claude/skills/gamestack
 cd ~/.claude/skills/gamestack
 ./setup
 ```

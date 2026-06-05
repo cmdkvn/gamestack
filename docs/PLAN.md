@@ -1,10 +1,6 @@
 # Implementation plan
 
-gamestack ships across four milestones organized as 16 groups, each ≤400k tokens. The authoritative plan lives in the companion alliance studio repo:
-
-> [`alliance/docs/superpowers/plans/2026-06-04-gamestack-implementation-plan.md`](https://github.com/alliance/alliance/blob/main/docs/superpowers/plans/2026-06-04-gamestack-implementation-plan.md)
-
-A snapshot of the milestone-level plan follows. For the design rationale behind each skill, see the spec at `alliance/docs/superpowers/specs/2026-06-03-gamestack-design.md`.
+gamestack v1.0 shipped across four milestones organized as 16 groups, each ≤400k tokens (cache-friendly Claude Code sessions). The milestone-level summary below is the public roadmap; for what landed in v1.0 specifically, see [`../CHANGELOG.md`](../CHANGELOG.md).
 
 ## Milestones
 
@@ -41,6 +37,6 @@ Engine SDKs still stubbed (full integration lands in M2).
 - **Group 15 — Reference docs + tutorials (✓ shipped):** ROLES / ENGINES / CERT / ACCESSIBILITY / PLATFORMS reference + 5 howto-* tutorials at `docs/howto/`. ~28,700 words across 10 docs.
 - **Group 16 — Tests + case studies + launch (✓ shipped):** `gamestack-skill-lint` regression validator (8th CLI, 11 tests), 2 case studies at `docs/case-studies/` (Unity + Godot, ~3500 words each), [`docs/LAUNCH-CHECKLIST.md`](LAUNCH-CHECKLIST.md), [`CHANGELOG.md`](../CHANGELOG.md) v1.0.0 entry. 89/0 Bun tests pass.
 
-## Group structure
+## What's next
 
-The 16 groups are individually sized at ≤400k tokens (cache-friendly Claude Code sessions). See the full plan in the alliance repo for the group breakdown, dependencies, recommended execution order, and risk flags.
+v1.0 is the launch baseline. Post-v1 work tracks in [`../CHANGELOG.md`](../CHANGELOG.md). Contributions welcome — see [`../.claude/CLAUDE.md`](../.claude/CLAUDE.md) for the skill-development guide.

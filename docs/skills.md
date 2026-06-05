@@ -576,7 +576,7 @@ Developer says "no, keep the November one." Claude re-scopes; no `--force` worka
 
 ```
 FREEZE — write refused.
-  Target: /Users/dev/alliance/README.md
+  Target: /Users/dev/myproject/README.md
   Frozen zone: games/bridge-keeper/
 
 To allow this edit:

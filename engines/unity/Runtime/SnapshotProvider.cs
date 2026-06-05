@@ -4,7 +4,7 @@ using System.Reflection;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-namespace Alliance.Gamestack
+namespace Gamestack
 {
     /// <summary>
     /// Implement on any MonoBehaviour that owns state needing custom snapshot/restore beyond

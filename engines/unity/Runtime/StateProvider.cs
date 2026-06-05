@@ -4,7 +4,7 @@ using System.Reflection;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-namespace Alliance.Gamestack
+namespace Gamestack
 {
     /// <summary>
     /// Builds the JSON-serializable game-state snapshot returned by GET /state.

@@ -1,8 +1,8 @@
 {
-    "name": "Alliance.Gamestack.Editor",
-    "rootNamespace": "Alliance.Gamestack.Editor",
+    "name": "Gamestack.Editor",
+    "rootNamespace": "Gamestack.Editor",
     "references": [
-        "Alliance.Gamestack"
+        "Gamestack"
     ],
     "includePlatforms": [
         "Editor"

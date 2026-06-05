@@ -35,3 +35,13 @@ coverage/
 
 # Logs
 *.log
+
+# Local-only working docs (design notes, specs, implementation plans, scratch).
+# Keep these on disk for your own workflow without committing them upstream.
+docs/superpowers/
+docs/_local/
+docs/_internal/
+notes/
+scratch/
+*.local.md
+

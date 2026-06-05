@@ -24,4 +24,4 @@ All notable changes to gamestack land here. Format follows [Keep a Changelog](ht
 - The Cursor host script symlinks like the other hosts; if Cursor's production plugin loader requires a manifest per skill, the script will need an emit step in a future release.
 - Live Unity / Godot project validation is still pending — the SDKs are validated end-to-end against an in-process `Bun.serve()` fake. Real engine bugs will surface with the first shipped game using them.
 
-[1.0.0]: https://github.com/alliance/gamestack/releases/tag/v1.0.0
+[1.0.0]: https://github.com/cmdkvn/gamestack/releases/tag/v1.0.0

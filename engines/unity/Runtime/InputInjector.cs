@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Alliance.Gamestack
+namespace Gamestack
 {
     /// <summary>
     /// Device class of a synthesized input event.

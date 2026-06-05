@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Alliance.Gamestack
+namespace Gamestack
 {
     /// <summary>
     /// Tag-based breakpoint API. The developer's game calls

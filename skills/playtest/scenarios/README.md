@@ -122,7 +122,7 @@ The five scenarios shipped with the skill:
 
 ## Promoting scenarios
 
-When a scenario is game-specific, keep it under `games/<game-slug>/playtest/scenarios/`. When it's reusable across the studio, copy to `studio/playbooks/playtest/`. The alliance studio's `_template` for new games can include studio scenarios in `playtest/scenarios/`.
+When a scenario is game-specific, keep it next to the game (e.g. `playtest/scenarios/` inside the project). When it's reusable across multiple games — for a studio sharing scenarios across projects — promote it to a shared location (e.g. `studio/playbooks/playtest/`) and reference it from each game.
 
 ## What scenarios don't do
 

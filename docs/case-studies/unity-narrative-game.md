@@ -124,7 +124,7 @@ Week 5 the developer opens an empty Unity project. They install the gamestack SD
 
 ```
 # Unity → Window → Package Manager → + → Add package from git URL:
-https://github.com/alliance/gamestack.git?path=engines/unity
+https://github.com/cmdkvn/gamestack.git?path=engines/unity
 ```
 
 Then Tools → gamestack → Create Config Asset, Tools → gamestack → Add Server to Scene. Loopback only, port 7331. Press Play, `http://localhost:7331/health` returns 200. Five minutes of setup that pays off for 30 weeks.

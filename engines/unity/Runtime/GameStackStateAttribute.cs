@@ -1,6 +1,6 @@
 using System;
 
-namespace Alliance.Gamestack
+namespace Gamestack
 {
     /// <summary>
     /// Tag a field or property on a MonoBehaviour to expose it through GET /state.

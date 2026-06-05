@@ -123,7 +123,7 @@ The autoplan summary in the chat references each file. The developer can read de
 
 These are baked into the pipeline. They auto-apply without asking unless they conflict with explicit developer choices:
 
-1. **Accessibility basic-tier is non-negotiable.** If `plan-audio-direction` or other skills find missing accessibility items, apply the studio defaults from `alliance/studio/docs/accessibility.md`.
+1. **Accessibility basic-tier is non-negotiable.** If `plan-audio-direction` or other skills find missing accessibility items, apply the defaults from [`docs/ACCESSIBILITY.md`](../../docs/ACCESSIBILITY.md) (GAG basic-tier + Top-4: remap, text scale, colorblind, subtitles).
 2. **Save format must have a version field and atomic writes.** Auto-add to tech-design if missing.
 3. **`.meta` files (Unity) are committed, never gitignored.** If found in `.gitignore`, propose removal as a top-priority finding.
 4. **Externalize strings from day one.** If localization tooling is unspecified, propose engine-default and surface as a quick decision.
