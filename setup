@@ -20,27 +20,40 @@ export GAMESTACK_DIR
 
 HOST=""
 MODE="install"
+WITH_CLI=0
+CLI_DIR=""
 
 usage() {
   cat <<'EOF'
-Usage: ./setup [--host <name>] [--uninstall | --status]
+Usage: ./setup [--host <name>] [--with-cli [--cli-dir <path>]] [--uninstall | --status]
 
-Install gamestack skills into your AI agent host.
+Install gamestack skills (and optionally CLIs) into your AI agent host.
 
 Options:
   --host <name>      Override host detection.
-                     Supported (v0.1): claude-code
-  --uninstall        Remove gamestack symlinks from the host.
-  --status           Show install status without changing anything.
+                     Supported: claude-code, codex, opencode, cursor, factory,
+                     slate, kiro, hermes, gbrain
+  --with-cli         Also install the bin/gamestack-* CLIs as symlinks into a
+                     writable on-PATH directory. Auto-detects
+                     /opt/homebrew/bin, /usr/local/bin, or ~/.local/bin.
+  --cli-dir <path>   Override the CLI install directory. Implies --with-cli.
+  --uninstall        Remove gamestack skill symlinks. Combine with --with-cli
+                     to also remove CLI symlinks.
+  --status           Show install status without changing anything. With
+                     --with-cli, also show CLI status.
   --check-updates    Compare local gamestack commit to origin/main.
                      Local-only — no third-party network calls.
   -h, --help         Show this help.
 
 Examples:
-  ./setup                           # auto-detect host and install
-  ./setup --status                  # see what's installed
-  ./setup --host claude-code        # explicit host
-  ./setup --uninstall               # remove all gamestack symlinks
+  ./setup                           # install skills only
+  ./setup --with-cli                # install skills + CLIs (CLI dir auto-detected)
+  ./setup --with-cli --cli-dir=~/bin
+  ./setup --status --with-cli       # show skills + CLI status
+  ./setup --uninstall --with-cli    # remove both
+
+After developing changes in this checkout, re-run `./setup --with-cli` to
+re-link any new skills or CLIs and clean up stale symlinks from removals.
 
 EOF
 }
@@ -73,6 +86,24 @@ while [[ $# -gt 0 ]]; do
       ;;
     --check-updates)
       MODE="check-updates"
+      shift
+      ;;
+    --with-cli)
+      WITH_CLI=1
+      shift
+      ;;
+    --cli-dir)
+      if [[ $# -lt 2 ]]; then
+        echo "error: --cli-dir requires a value" >&2
+        exit 1
+      fi
+      CLI_DIR="$2"
+      WITH_CLI=1
+      shift 2
+      ;;
+    --cli-dir=*)
+      CLI_DIR="${1#*=}"
+      WITH_CLI=1
       shift
       ;;
     *)
@@ -161,17 +192,41 @@ for fn in gamestack_install gamestack_uninstall gamestack_status; do
   fi
 done
 
+if [[ $WITH_CLI -eq 1 && -z "$CLI_DIR" ]]; then
+  CLI_DIR="$(_gamestack_detect_cli_dir)"
+  # Expand ~ in the user-supplied path too (handled below if it came via flag).
+fi
+# Expand a leading ~ in CLI_DIR (bash doesn't tilde-expand inside variables).
+if [[ -n "$CLI_DIR" && "$CLI_DIR" == "~"* ]]; then
+  CLI_DIR="${HOME}${CLI_DIR:1}"
+fi
+
 case "$MODE" in
   install)
-    echo "==> Installing gamestack for $HOST..."
+    echo "==> Installing gamestack skills for $HOST..."
     gamestack_install
+    if [[ $WITH_CLI -eq 1 ]]; then
+      echo
+      echo "==> Installing gamestack CLIs..."
+      _gamestack_install_clis_to "$CLI_DIR"
+    fi
     ;;
   uninstall)
-    echo "==> Uninstalling gamestack for $HOST..."
+    echo "==> Uninstalling gamestack skills for $HOST..."
     gamestack_uninstall
+    if [[ $WITH_CLI -eq 1 ]]; then
+      echo
+      echo "==> Uninstalling gamestack CLIs..."
+      _gamestack_uninstall_clis_to "$CLI_DIR"
+    fi
     ;;
   status)
     echo "==> gamestack status for $HOST:"
     gamestack_status
+    if [[ $WITH_CLI -eq 1 ]]; then
+      echo
+      echo "==> gamestack CLI status:"
+      _gamestack_status_clis_to "$CLI_DIR"
+    fi
     ;;
 esac
