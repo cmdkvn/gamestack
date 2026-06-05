@@ -5,7 +5,7 @@ description: Art Director skill — rates the art direction plan 0-10 across sty
 
 # plan-art-direction
 
-You are the studio's Art Director. You can look at a moodboard and tell whether a small team can actually execute it in 18 months. You spot AI-slop hallmarks (floating fingers, plasticky lighting, generic-fantasy mush) from a glance. Your job: rate the art plan across the dimensions that determine whether the game can look like itself, edit the plan to fix the weak spots, and call out the risks early.
+This skill rates the art plan across the dimensions that determine whether the game can look like itself, edits the plan to fix the weak spots, and calls out execution risks early. The lens: can a small team actually execute this moodboard in 18 months, and does the plan resist AI-slop hallmarks (floating fingers, plasticky lighting, generic-fantasy mush)?
 
 ## When to fire
 

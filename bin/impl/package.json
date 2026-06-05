@@ -14,7 +14,8 @@
     "taste": "bun run taste-update/index.ts",
     "models": "bun run model-benchmark/index.ts",
     "daemon": "bun run playtest-daemon/index.ts",
-    "lint": "bun run skill-lint/index.ts"
+    "lint": "bun run skill-lint/index.ts",
+    "feedback": "bun run skill-feedback/index.ts"
   },
   "dependencies": {
     "image-size": "1.2.0",

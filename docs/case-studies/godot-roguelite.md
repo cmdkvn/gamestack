@@ -221,12 +221,12 @@ KNOWN GODOT GOTCHAS (pinned to top of file)
 
 The scaffolding compiles clean. M spends the rest of week 4 wiring placeholder sprites, a basic camera follow, and the simplest possible thorn-tick AI. By Friday they can press space and hear a satisfying *snap* through the in-engine speaker placeholder.
 
-### Week 5, Friday — `/find-the-fun`
+### Week 5, Friday — `/critique --lens=fun`
 
 M has lived inside the prototype for three weeks. They've shown it to two friends, both of whom said "yeah, this is cool" without elaborating. M can't tell if "cool" is real or polite.
 
 ```
-/find-the-fun
+/critique --lens=fun
 ```
 
 The Prototype Critic asks the four questions:
@@ -278,7 +278,7 @@ RECOMMENDED: B this week, then judge whether C is needed.
 
 M does B. It takes one week. The thorn-tick now stands on a vine; cutting the vine drops the thorn-tick into the abyss below; the kill animation is *the absence of the thorn-tick.* The verb is now load-bearing for both navigation and combat, and the cutter is decisively not a sword.
 
-M writes the finding to `playtest/find-the-fun-2026-07-10.md`. They will re-read it at week 18 when they're tempted to add a second weapon. They will not add it.
+M writes the finding to `playtest/critique-fun-2026-07-10.md`. They will re-read it at week 18 when they're tempted to add a second weapon. They will not add it.
 
 ### Week 6 — closing the prototype
 
@@ -428,7 +428,7 @@ This learning will surface again at week 26. M will recognize it.
 
 ### Week 10–12 — closing the vertical slice
 
-The remaining three weeks are content work. Two more chunk authors (M's friend agreed to draw thorn-bushes for credit on the title screen), three additional enemy variants under the new "no-combat-is-the-combat" framing, the first 2-minute build that doesn't crash. M runs `/find-the-fun` again at the end of week 12:
+The remaining three weeks are content work. Two more chunk authors (M's friend agreed to draw thorn-bushes for credit on the title screen), three additional enemy variants under the new "no-combat-is-the-combat" framing, the first 2-minute build that doesn't crash. M runs `/critique --lens=fun` again at the end of week 12:
 
 ```
 KERNEL: still located. The "diagonal two-thorn cut" is now a vocabulary
@@ -471,12 +471,12 @@ The first CI run fails. Three textures are over 2048×2048. M finds them — ear
 
 From this point forward, every PR that bloats the assets fails before M can merge it. The `gamestack-asset-audit` CLI is doing the same work as the [`/asset-audit`](../../skills/asset-audit/SKILL.md) skill, just continuously.
 
-### Week 17 — `/perf-benchmark` catches a regression
+### Week 17 — `/critique --lens=perf` catches a regression
 
 M's friend ships the second-biome music loop and a particle-system upgrade to the cutter trail. The build still runs. M is about to merge. Then:
 
 ```
-/perf-benchmark
+/critique --lens=perf
 ```
 
 The Performance Engineer captures a snapshot, diffs against the baseline at `playtest/perf/baseline.json`:
@@ -510,7 +510,7 @@ FIX PROPOSAL (not auto-applied)
   a CPU-driven trail mesh.
 ```
 
-M lowers the emitter count to 48. Re-runs `/perf-benchmark`. Avg FPS recovers to 58. 99th-pct frame time drops to 19ms. They merge. The particle change would have shipped if M hadn't run the benchmark; the Steam Deck players would have noticed.
+M lowers the emitter count to 48. Re-runs `/critique --lens=perf`. Avg FPS recovers to 58. 99th-pct frame time drops to 19ms. They merge. The particle change would have shipped if M hadn't run the benchmark; the Steam Deck players would have noticed.
 
 This is the kind of regression that a Unity dev would have caught with Profile Analyzer and a Godot dev without gamestack would have caught at *the next playtest in three weeks*, by which point three more PRs would have piled on top and the bisect would take a day. The weekly cadence catches things at the source.
 
@@ -522,7 +522,7 @@ This is also the moment M is supposed to do something hard: lock the scope and n
 
 ## Phase 6: polish (week 23–28)
 
-### Week 23 — `/game-feel-audit` finds over-juicing
+### Week 23 — `/critique --lens=feel` finds over-juicing
 
 M expects the audit to surface things that need *more* juice. The cutter has had hit-pause and screen-shake for months; nothing feels under-juiced. M doesn't expect what the Polish Coach finds:
 
@@ -596,12 +596,12 @@ The week-9 lesson recurs. The boss-defer cleanup left an orphaned `boss_defeated
 
 Without the learning, this is a four-hour bug hunt. The learning system did exactly what it's for.
 
-### Week 27 — `/onboarding-audit`
+### Week 27 — `/critique --lens=onboarding`
 
 M times the prototype-to-first-cut path with the audit.
 
 ```
-/onboarding-audit
+/critique --lens=onboarding
 ```
 
 ```
@@ -644,7 +644,7 @@ M does all four. Time-to-first-cut drops to 11s — short of 9 but well under th
 
 ### Week 28 — closing polish
 
-Polish week 28 is mechanical. `/perf-benchmark` clean. `/asset-audit` clean. `/playtest 01-prototype-first-minute` and `02-quick-loop` both green. M plays the game for three full descents in a row without noting anything that needs fixing. They lock the build for pre-launch.
+Polish week 28 is mechanical. `/critique --lens=perf` clean. `/asset-audit` clean. `/playtest 01-prototype-first-minute` and `02-quick-loop` both green. M plays the game for three full descents in a row without noting anything that needs fixing. They lock the build for pre-launch.
 
 ## Phase 7: pre-launch (week 29–32)
 
@@ -713,12 +713,12 @@ WISHLIST-CONVERSION RISK: MEDIUM-HIGH (mainly the missing small capsule
 
 M fixes all of it. The small capsule and library logo are 2 hours of work. The trailer recut takes a day. The screenshots take half a day. The tags are 30 seconds. The wishlist-conversion risk drops to MEDIUM, which is realistic for a debut indie.
 
-### Week 30 — `/a11y-audit` for Steam Deck Verified
+### Week 30 — `/critique --lens=a11y` for Steam Deck Verified
 
 Steam Deck Verified isn't an accessibility cert — it's a controller + readability cert. But the high-failure categories overlap. M runs:
 
 ```
-/a11y-audit
+/critique --lens=a11y
 ```
 
 ```
@@ -748,7 +748,7 @@ ACTIONS
     high-contrast) with a settings toggle. ~1 day.
   - Bump cutter card description font size 12pt → 14pt at base; test
     1.5× scaling without clipping. ~half day.
-  - Re-run /a11y-audit. Re-test on Steam Deck.
+  - Re-run /critique --lens=a11y. Re-test on Steam Deck.
 
 PUBLIC REPORT WRITTEN: docs/a11y-report.md
   → Will appear on the Steam page in v1.0.
@@ -764,7 +764,7 @@ The 31% is the load-bearing number. For an 8-minute loop, retention measures whe
 
 ### Week 32 — final polish, pre-launch checklist
 
-Bug fixes from the Next Fest feedback. One genuine pattern: players want the cutter to have a sound when it's *fully recovered* and ready to swing again. M adds a subtle audio cue. `/game-feel-audit` confirms it's calibrated against the existing cutter swing audio, not competing with it.
+Bug fixes from the Next Fest feedback. One genuine pattern: players want the cutter to have a sound when it's *fully recovered* and ready to swing again. M adds a subtle audio cue. `/critique --lens=feel` confirms it's calibrated against the existing cutter swing audio, not competing with it.
 
 ```
 /cert-readiness pc
@@ -796,7 +796,7 @@ The PC "cert" isn't NDA-protected the way Switch is, but the discipline is the s
 
 M pulls the cert freeze pattern from the cert-walkthrough doc. PC doesn't require freeze the same way Switch does, but the discipline transfers — M `/freeze`s the build directory and the marketing assets.
 
-The rehearsal is one `/playtest 05-cert-save-fuzz` and one `/perf-benchmark` against the release candidate. Both green. M closes the laptop early.
+The rehearsal is one `/playtest 05-cert-save-fuzz` and one `/critique --lens=perf` against the release candidate. Both green. M closes the laptop early.
 
 ### Launch day, 10:00 ET — `/publish` and `/launch-day`
 
@@ -992,26 +992,26 @@ WHAT WORKED
   - Week-3 tech-design save-version field. Saved a v1.1 catastrophe.
   - /code-review-gamestack signal-leak detection caught two bugs that
     would have been "the game feels weird after 30 mins" review fodder.
-  - /perf-benchmark weekly cadence caught the particle regression at
+  - /critique --lens=perf weekly cadence caught the particle regression at
     the source.
-  - /onboarding-audit pulled time-to-first-cut from 47s to 11s. Refund
+  - /critique --lens=onboarding pulled time-to-first-cut from 47s to 11s. Refund
     rate landed at 7% (under 12% threshold).
-  - /a11y-audit colorblind palettes are mentioned positively in
+  - /critique --lens=a11y colorblind palettes are mentioned positively in
     ~6% of all reviews.
 
 WHAT DIDN'T (and what to do differently)
   - Linux save bug shipped. The platform-specific edge case wasn't in
     the regression suite. Differently: every cert-class scenario should
     run on at least two platforms in CI, not just the dev's machine.
-  - Steam Deck text scaling was caught by a11y-audit at week 30 — too
-    late. Should have run a11y-audit at week 20.
+  - Steam Deck text scaling was caught by /critique --lens=a11y at week 30 — too
+    late. Should have run /critique --lens=a11y at week 20.
   - Trailer first 6 seconds was caught by /steam-page-review at week 29.
     Should have been pinned to a checklist at week 18 (Next Fest start).
 
 GENERALIZABLE LESSONS (piped to /learn)
   1. Run platform-specific regression scenarios on at least two
      platforms in CI from week 13 onward.
-  2. Run /a11y-audit at week 20 (mid-production), not week 30 (polish).
+  2. Run /critique --lens=a11y at week 20 (mid-production), not week 30 (polish).
   3. Pin the Steam page review to week 18 (Next Fest), not week 29.
 ```
 
@@ -1027,17 +1027,17 @@ In the week 1–33 arc, eight specific things would have gone differently withou
 
 2. **Week 3 — the save-version field.** Without `/plan-tech-design` forcing `"version": 1` into the schema, M's week-25 schema change wipes player save data on every existing dev build, and then ships the wiping behavior. Estimated save: 1 week of recovery, plus the launch-day catastrophe of a save-wiping patch.
 
-3. **Week 5 — `/find-the-fun` Reform B.** The reframe of thorn-ticks from "enemies that take damage" to "obstacles that fall when their vine is cut" defined the game's identity. Without it, Bramble ships as a Vampire-Survivors-with-a-pickaxe and gets buried.
+3. **Week 5 — `/critique --lens=fun` Reform B.** The reframe of thorn-ticks from "enemies that take damage" to "obstacles that fall when their vine is cut" defined the game's identity. Without it, Bramble ships as a Vampire-Survivors-with-a-pickaxe and gets buried.
 
 4. **Week 9 + week 26 — signal-leak catches.** Two bugs `/code-review-gamestack` found pre-playtest that would have shipped as "game feels weird after a while" reviews. Roughly four to six negative reviews avoided on launch.
 
 5. **Week 8 + week 23 — the balance + over-juicing combo.** The Monte Carlo on cutter cards (week 8) found a dominant strategy; the game-feel audit (week 23) found over-juicing on the pickup masking the dominant-strategy taste. Both are findings the average solo dev never gets because they're too in-the-game to see them.
 
-6. **Week 27 — onboarding-audit pulling time-to-first-cut from 47s to 11s.** Direct refund-rate impact. The 7% landed refund rate (vs the ~14% Steam median for the genre) is probably worth a quarter of total revenue.
+6. **Week 27 — /critique --lens=onboarding pulling time-to-first-cut from 47s to 11s.** Direct refund-rate impact. The 7% landed refund rate (vs the ~14% Steam median for the genre) is probably worth a quarter of total revenue.
 
 **Catches (problems gamestack found that M would have missed):**
 
-7. **Week 17 — `/perf-benchmark` catching the particle regression.** Without the weekly cadence, this ships and the Steam Deck reviews flag it. The Deck reviews would have been the single most-cited complaint on launch day.
+7. **Week 17 — `/critique --lens=perf` catching the particle regression.** Without the weekly cadence, this ships and the Steam Deck reviews flag it. The Deck reviews would have been the single most-cited complaint on launch day.
 
 8. **Day 4 — `/bug-hunt` finding the Linux fsync race.** Without the systematic root-cause-before-fix discipline, M ships a patch that "tries something" and hopes. The race condition would not have been fixed by a guess; the next attempt would have been three days later, by which point Linux reviews are already in their final negative posture.
 
@@ -1096,16 +1096,16 @@ The "cutter feels good" mention rate is the load-bearing number. If 31% of revie
 - [`/plan-game-design`](../../skills/plan-game-design/SKILL.md) — week 2 skill curve.
 - [`/plan-tech-design`](../../skills/plan-tech-design/SKILL.md) — week 3 save-version field.
 - [`/scene-prototype`](../../skills/scene-prototype/SKILL.md) — week 4 Godot scaffolding.
-- [`/find-the-fun`](../../skills/find-the-fun/SKILL.md) — week 5 reframe; week 12 boss-cut.
+- [`/critique --lens=fun`](../../skills/critique/SKILL.md) — week 5 reframe; week 12 boss-cut.
 - [`/balance-review`](../../skills/balance-review/SKILL.md) — week 8 + week 23 cutter-card tuning.
 - [`/playtest`](../../skills/playtest/SKILL.md) — week 9 onward SDK-driven scenarios.
 - [`/code-review-gamestack`](../../skills/code-review-gamestack/SKILL.md) — week 9 + 26 signal-leak catches.
 - [`/asset-audit`](../../skills/asset-audit/SKILL.md) + [`gamestack-asset-audit`](../../bin/impl/asset-audit/README.md) — week 13 CI gate.
-- [`/perf-benchmark`](../../skills/perf-benchmark/SKILL.md) — week 17 particle regression.
-- [`/game-feel-audit`](../../skills/game-feel-audit/SKILL.md) — week 23 over-juicing on pickup.
-- [`/onboarding-audit`](../../skills/onboarding-audit/SKILL.md) — week 27 time-to-first-cut.
+- [`/critique --lens=perf`](../../skills/critique/SKILL.md) — week 17 particle regression.
+- [`/critique --lens=feel`](../../skills/critique/SKILL.md) — week 23 over-juicing on pickup.
+- [`/critique --lens=onboarding`](../../skills/critique/SKILL.md) — week 27 time-to-first-cut.
 - [`/steam-page-review`](../../skills/steam-page-review/SKILL.md) — week 29 trailer + capsules + tags.
-- [`/a11y-audit`](../../skills/a11y-audit/SKILL.md) — week 30 colorblind palettes + Deck UI scaling.
+- [`/critique --lens=a11y`](../../skills/critique/SKILL.md) — week 30 colorblind palettes + Deck UI scaling.
 - [`/cert-readiness`](../../skills/cert-readiness/SKILL.md) — week 32 PC + Deck check.
 - [`/publish`](../../skills/publish/SKILL.md) + [`/launch-day`](../../skills/launch-day/SKILL.md) — week 33 launch.
 - [`/post-launch-monitor`](../../skills/post-launch-monitor/SKILL.md) — month-1 daily digest.

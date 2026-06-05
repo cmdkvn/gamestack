@@ -39,7 +39,7 @@ Cap numbers are runtime asset budgets, not source-file budgets. `.psd`, `.blend`
 
 **Capsule slots.** Steam wants seven, and `/steam-page-review` enforces them: Header 460×215, Small 231×87, Main 1232×706, Library capsule 600×900, Library hero 3840×1240, Library logo 1280×720 (transparent), Page background 1438×810. The Library hero and Library logo are the most-skipped pair; without them, the game looks unfinished in player libraries post-purchase. See [`/steam-page-review`](../skills/steam-page-review/SKILL.md) for the full capsule + trailer + tag audit.
 
-**Refund window.** Steam refunds anything under 2 hours of play. That window is half your onboarding budget — the player decides whether to keep your game inside it. Run [`/onboarding-audit`](../skills/onboarding-audit/SKILL.md) before launch and before Next Fest; refund rates over 12% mean onboarding is broken, not pricing.
+**Refund window.** Steam refunds anything under 2 hours of play. That window is half your onboarding budget — the player decides whether to keep your game inside it. Run [`/critique --lens=onboarding`](../skills/critique/SKILL.md) before launch and before Next Fest; refund rates over 12% mean onboarding is broken, not pricing.
 
 **Next Fest fit.** Demo length 15–30 minutes converts best. Trailer recut to 30 seconds with verb in the first 3 seconds. Coordinate the demo publish date ahead of your announced slot — Steam pushes demos that publish early.
 
@@ -65,7 +65,7 @@ Everything else (cert, capsules, refunds, Next Fest) is identical to hi-end. The
 
 **The second-most-failed item: localization width clipping.** German strings overflow. Russian strings overflow. CJK glyphs miss baselines. If you ship in any language other than English, you need a UI pass where every menu button and every dialog box is tested at the longest expected string width. The strings don't have to be final translations — placeholder strings of the right *width* catch the bug.
 
-**Memory ceiling.** 4 GB total, with OS reservation eating into it. A real-world indie budget is ~3 GB of game memory. Test peak memory with [`/perf-benchmark`](../skills/perf-benchmark/SKILL.md) in the worst scenario you ship (largest scene + every effect firing + max save state). Switch builds that hit 3.5 GB pass cert and OOM in week two when players visit a scene the dev didn't profile.
+**Memory ceiling.** 4 GB total, with OS reservation eating into it. A real-world indie budget is ~3 GB of game memory. Test peak memory with [`/critique --lens=perf`](../skills/critique/SKILL.md) in the worst scenario you ship (largest scene + every effect firing + max save state). Switch builds that hit 3.5 GB pass cert and OOM in week two when players visit a scene the dev didn't profile.
 
 **Asset budget gotcha.** Switch handheld and docked share the same texture / atlas ceiling. The triangle budget is the only thing that changes between modes. Audit once against handheld; if you pass handheld, you pass docked.
 
@@ -101,7 +101,7 @@ But the SKU split matters. The Series S has less GPU and 8 GB usable RAM (vs Ser
 
 **Quick Resume gate.** Xbox-unique. The console suspends arbitrary state and restores it later without your game knowing it happened. If your save / load assumes a fresh process, you fail. Quick Resume failures almost always trace back to save-system bugs in disguise — atomic writes, schema versions, cloud-save round-trip. If [`/playtest`](../skills/playtest/SKILL.md)'s `05-cert-save-fuzz` scenario passes, Quick Resume usually does.
 
-**Accessibility strictness.** Xbox has the strictest a11y cert of the three consoles. The [`/a11y-audit`](../skills/a11y-audit/SKILL.md) top-4 (remappable controls, 1.5× text scale without UI break, colorblind presets, subtitles default ON with speaker labels) are not "nice to have" on Xbox — they are P0 cert blockers. Plan accessibility into the UI from the start; retrofitting it is months of work.
+**Accessibility strictness.** Xbox has the strictest a11y cert of the three consoles. The [`/critique --lens=a11y`](../skills/critique/SKILL.md) top-4 (remappable controls, 1.5× text scale without UI break, colorblind presets, subtitles default ON with speaker labels) are not "nice to have" on Xbox — they are P0 cert blockers. Plan accessibility into the UI from the start; retrofitting it is months of work.
 
 **Achievement requirements.** Full set required. Achievements unlock offline, sync online when connectivity returns. The same retrofit warning as PS5 trophies applies — design the achievement set during Production.
 
@@ -174,8 +174,8 @@ There's no universal answer, but there is a decision tree most indie narrative g
 - [`/asset-audit`](../skills/asset-audit/SKILL.md) — per-platform budget audit. Run against the tightest target.
 - [`/cert-readiness`](../skills/cert-readiness/SKILL.md) — PS5 / Xbox / Switch cert category walk.
 - [`/steam-page-review`](../skills/steam-page-review/SKILL.md) — capsule, trailer, tag, screenshot audit.
-- [`/perf-benchmark`](../skills/perf-benchmark/SKILL.md) — peak-memory and frame-time validation against the platform ceiling.
-- [`/a11y-audit`](../skills/a11y-audit/SKILL.md) — Xbox-strict top-4 and the GAG checklist.
-- [`/onboarding-audit`](../skills/onboarding-audit/SKILL.md) — refund-window critical for Steam.
+- [`/critique --lens=perf`](../skills/critique/SKILL.md) — peak-memory and frame-time validation against the platform ceiling.
+- [`/critique --lens=a11y`](../skills/critique/SKILL.md) — Xbox-strict top-4 and the GAG checklist.
+- [`/critique --lens=onboarding`](../skills/critique/SKILL.md) — refund-window critical for Steam.
 - [`gamestack-asset-audit`](../bin/impl/asset-audit/README.md) — CLI for CI gating.
 - [`bin/impl/shared/platforms.ts`](../bin/impl/shared/platforms.ts) — authoritative budget table.

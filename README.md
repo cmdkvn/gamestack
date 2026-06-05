@@ -1,64 +1,42 @@
 # gamestack
 
-> Ship a game like a 20-person studio. Solo.
+> A virtual game studio you talk to. Solo.
 
-gamestack turns Claude Code into a coordinated virtual game studio. Each slash command is a specialist — a Creative Director, a Prototype Critic, a Senior Gameplay Engineer, a Platform Cert Officer — and they're meant to run as a sprint:
+gamestack turns your AI coding agent (Claude Code, Codex, Cursor) into a coordinated set of specialists — a Creative Director, a Prototype Critic, a Senior Gameplay Engineer, a Platform Cert Officer — that you invoke as slash commands. It's a discipline scaffold for solo indie devs.
 
-**Pitch → Plan → Build → Review → Playtest → Ship → Reflect**
+This is **early-access software (v1.0.0)**. The skill catalog is shipped; real-world validation across many projects is still being collected. The honest section below has the unvarnished status.
 
-38 skills, 7 CLIs, two engine SDKs, nine AI agent hosts. One developer.
+## What a session feels like
 
-## What a session looks like
+The catalog is a menu, not a path. You pick the skill that fits where you are.
 
 ```
-You:    "I want to build a 60-second cooking roguelite, but mostly about weather."
-        /design-jam
+You:    /gamestack                       # the front door — bootstraps state, picks 1–2 next steps
+You:    /design-jam                      # six forcing questions before any code
+Claude: (Creative Director rubric)       # locks the pitch in design/pitch.md
 
-Claude (Creative Director): six forcing questions. Cuts "weather as visual fluff";
-                            promotes "weather as the main verb." Locks the pitch.
+You:    /plan-game-design                # locks the core loop, plots the skill curve
+You:    /plan-art-direction              # rates 0–10 across 8 dimensions
+You:    /autoplan                        # runs all the plan-* skills in sequence
 
-You:    /plan-game-design  /plan-art-direction  /plan-narrative
-        (or just /autoplan to run all seven plan-* skills in sequence)
+You:    /scene-prototype "first verb"    # emits Unity C# / Godot GDScript scaffolding
+You:    /critique --lens=fun             # is the kernel of fun present?
 
-Claude (six specialists, one pipeline): pressure-tests pacing, voice, palette,
-                                        kills three dead mechanics, surfaces only
-                                        the taste calls that need your judgment.
+You:    /code-review-gamestack           # gameplay-engineer rubric — surfaces, doesn't auto-fix
+You:    /playtest --mode=screenshot-diff # zero-SDK: you drive the build, daemon catches regressions
 
-You:    /scene-prototype "the weather front roll-in"
+You:    /critique --lens=a11y            # GAG audit, P0/P1/P2 dev TODO + public report
+You:    /steam-page-review               # capsule / trailer / hook / tags / wishlist risk
+You:    /publish                         # version bump + build + last-mile cert + upload checklist
 
-Claude (Engine Builder): emits Unity C# (or Godot GDScript) you assemble in
-                         the editor. 90 minutes later you're playing it.
-
-You:    /find-the-fun  →  it's the storm pressure, not the soup. /design-jam again.
-
-You:    /art-shotgun "key art for the storm front"  →  six variants → you pick V3.
-        gamestack-taste-update --record approval.json   # remembers what you chose
-
-You:    /game-feel-audit  →  hit-pause too long on lightning strike. Fixed.
-You:    /playtest 01-prototype-first-minute.json  →  driven by gamestack-playtest-daemon.
-
-(several weeks later)
-
-You:    /cert-readiness all  →  PS5 missing platinum trophy; sleep/resume PASS_CODE_ONLY.
-You:    /steam-page-review  →  capsule's title illegible at thumbnail. Fixed.
-You:    /publish  →  build + upload + tag + open patch-notes PR.
-You:    /launch-day  →  strictest discipline: /careful + /freeze + verbose logging.
-
-(after launch)
-
-You:    /post-launch-monitor  →  daily digest. /patch-notes when v1.0.1 ships.
-You:    /post-mortem  →  blameless retro; three lessons piped to /learn.
+You:    /post-launch-monitor             # daily digest of reviews / crashes / refunds
+You:    /post-mortem                     # blameless retro; lessons → /learn
+You:    /skill-feedback - <skill>        # log when a skill output was wrong; aggregates inform rewrites
 ```
 
-That's the loop. Every command is a real specialist with real opinions; gamestack is the discipline you'd hire 20 people to enforce.
+`/gamestack` is the entry point. It reads `gamestack/state.json`, recommends the 1–2 next skills, and gets out of the way.
 
-## Install — 30 seconds
-
-Open Claude Code and paste this:
-
-> Install gamestack: run `git clone --single-branch --depth 1 https://github.com/cmdkvn/gamestack.git ~/.claude/skills/gamestack && cd ~/.claude/skills/gamestack && ./setup`. Then tell me which gamestack skills are now available.
-
-Or manually:
+## Install
 
 ```bash
 git clone --single-branch --depth 1 https://github.com/cmdkvn/gamestack.git ~/.claude/skills/gamestack
@@ -66,168 +44,236 @@ cd ~/.claude/skills/gamestack
 ./setup
 ```
 
-`./setup` detects your AI agent host, symlinks each skill into the host's discovery path, and reports what's installed. Subsequent runs are idempotent. To target a different host:
+`./setup` auto-detects Claude Code and symlinks every shipped skill into the host's discovery path. Subsequent runs are idempotent. Then in any project directory: `/gamestack`.
 
 ```bash
-./setup --host codex          # or opencode, cursor, factory, slate, kiro, hermes, gbrain
-./setup --status              # show what's installed
-./setup --uninstall           # cleanly remove all gamestack symlinks
+./setup --status              # what's installed
+./setup --check-updates       # compare local commit to origin/main
+./setup --uninstall           # remove gamestack symlinks
+./setup --host codex          # other host (codex, cursor — verified)
+                              # factory, slate, kiro, hermes, gbrain — community / unverified
 ```
 
-The CLIs require Bun: `brew install bun` once. Skills work without it.
+The CLIs (`gamestack-asset-audit`, `gamestack-skill-feedback`, etc.) require Bun: `brew install bun` once. Skills work without it.
+
+Full first-session walkthrough: [`docs/howto/first-30-minutes.md`](docs/howto/first-30-minutes.md).
 
 ## Who this is for
 
-Solo indie game devs shipping single-player narrative games for PC, console, mobile, or web. Engine-agnostic — skills detect Unity, Godot, Unreal, GameMaker, Bevy, or web frameworks and tailor advice accordingly.
+Solo indie devs shipping single-player narrative / arcade / puzzle / platforming games for PC, console, mobile, or web. Engine-agnostic — skills detect Unity, Godot, Unreal, GameMaker, Bevy, or web frameworks and tailor advice accordingly.
 
-If you're building hyper-casual, live-service, or multiplayer games, gamestack v1 will still be useful for the discipline scaffolding (design, code review, accessibility, cert), but the specialized skills you'd want haven't shipped yet. See [`docs/PLAN.md`](docs/PLAN.md) for the v1.x roadmap.
+If you're building hyper-casual, live-service, or multiplayer games, the discipline-scaffold skills (design, code review, accessibility, cert) still apply; the specialized skills you'd want (matchmaking design, retention metric review, server-cost balancing) aren't shipped yet.
 
 ## Skills (v1.0.0)
 
+The catalog is **35 skills**. Pick whichever fits your phase — `/gamestack` will suggest 1–2 if you're not sure.
+
+### Front door
+
+| Skill | Use it when |
+|---|---|
+| [`/gamestack`](skills/gamestack/SKILL.md) | You don't know which skill to use. Reads project state, recommends 1–2 next. |
+| [`/skill-feedback`](skills/skill-feedback/SKILL.md) | After any skill output. Logs whether it was useful (drives catalog rewrites). |
+
 ### Pitch
-| Skill | Specialist | When it fires |
-|---|---|---|
-| [`/design-jam`](skills/design-jam/SKILL.md) | Creative Director | Start here for any new game idea or pivot. Six forcing questions that pressure-test the idea before any code or art. |
-| [`/find-the-fun`](skills/find-the-fun/SKILL.md) | Prototype Critic | Run on an early prototype. Identifies the kernel of fun (if any), surfaces dead mechanics, recommends three sharpening directions. |
+
+| Skill | What it does |
+|---|---|
+| [`/design-jam`](skills/design-jam/SKILL.md) | Six forcing questions that pressure-test an idea before any code or art. |
 
 ### Plan
-| Skill | Specialist | When it fires |
-|---|---|---|
-| [`/plan-creative-director`](skills/plan-creative-director/SKILL.md) | Creative Director | Rethinks the design in one of four modes (Scope-Up, Selective Expansion, Hold Scope, Reduction). Looks for the 10-star version. |
-| [`/plan-game-design`](skills/plan-game-design/SKILL.md) | Lead Game Designer | Locks the core loop. Plots the player's skill curve (minute 1 → hour 10). Kills dead mechanics at plan stage. |
-| [`/plan-narrative`](skills/plan-narrative/SKILL.md) | Narrative Designer | Pressure-tests voice cards, exposition pacing, branching fragility, localization readiness. |
-| [`/plan-level-design`](skills/plan-level-design/SKILL.md) | Level Designer | Builds the tension graph. Flags monotony zones, navigation confusion, gating hell. |
-| [`/plan-art-direction`](skills/plan-art-direction/SKILL.md) | Art Director | Rates 0–10 across 8 dimensions (style, references, color, silhouette, budget, animation, VFX, slop-resistance). |
-| [`/plan-audio-direction`](skills/plan-audio-direction/SKILL.md) | Audio Director | Locks SFX taxonomy, music structure, mix priority, accessibility, tooling choice. |
-| [`/plan-tech-design`](skills/plan-tech-design/SKILL.md) | Technical Designer | Architecture, state machines, frame budget, save format, cross-platform abstraction, console requirements. |
-| [`/autoplan`](skills/autoplan/SKILL.md) | Review Pipeline | Runs all seven `plan-*` skills in sequence. Applies auto-fixes; surfaces only taste decisions. |
+
+| Skill | What it does |
+|---|---|
+| [`/plan-creative-director`](skills/plan-creative-director/SKILL.md) | Rethinks scope (Scope-Up / Selective Expansion / Hold / Reduction). |
+| [`/plan-game-design`](skills/plan-game-design/SKILL.md) | Locks the core loop; plots minute 1 → hour 10 → hour 100. |
+| [`/plan-narrative`](skills/plan-narrative/SKILL.md) | Voice cards, exposition pacing, branching fragility, localization. |
+| [`/plan-level-design`](skills/plan-level-design/SKILL.md) | Tension graph, monotony zones, navigation, gating. |
+| [`/plan-art-direction`](skills/plan-art-direction/SKILL.md) | Rates 0–10 across 8 dimensions (style / refs / color / silhouette / budget / animation / VFX / slop-resistance). |
+| [`/plan-audio-direction`](skills/plan-audio-direction/SKILL.md) | SFX taxonomy, music structure, mix priority, accessibility, tooling. |
+| [`/plan-tech-design`](skills/plan-tech-design/SKILL.md) | Architecture, state machines, frame budget, save format, cross-platform. |
+| [`/autoplan`](skills/autoplan/SKILL.md) | Runs all seven `plan-*` skills in sequence; surfaces only taste decisions. |
 
 ### Build
-| Skill | Specialist | When it fires |
-|---|---|---|
-| [`/art-bible`](skills/art-bible/SKILL.md) | Concept Artist | Builds the production art bible from a locked direction: palette, naming, silhouettes, vignettes, animation language, hand-off checklist. |
-| [`/art-shotgun`](skills/art-shotgun/SKILL.md) | Visual Explorer | Structured visual exploration. 4–6 prompt variants per round, captures feedback, learns taste over time. Pairs with `gamestack-taste-update`. |
-| [`/scene-prototype`](skills/scene-prototype/SKILL.md) | Engine Builder | Detects engine and emits script + setup checklist (Unity C#, Godot `.tscn` + GDScript, Unreal class stub). Editor-assembly-friendly. |
-| [`/dialogue-write`](skills/dialogue-write/SKILL.md) | Game Writer | First-pass dialogue from beat outline + voice cards. Auto-detects Yarn / Ink / Dialogic / engine-native format. |
+
+| Skill | What it does |
+|---|---|
+| [`/art-bible`](skills/art-bible/SKILL.md) | Palette, naming, silhouettes, vignettes, animation language, hand-off checklist. |
+| [`/art-shotgun`](skills/art-shotgun/SKILL.md) | 4–6 prompt variants per round; pairs with `gamestack-taste-update`. |
+| [`/scene-prototype`](skills/scene-prototype/SKILL.md) | Engine-detected script + setup checklist (Unity C#, Godot `.tscn` + GDScript, Unreal class stub). |
+| [`/dialogue-write`](skills/dialogue-write/SKILL.md) | First-pass dialogue from beats + voice cards (Yarn / Ink / Dialogic / engine-native). |
 
 ### Review
-| Skill | Specialist | When it fires |
+
+| Skill | What it does |
+|---|---|
+| [`/code-review-gamestack`](skills/code-review-gamestack/SKILL.md) | Game-specific runtime bug families. Defaults to `[PROPOSE]` — surfaces fixes, doesn't auto-apply. |
+| [`/bug-hunt`](skills/bug-hunt/SKILL.md) | Iron Law: no fix without investigation. 3-strikes rule before reclassifying. |
+| [`/balance-review`](skills/balance-review/SKILL.md) | Monte Carlo on configs; surfaces dominant strategies and dead choices. |
+| [`/dialogue-review`](skills/dialogue-review/SKILL.md) | Voice consistency, info-dump scan, "as you know" detection, exposition pacing. |
+| [`/asset-audit`](skills/asset-audit/SKILL.md) | Per-platform texture / audio / mesh / atlas / naming. Catches `.meta`-in-`.gitignore`. |
+
+### Critique (the consolidated playtest-phase rubric)
+
+| Skill | Lens | What it audits |
 |---|---|---|
-| [`/code-review-gamestack`](skills/code-review-gamestack/SKILL.md) | Senior Gameplay Engineer | Runtime bugs CI misses — allocation in `Update()`, off-thread API calls, signal/event leaks, save-data corruption. Auto-fixes the obvious. |
-| [`/bug-hunt`](skills/bug-hunt/SKILL.md) | Debugger | Iron Law: no fix without investigation. Traces data flow, tests hypotheses, three-strikes rule to force reclassification. |
-| [`/balance-review`](skills/balance-review/SKILL.md) | Systems Designer | Pulls config tables, runs Monte Carlo on outcomes, flags dominant strategies and dead choices, proposes numeric edits. |
-| [`/dialogue-review`](skills/dialogue-review/SKILL.md) | Narrative Editor | Voice consistency, info-dump scan, "as you know" detection, exposition pacing, length budget. |
-| [`/asset-audit`](skills/asset-audit/SKILL.md) | Technical Artist | Per-platform texture / audio / mesh / atlas / naming audit. Surfaces `.meta`-in-`.gitignore` catastrophes. |
+| [`/critique --lens=fun`](skills/critique/SKILL.md) | Prototype kernel | Is the kernel of fun here? What mechanics are dead? |
+| [`/critique --lens=onboarding`](skills/critique/SKILL.md) | First 60 seconds | Time to first verb / decision / reward / failure / "I get it". |
+| [`/critique --lens=feel`](skills/critique/SKILL.md) | Game feel | 8 dimensions: animation curves, hit-pause, screen-shake, particles, audio, camera, haptics, input forgiveness. |
+| [`/critique --lens=pacing`](skills/critique/SKILL.md) | Tension graph | Skill demand / stakes / density. Monotony zones, hollow middles, fatigue compound. |
+| [`/critique --lens=a11y`](skills/critique/SKILL.md) | Accessibility | Game Accessibility Guidelines top-4 + basic + intermediate + Xbox cert gates. |
+| [`/critique --lens=perf`](skills/critique/SKILL.md) | Performance | FPS / 99th-pct frame time / 0.1th-pct (visible stutter) / draw calls / GC alloc / scene load / peak memory. |
+
+> **Breaking change in v1.0.0:** the prior `/find-the-fun`, `/onboarding-audit`, `/game-feel-audit`, `/pacing-review`, `/a11y-audit`, `/perf-benchmark` commands have been consolidated under `/critique` with the `--lens` flag. The rubrics are unchanged; the catalog is smaller.
 
 ### Playtest
-| Skill | Specialist | When it fires |
-|---|---|---|
-| [`/game-feel-audit`](skills/game-feel-audit/SKILL.md) | Polish Coach | Audits animation curves, hit-pause, screen-shake, particles, audio, camera, haptics, input forgiveness. Detects under- AND over-juiced moments. |
-| [`/pacing-review`](skills/pacing-review/SKILL.md) | Pacing Designer | Builds the tension graph from level + encounter data. Flags monotony zones, spike clusters, hollow middles, narrative misalignment. |
-| [`/onboarding-audit`](skills/onboarding-audit/SKILL.md) | First-60-Seconds Critic | Times first verb / decision / reward / failure / "I get it". Counts friction. Trailer-to-game alignment check. |
-| [`/a11y-audit`](skills/a11y-audit/SKILL.md) | Accessibility Consultant | Full GAG basic + intermediate + advanced. Top-4 focus. Produces dev TODO + public accessibility report. |
-| [`/perf-benchmark`](skills/perf-benchmark/SKILL.md) | Performance Engineer | FPS / 99th-pct frame time / draw calls / GC alloc / scene-load / memory peak. Diffs against baseline. |
-| [`/playtest`](skills/playtest/SKILL.md) | QA Lead | Phase-aware (Prototype / Vertical Slice / Polish / Cert / Launched). Drives a real Unity / Godot build via the engine SDK. Six reference scenarios shipped. Offline static-analysis fallback. |
+
+| Skill | What it does |
+|---|---|
+| [`/playtest`](skills/playtest/SKILL.md) | Drives a build. Three modes — **SDK live**, **zero-SDK screenshot-diff** (default if no SDK), **offline static**. Phase-aware. |
 
 ### Ship
-| Skill | Specialist | When it fires |
-|---|---|---|
-| [`/cert-readiness`](skills/cert-readiness/SKILL.md) | Platform Cert Officer | Per-platform PS5 TRC / Xbox TCR-XR / Switch lotcheck audit on high-failure-rate categories. P0 / P1 / NEEDS_LIVE_TEST verdicts + combined action list. |
-| [`/steam-page-review`](skills/steam-page-review/SKILL.md) | Marketing Lead | Capsule sizes + trailer first-6-second + short-description hook + tag strategy + screenshots + Next Fest fit. Wishlist-conversion risk score. |
-| [`/publish`](skills/publish/SKILL.md) | Release Engineer | Pre-publish gates → version bump → last-mile cert → build → upload → tag + PR → ROADMAP update. Friday-afternoon guardrail. |
-| [`/post-launch-monitor`](skills/post-launch-monitor/SKILL.md) | Live Ops | Daily digest of Steam reviews, crash rate, refund rate, player count, top community complaints, wishlist conversion. GREEN / YELLOW / RED / EMERGENCY per signal. |
+
+| Skill | What it does |
+|---|---|
+| [`/cert-readiness`](skills/cert-readiness/SKILL.md) | PS5 TRC / Xbox TCR-XR / Switch lotcheck high-failure categories. P0 / P1 / NEEDS_LIVE_TEST. |
+| [`/steam-page-review`](skills/steam-page-review/SKILL.md) | Capsule + trailer first-6-second + hook + tags + Next Fest fit. Wishlist-conversion risk. |
+| [`/publish`](skills/publish/SKILL.md) | Pre-publish gates → version bump → cert → build → upload checklist → PR. Friday-afternoon guardrail. |
+| [`/post-launch-monitor`](skills/post-launch-monitor/SKILL.md) | Daily digest. Steam reviews, crash rate, refund rate, players, top complaints. GREEN / YELLOW / RED / EMERGENCY. |
 
 ### Reflect
-| Skill | Specialist | When it fires |
-|---|---|---|
-| [`/patch-notes`](skills/patch-notes/SKILL.md) | Technical Writer | Reads diff + closed issues + tone notes; drafts player-facing patch notes and a separate dev-facing changelog. |
-| [`/post-mortem`](skills/post-mortem/SKILL.md) | Eng Manager | Weekly retros + 7-day post-launch retros. Blameless, specific, actionable. Pairs every "wrong" with a "differently". |
-| [`/learn`](skills/learn/SKILL.md) | Memory | Persists generalizable lessons (engine quirks, bug patterns, taste preferences) across sessions; surfaces conflicts before overwriting. |
+
+| Skill | What it does |
+|---|---|
+| [`/patch-notes`](skills/patch-notes/SKILL.md) | Player-facing patch notes + dev-facing changelog from the diff + closed issues + tone notes. |
+| [`/post-mortem`](skills/post-mortem/SKILL.md) | Blameless retros (weekly + 7-day post-launch). |
+| [`/learn`](skills/learn/SKILL.md) | Persists generalizable lessons across sessions. |
 
 ### Power tools
+
 | Skill | Purpose |
 |---|---|
-| [`/careful`](skills/careful/SKILL.md) | Pause before destructive or hard-to-reverse operations; surface what's lost; ask once. |
-| [`/freeze`](skills/freeze/SKILL.md) | Restrict writes to a named directory. Refuses every write outside the zone. |
+| [`/careful`](skills/careful/SKILL.md) | Pause before destructive ops; surface what's lost. |
+| [`/freeze`](skills/freeze/SKILL.md) | Restrict writes to a named directory. |
 | [`/unfreeze`](skills/unfreeze/SKILL.md) | Lift a `/freeze`. |
-| [`/guard`](skills/guard/SKILL.md) | `/careful` + `/freeze` together. Standard for cert prep and hotfix branches. |
-| [`/cert-freeze`](skills/cert-freeze/SKILL.md) | Opinionated `/freeze` for cert windows (default zone: build, dist, docs/cert, playtest/cert-readiness). |
-| [`/launch-day`](skills/launch-day/SKILL.md) | Strongest setting. `/guard` plus verbose action logging and a "what could go wrong" line before every write. |
+| [`/guard`](skills/guard/SKILL.md) | `/careful` + `/freeze` together. |
+| [`/cert-freeze`](skills/cert-freeze/SKILL.md) | Opinionated `/freeze` for cert windows. |
+| [`/launch-day`](skills/launch-day/SKILL.md) | `/guard` + verbose logging + "what could go wrong" before every write. |
 
-> **Why the `-gamestack` suffix on `/code-review-gamestack`?** Claude Code ships with a built-in `/code-review` slash command for general-purpose review. gamestack's game-specific version is suffixed to coexist rather than shadow it. Other skills use their natural names.
+> **Why the `-gamestack` suffix on `/code-review-gamestack`?** Claude Code ships with a built-in `/code-review`. gamestack's game-specific version is suffixed to coexist rather than shadow it.
 
-Deep-dives on every skill live in [`docs/skills.md`](docs/skills.md).
+Catalog deep-dives: [`docs/skills.md`](docs/skills.md).
 
 ## CLIs (CI-friendly)
 
-Each skill is interactive — meant for milestone-gate audits with a developer at the keyboard. The CLIs wrap the mechanical checks for use in CI: fail the build on a regression rather than discovering it during the next interactive session.
+Skills are interactive. The CLIs wrap the mechanical checks for CI gates.
 
-| CLI | Wraps | Purpose |
-|---|---|---|
-| [`gamestack-asset-audit`](bin/impl/asset-audit/README.md) | [`/asset-audit`](skills/asset-audit/SKILL.md) | Per-platform texture / audio / mesh / atlas / naming audit. Detects Unity `.meta` integrity catastrophes. |
-| [`gamestack-cert-checklist`](bin/impl/cert-checklist/README.md) | [`/cert-readiness`](skills/cert-readiness/SKILL.md) | PS5 TRC / Xbox TCR-XR / Switch lotcheck high-failure-rate categories. PASS / PASS_CODE_ONLY / NEEDS_LIVE_TEST / FAIL_P0 / FAIL_P1 verdicts. |
-| [`gamestack-steam-page-check`](bin/impl/steam-page-check/README.md) | [`/steam-page-review`](skills/steam-page-review/SKILL.md) | Capsule dimensions, trailer length, short-description hook, tag strategy, screenshot count, Next Fest fit. Wishlist-conversion risk verdict. |
-| [`gamestack-game-benchmark`](bin/impl/game-benchmark/README.md) | [`/perf-benchmark`](skills/perf-benchmark/SKILL.md) | Polls engine SDK `/state` for FPS / frame time / draw calls / GC alloc / memory; diffs against a baseline. |
-| [`gamestack-playtest-daemon`](bin/impl/playtest-daemon/README.md) | [`/playtest`](skills/playtest/SKILL.md) | Broker between Claude Code and a running engine build. Walks the 9 scenario step primitives; per-step run log. |
-| [`gamestack-taste-update`](bin/impl/taste-update/README.md) | [`/art-shotgun`](skills/art-shotgun/SKILL.md) | Persists per-axis approval events into a project taste profile with exponential time-decay; surfaces emerging signals. |
-| [`gamestack-model-benchmark`](bin/impl/model-benchmark/README.md) | _(reflective tool)_ | Runs a prompt suite against several Claude models; scores responses; picks a winner per run. Local-only. |
+| CLI | Purpose |
+|---|---|
+| [`gamestack-asset-audit`](bin/impl/asset-audit/README.md) | Per-platform asset budgets. Catches Unity `.meta` integrity bugs. |
+| [`gamestack-cert-checklist`](bin/impl/cert-checklist/README.md) | PS5 / Xbox / Switch high-failure cert categories. |
+| [`gamestack-steam-page-check`](bin/impl/steam-page-check/README.md) | Capsule dims, trailer length, description hook, tags, screenshots. |
+| [`gamestack-game-benchmark`](bin/impl/game-benchmark/README.md) | Polls engine SDK `/state` for perf metrics; diffs vs baseline. |
+| [`gamestack-playtest-daemon`](bin/impl/playtest-daemon/README.md) | Broker for `/playtest`. SDK + screenshot-diff modes. |
+| [`gamestack-taste-update`](bin/impl/taste-update/README.md) | Persists `/art-shotgun` per-axis approvals with time-decay. |
+| [`gamestack-model-benchmark`](bin/impl/model-benchmark/README.md) | Prompt suite across several Claude models; pick winner. Local-only. |
+| [`gamestack-skill-feedback`](bin/impl/skill-feedback/README.md) | Aggregates the `/skill-feedback` log. |
+| [`gamestack-skill-lint`](bin/impl/skill-lint/README.md) | Regression validator for SKILL.md + scenario JSON. |
 
-Every CLI is `0 = clean / 1 = regression / 2 = bad args / 127 = bun missing`. Wire them into CI for gates on asset budgets, cert readiness, Steam page quality, perf, and functional scenarios.
+Every CLI is `0 = clean / 1 = regression / 2 = bad args / 127 = bun missing`. Wire into CI.
 
 ## Engine SDKs
 
-Both SDKs expose a loopback-only HTTP server you drop into a running build. Same endpoints, same JSON shapes, just different ports — `/playtest` scenarios run unchanged against either.
+Both SDKs expose a loopback-only HTTP server you drop into a running build. `/playtest` scenarios run unchanged against either.
 
-| Engine | Port | Status | Endpoints |
+| Engine | Port | Status | Verified |
 |---|---|---|---|
-| Unity (UPM package) | 7331 | ✓ v0.2.0 | `/state`, `/health`, `/screenshot`, `/input`, `/snapshot`, `/restore`, `/snapshots`, `/breakpoint` + Samples~/Basic |
-| Godot 4.x (addon) | 7332 | ✓ v0.2.0 | Same contract as Unity at port 7332 + samples |
-| Unreal (UPlugin) | — | Post-v1 | — |
+| Unity (UPM package) | 7331 | v0.2.0 | End-to-end against `Bun.serve()` fake. **Live engine validation pending** — first real game using it will surface engine-side bugs. |
+| Godot 4.x (addon) | 7332 | v0.2.0 | End-to-end against `Bun.serve()` fake. Same caveat. |
+| Unreal (UPlugin) | — | post-v1 | — |
 
-See [`engines/unity/README.md`](engines/unity/README.md) and [`engines/godot/README.md`](engines/godot/README.md).
+See [`engines/unity/README.md`](engines/unity/README.md), [`engines/godot/README.md`](engines/godot/README.md).
 
-## Multi-host
+**Zero-SDK alternative:** if installing the engine SDK isn't worth the friction yet, run `/playtest --mode=screenshot-diff`. Full doc: [`docs/ZERO-SDK-PLAYTEST.md`](docs/ZERO-SDK-PLAYTEST.md).
 
-| Host | Skill discovery path | Status |
+## Hosts
+
+| Host | Status | Setup |
 |---|---|---|
-| Claude Code | `~/.claude/skills/<name>/` | ✓ Default; auto-detected when `~/.claude/` exists |
-| Codex CLI | `~/.codex/skills/<name>/` | ✓ `./setup --host codex` |
-| OpenCode | `$XDG_CONFIG_HOME/opencode/skills/<name>/` | ✓ `./setup --host opencode` |
-| Cursor | `~/.cursor/skills/<name>/` | ✓ `./setup --host cursor` |
-| Factory Droid | `~/.factory/skills/<name>/` | ✓ `./setup --host factory` |
-| Slate | `~/.slate/skills/<name>/` | ✓ `./setup --host slate` |
-| Kiro | `~/.kiro/skills/<name>/` | ✓ `./setup --host kiro` |
-| Hermes | `~/.hermes/skills/<name>/` | ✓ `./setup --host hermes` |
-| GBrain | `~/.gbrain/skills/<name>/` | ✓ `./setup --host gbrain` |
+| Claude Code | Verified (primary target) | `./setup` |
+| Codex CLI | Verified | `./setup --host codex` |
+| Cursor | Verified (script confirmed working; some Cursor distributions require a manifest the script doesn't emit) | `./setup --host cursor` |
+| OpenCode | Verified | `./setup --host opencode` |
+| Factory Droid | Community / unverified | `./setup --host factory` |
+| Slate | Community / unverified | `./setup --host slate` |
+| Kiro | Community / unverified | `./setup --host kiro` |
+| Hermes | Community / unverified | `./setup --host hermes` |
+| GBrain | Community / unverified | `./setup --host gbrain` |
 
-All hosts share `hosts/_lib.sh` for the symlink discovery / install / uninstall / status logic. Adding another host is ~15 lines. See [`hosts/_README.md`](hosts/_README.md).
+Unverified hosts: the symlink scripts exist and follow the shared `_lib.sh` contract, but no maintainer has confirmed an end-to-end install on those targets. **PRs welcome** that verify one host with a screen-recording or session transcript demonstrating an installed skill firing in that host. Adding a new host is ~15 lines — see [`hosts/_README.md`](hosts/_README.md).
+
+## Project state
+
+gamestack stores a single canonical state file per project at `<project>/gamestack/state.json`. Every skill reads it to orient itself; every skill writes back its run + the artifact it produced. Schema and lifecycle: [`docs/STATE.md`](docs/STATE.md).
+
+## Privacy
+
+gamestack is **local-only**. None of the following leave your machine:
+
+- `gamestack/state.json` — phase, engine, platforms, artifact paths, recent runs.
+- `.gamestack/taste-profile.json` — `/art-shotgun` preference data.
+- `.gamestack/skill-feedback.jsonl` — thumbs-up / thumbs-down on skill outputs.
+- `design/`, `playtest/`, `playtest/screenshots/`, `playtest/baseline/` — all artifacts.
+- Engine SDK HTTP servers bind to **loopback only** (`127.0.0.1`) and refuse non-loopback clients.
+
+The skills and CLIs do not transmit telemetry to gamestack maintainers or any third party. The only external network calls anywhere in gamestack are:
+
+- `setup --check-updates` runs `git fetch origin main` if `origin` is configured. (Standard git; no other service.)
+- `gamestack-model-benchmark` calls the Anthropic API using **your own** API key from env. The benchmark output stays on your disk.
+- `/post-launch-monitor` reads public Steam review / community pages if you point it at your game's page. You opt in per invocation.
+
+If you want to share feedback with the maintainer, run `gamestack-skill-feedback --format=json --out=feedback.json` and attach the file to a GitHub issue **manually**.
 
 ## Philosophy
 
-- **Find the fun before you polish it.** A 10-minute prototype that feels right beats a 10-hour one that doesn't. `/find-the-fun` is the entry skill for an existing build for a reason.
-- **Discipline > inspiration.** Skills enforce questions that uninspired-you would skip. Inspired-you doesn't need them.
-- **Engine-agnostic by default.** Skills detect your engine and tailor advice without locking you in. Adding a new engine is a fork-skill away.
-- **Solo-viable.** Every skill is something a solo dev can use without a team behind them. The CLIs let you wire the mechanical parts into CI so the interactive sessions stay focused on judgment calls.
-- **Honest over flattering.** Skills push back. The polite answer to "is this fun?" when it isn't is *"no, here's why, here's what to try next."*
-- **Don't generate what a human can decide.** gamestack doesn't auto-write your design doc, your dialogue, or your trailer copy. It surfaces the questions, structures the comparison, and remembers what you chose.
+- **Find the fun before you polish it.** `/critique --lens=fun` is the entry skill for an early build.
+- **Discipline > inspiration.** Skills enforce questions you'd skip on a bad day. On a good day, you don't need them.
+- **Engine-agnostic by default.** Skills detect your engine and tailor without locking you in.
+- **Solo-viable.** Every skill is something one person can use without a team. CLIs cover the mechanical parts in CI.
+- **Honest over flattering.** Skills push back. The right answer to "is this fun?" when it isn't is *"no, here's why, here's what to try next."*
+- **Don't generate what a human can decide.** gamestack doesn't auto-write your design doc, dialogue, or trailer copy. It structures the questions and remembers what you chose.
+- **Default to `[PROPOSE]`, not `[AUTO]`.** Solo devs have no second reviewer to catch a bad auto-fix. The skill surfaces the diff; the developer applies it.
+
+## Status (honest)
+
+- The 35 skills, 9 CLIs, and 2 engine SDKs in this repo are **functionally shipped** — they pass the test suite (`bun test` = 98 / 98), the linter (`gamestack-skill-lint`), and have documented contracts.
+- They have **not been validated end-to-end by a real shipped game using gamestack throughout**. The case studies in [`docs/case-studies/`](docs/case-studies/) walk reference Unity / Godot projects; they are not retrospectives of a shipped commercial title.
+- Engine SDKs are validated against an in-process `Bun.serve()` fake. The first real Unity / Godot game using them will surface engine-side bugs the fake doesn't catch.
+- Six of the nine hosts (factory, slate, kiro, hermes, gbrain, plus partial cursor) have **unverified** install scripts. They follow the shared contract; nobody has run them in their respective AI agents and confirmed a skill fired.
+- The Pitch → Plan → Build → Review → Playtest → Ship → Reflect *narrative* is a useful menu shape, but real solo dev work is iterative and chaotic. The skill catalog is a menu, not a path. `/gamestack` exists to make this explicit.
+
+If something doesn't work, [open an issue](https://github.com/cmdkvn/gamestack/issues) — and please run `/skill-feedback - <skill>` so the next rewrite knows what's missing.
 
 ## Roadmap
 
-gamestack ships in milestones. Full plan at [`docs/PLAN.md`](docs/PLAN.md).
-
-| Milestone | Focus | Status |
+| Stage | Focus | Status |
 |---|---|---|
-| M0 | Skeleton + 3 pilot skills | ✓ Shipped |
-| M1 | 8 plan-* + autoplan + 4 build skills | ✓ Shipped |
-| M2 | Review + 6 playtest + Unity SDK | ✓ Shipped |
-| M3 | Ship skills + 7 CLIs + Godot SDK | ✓ Shipped |
-| **M4** | Reflect + power tools + docs + launch | **✓ Shipped — v1.0.0 launched 2026-06-05** |
+| v1.0 | 35 skills + 9 CLIs + Unity & Godot SDKs + 4 verified hosts | Functionally shipped, validation in progress |
+| v1.1 | First end-to-end shipped game; verified Unreal SDK | Planned |
+| v1.x | Live-service / multiplayer skill set | Planned |
+| v2.0 | Engine SDK rev'd against real-game findings; community-verified host expansion | Planned |
 
-For the v1.0 release notes, see [`CHANGELOG.md`](CHANGELOG.md). For the gates this release passed, see [`docs/LAUNCH-CHECKLIST.md`](docs/LAUNCH-CHECKLIST.md).
+For per-milestone scope, see [`docs/PLAN.md`](docs/PLAN.md). For v1.0 changes, [`CHANGELOG.md`](CHANGELOG.md).
+
+## Contributing
+
+The single most valuable contribution is **using gamestack on a real game and logging skill-feedback honestly**. The aggregator (`gamestack-skill-feedback`) surfaces which skills are landing and which are drifting; that's what drives the next rewrite.
+
+For PRs: the skill-development conventions live in [`.claude/CLAUDE.md`](.claude/CLAUDE.md). Run `bin/gamestack-skill-lint --warn-as-error` before opening.
 
 ## Acknowledgments
 
-gamestack borrows its core pattern — slash commands as a virtual team of specialists — from [garrytan/gstack](https://github.com/garrytan/gstack), Garry Tan's Claude Code virtual engineering team for software founders. gamestack adapts that pattern for game development, with disciplines unique to games: game feel, pacing, accessibility, platform certification, and console launch readiness.
+gamestack borrows its core pattern — slash commands as a virtual team of specialists — from [garrytan/gstack](https://github.com/garrytan/gstack), Garry Tan's Claude Code virtual engineering team for software founders. gamestack adapts the pattern for game dev with disciplines unique to games: game feel, pacing, accessibility, platform cert, and console launch readiness.
 
 ## License
 

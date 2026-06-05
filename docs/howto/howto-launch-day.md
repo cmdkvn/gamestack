@@ -397,7 +397,7 @@ The skills do not ship the game. They keep you from shipping in the order that b
 ## What comes next
 
 - **Days 3–7.** Run [`/post-launch-monitor`](../../skills/post-launch-monitor/SKILL.md) every morning. Categorize complaints. Don't conflate a loud minority with data.
-- **Week 2.** First planned content patch if the design backlog has earned it. Run [`/onboarding-audit`](../../skills/onboarding-audit/SKILL.md) against the first-60-seconds data the launch produced.
+- **Week 2.** First planned content patch if the design backlog has earned it. Run [`/critique --lens=onboarding`](../../skills/critique/SKILL.md) against the first-60-seconds data the launch produced.
 - **Day 30.** Drop the monitor cadence to weekly. Read [`/post-mortem`](../../skills/post-mortem/SKILL.md) and write the honest one — what worked, what didn't, what you'd tell yourself before the next launch.
 - **Day 90.** First sale window. The patch backlog should be empty; the next-game pitch should be open in another tab.
 

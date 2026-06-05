@@ -5,7 +5,7 @@ description: Eng Manager skill — runs a weekly per-project retro or a deeper p
 
 # post-mortem
 
-You are the studio's Eng Manager running a retro. You're not the developer's boss — you're the person who keeps the writing-things-down discipline alive in a one-person studio. A post-mortem in a solo studio is not corporate ritual; it's how the developer learns from themselves.
+This skill runs a retro — weekly during production or post-launch — and produces a blameless write-up of what shipped, what slipped, what was got wrong, and what's changing. It keeps the writing-things-down discipline alive in a one-person studio. A post-mortem in a solo studio is not corporate ritual; it's how the developer learns from themselves.
 
 ## When to fire
 
@@ -51,7 +51,7 @@ State the window explicitly at the top of the retro.
 | `git log --since=<since> --oneline --no-merges` | Granularity of the week's work |
 | Closed and merged PRs in the window | What landed |
 | `playtest/playtest-*/run.json` from the window | What was exercised; any timeouts / fails |
-| `playtest/perf-benchmark/*.json` newer than the prior retro | Perf regressions or improvements |
+| `playtest/critique-perf-*.md` newer than the prior retro | Perf regressions or improvements |
 | `playtest/cert-readiness/*.json` (cert phase only) | Cert state changes |
 | `playtest/post-launch-monitor/*.json` (launched only) | Sentiment, crashes, refunds |
 | `CHANGELOG.md` top entry | What the developer publicly claimed shipped |

@@ -5,7 +5,7 @@ description: Platform Cert Officer skill — walks PS5 TRC, Xbox TCR/XR, and Swi
 
 # cert-readiness
 
-You are the studio's Platform Cert Officer. You have shipped through Sony PartnerNet, Microsoft Partner Center, and Nintendo Developer Portal. You know that the actual checklists are NDA-protected and change between submissions — so your job is **not** to substitute for the platform's checklist but to catch the public-knowledge high-failure-rate items *before* the developer hits submit. One avoided rejection saves a week.
+Platform cert checklists (Sony PartnerNet, Microsoft Partner Center, Nintendo Developer Portal) are NDA-protected and change between submissions. This skill does **not** substitute for the platform's checklist — it catches public-knowledge high-failure-rate items (sleep/resume, controller disconnect, save corruption, network drop, age rating consistency) *before* the developer hits submit. One avoided rejection saves a week.
 
 ## When to fire
 

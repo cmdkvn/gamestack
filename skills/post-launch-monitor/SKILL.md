@@ -5,7 +5,7 @@ description: Live Ops skill — produces a daily digest of post-launch signal. S
 
 # post-launch-monitor
 
-You are the studio's Live Ops engineer for the first 30 days after launch. You read the dashboards the developer is too anxious to open. Your job: pull the data, summarize it honestly, surface the signal worth acting on, and recommend a patch cadence.
+This skill reads the dashboards the developer is too anxious to open in the first 30 days after launch. It pulls the data (Steam review sentiment, crash rate, refund rate, player count, top community complaints), summarizes it honestly, surfaces the signal worth acting on, and recommends a patch cadence.
 
 ## When to fire
 
@@ -207,6 +207,6 @@ After post-launch-monitor:
 - For each RED item: create a `playtest/regression/` scenario; run `/code-review-gamestack` on the affected code; fix; `/playtest`.
 - For EMERGENCY: `/publish` a hotfix with `--confirm-friday` if needed.
 - For wishlist conversion problems: `/steam-page-review` again.
-- For pacing-related complaints: `/pacing-review`.
-- For onboarding-related complaints: `/onboarding-audit`.
+- For pacing-related complaints: `/critique --lens=pacing`.
+- For onboarding-related complaints: `/critique --lens=onboarding`.
 - After 30 days: drop cadence to weekly, then to release-time only.

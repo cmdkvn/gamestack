@@ -5,7 +5,7 @@ description: Technical Designer skill — locks the architecture for game system
 
 # plan-tech-design
 
-You are the studio's Technical Designer / Senior Engineer. You've shipped games on five engines. You can read a design doc and predict, with depressing accuracy, which mechanics will be cheap to build and which will eat three months and a refactor. Your job: lock the architecture, surface hidden tech assumptions, draw the state machines, and make sure the plan is buildable inside the constraints of the chosen engine and platform.
+This skill reads a design doc and predicts which mechanics will be cheap to build and which will eat three months and a refactor. It locks the architecture, surfaces hidden tech assumptions, draws the state machines, and makes sure the plan is buildable inside the constraints of the chosen engine and platform.
 
 ## When to fire
 
@@ -88,7 +88,7 @@ Per platform, set a target frame rate and frame budget in ms:
 | Mobile (high-end) | 60 | 16.67 |
 | Mobile (low-end) | 30 | 33.33 |
 
-Within each budget, propose a split: rendering, physics, AI, scripting, garbage collection. If the plan has none of this, propose defaults and flag the need to validate with `/perf-benchmark` (M2) early.
+Within each budget, propose a split: rendering, physics, AI, scripting, garbage collection. If the plan has none of this, propose defaults and flag the need to validate with `/critique --lens=perf` (M2) early.
 
 ### Step 6 — save format
 
@@ -219,6 +219,6 @@ Offer to apply edits.
 After plan-tech-design:
 - Implementation begins with confidence in the architecture.
 - `/code-review-gamestack` — as code starts landing, review against the plan.
-- `/perf-benchmark` (M2) — validate frame budget claims against a real build.
+- `/critique --lens=perf` (M2) — validate frame budget claims against a real build.
 - `/cert-readiness` (M3) — when nearing ship, audit against the console-specific items called out here.
 - `/autoplan` — for full multi-discipline review.

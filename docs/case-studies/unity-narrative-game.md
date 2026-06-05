@@ -169,7 +169,7 @@ KNOWN UNITY GOTCHAS
 Three weeks later the prototype runs. Walk the gallery, hit a key to begin a log entry, type a few sentences, hit ENTER to commit. The day advances. Then the moment of truth:
 
 ```
-/find-the-fun
+/critique --lens=fun
 ```
 
 The Prototype Critic asks the four questions. The developer answers honestly:
@@ -217,7 +217,7 @@ RECOMMENDED: C this week, then A. B is week 15+ content work.
 
 C is the right call and the developer knows it. They spend week 8 hacking together the "predecessor reads your journal" reveal at a tiny scale — three days of typing read back to you on day 7 in the predecessor's voice. They play it. They cry a little. The hook works.
 
-The week 8 cut list reads: gallery walk shortened to 10 seconds for now (B comes back in week 16), the mending verb cut, scope held on everything else. The prototype's `playtest/find-the-fun-2026-08-01.md` is the artifact the developer re-reads at every doubt-the-game crisis through week 22.
+The week 8 cut list reads: gallery walk shortened to 10 seconds for now (B comes back in week 16), the mending verb cut, scope held on everything else. The prototype's `playtest/critique-fun-2026-08-01.md` is the artifact the developer re-reads at every doubt-the-game crisis through week 22.
 
 ## Phase 4: Vertical slice (weeks 9–14)
 
@@ -292,10 +292,10 @@ NEEDS DEV DECISION
 
 The developer accepts both. The auto-fix removed an obvious signal leak that would have shown up six weeks later as "the journal sometimes triggers suggestions twice" — a bug that's hard to diagnose because it depends on panel open/close cycles. The pooling change is two minutes of work that saves a player playtesting Steam Deck from a 1.2 KB/frame GC churn that compounds across a 6-hour playthrough.
 
-Week 13, the first `/game-feel-audit`:
+Week 13, the first `/critique --lens=feel`:
 
 ```
-/game-feel-audit
+/critique --lens=feel
 ```
 
 The Polish Coach is honest about scope:
@@ -403,12 +403,12 @@ NO STRUCTURAL EDITS PROPOSED.
 PACING-REVIEW IS THE MORE USEFUL NEXT STEP.
 ```
 
-This is exactly the skill behaving correctly — when there isn't math to fix, say so plainly. The developer runs `/pacing-review` instead and gets back a genuinely useful tension graph showing a monotony zone in chapters 6–7 (weeks of identical winter days with no NPC encounters). The fix is the predecessor's journal entries from week 22's pile getting redistributed across chapters 6–7 as discovered scraps. Three hours of work; the tension graph re-runs flat-no-more.
+This is exactly the skill behaving correctly — when there isn't math to fix, say so plainly. The developer runs `/critique --lens=pacing` instead and gets back a genuinely useful tension graph showing a monotony zone in chapters 6–7 (weeks of identical winter days with no NPC encounters). The fix is the predecessor's journal entries from week 22's pile getting redistributed across chapters 6–7 as discovered scraps. Three hours of work; the tension graph re-runs flat-no-more.
 
-Week 20, the first `/perf-benchmark` against a real Steam Deck:
+Week 20, the first `/critique --lens=perf` against a real Steam Deck:
 
 ```
-/perf-benchmark
+/critique --lens=perf
 ```
 
 ```
@@ -444,7 +444,7 @@ Three findings, all from the storm chapter, all caught at week 20 instead of wee
 Phase rolls to `polish`. The game is content-complete. Now it's about whether the first 15 minutes get someone past the Steam refund window:
 
 ```
-/onboarding-audit
+/critique --lens=onboarding
 ```
 
 The First-60-Seconds Critic is unsentimental:
@@ -486,10 +486,10 @@ EXPECTED EFFECT
 
 The "sign the log" reframe is the kind of edit that ships in two days and changes the storefront-to-game alignment fundamentally. The intro reel becomes a 6-second post-card-rate shot, skippable, and the four tutorial modals collapse into a single fading hint overlay. The typed signature is now the player's first action; they're writing in the journal before they walk anywhere.
 
-Week 24 is `/pacing-review` against actual implemented content (different lens than week 20 — this one walks the game, not the plan):
+Week 24 is `/critique --lens=pacing` against actual implemented content (different lens than week 20 — this one walks the game, not the plan):
 
 ```
-/pacing-review
+/critique --lens=pacing
 ```
 
 The graph from chapter 1 to chapter 12 surfaces one monotony zone (chapters 6–7 already fixed in week 22), one spike cluster (chapters 9–10 are *both* high-stakes — sister's letter goes dark in 9, storm in 10), and a hollow ending. The hollow ending is the more important finding:
@@ -514,7 +514,7 @@ Two days of work that turns the ending from "hollow" to "the thing players will 
 Week 25 is the full accessibility audit:
 
 ```
-/a11y-audit
+/critique --lens=a11y
 ```
 
 The developer has been a11y-aware since week 3 (the autoplan applied subtitles-default-on as an auto-fix), and the audit catches what discipline alone misses:
@@ -891,16 +891,16 @@ Concrete-feeling, not load-bearing. Treat these as one game's signal, not indust
 - [`/plan-creative-director`](../../skills/plan-creative-director/SKILL.md) — surfaced the journal expansion.
 - [`/autoplan`](../../skills/autoplan/SKILL.md) — the seven-discipline plan pass.
 - [`/scene-prototype`](../../skills/scene-prototype/SKILL.md) — Unity scaffolding for the morning rounds.
-- [`/find-the-fun`](../../skills/find-the-fun/SKILL.md) — the kernel check at week 8.
+- [`/critique --lens=fun`](../../skills/critique/SKILL.md) — the kernel check at week 8.
 - [`/playtest`](../../skills/playtest/SKILL.md) — SDK-driven scenarios from week 10 onward.
 - [`/code-review-gamestack`](../../skills/code-review-gamestack/SKILL.md) — runtime bugs, allocation patterns, IL2CPP gotchas.
-- [`/game-feel-audit`](../../skills/game-feel-audit/SKILL.md) — the typing polish and the "do not add shake" guardrail.
+- [`/critique --lens=feel`](../../skills/critique/SKILL.md) — the typing polish and the "do not add shake" guardrail.
 - [`/balance-review`](../../skills/balance-review/SKILL.md) — honest "mostly inapplicable" verdict on a narrative game.
 - [`/asset-audit`](../../skills/asset-audit/SKILL.md) — atlas budget violations caught in CI from week 15.
-- [`/perf-benchmark`](../../skills/perf-benchmark/SKILL.md) — Steam Deck regressions at week 20.
-- [`/onboarding-audit`](../../skills/onboarding-audit/SKILL.md) — the "sign the log" reframe at week 23.
-- [`/pacing-review`](../../skills/pacing-review/SKILL.md) — the hollow ending fix at week 24.
-- [`/a11y-audit`](../../skills/a11y-audit/SKILL.md) — Xbox-grade a11y from the start.
+- [`/critique --lens=perf`](../../skills/critique/SKILL.md) — Steam Deck regressions at week 20.
+- [`/critique --lens=onboarding`](../../skills/critique/SKILL.md) — the "sign the log" reframe at week 23.
+- [`/critique --lens=pacing`](../../skills/critique/SKILL.md) — the hollow ending fix at week 24.
+- [`/critique --lens=a11y`](../../skills/critique/SKILL.md) — Xbox-grade a11y from the start.
 - [`/cert-readiness`](../../skills/cert-readiness/SKILL.md) — Switch lotcheck audit at week 27.
 - [`/cert-freeze`](../../skills/cert-freeze/SKILL.md) — write-locking the build through submission.
 - [`/steam-page-review`](../../skills/steam-page-review/SKILL.md) — Library hero, trailer recut, Cozy tag.

@@ -5,7 +5,7 @@ description: Narrative Designer skill — pressure-tests the story plan for voic
 
 # plan-narrative
 
-You are the studio's Narrative Designer. You've written for games whose stories landed and watched many more whose didn't. You can spot voice drift at a hundred paces. Your job: pressure-test the story plan, lock the writing pipeline, and surface narrative risks before they become rewrites.
+This skill pressure-tests the story plan, locks the writing pipeline, and surfaces narrative risks before they become rewrites. It scans for voice drift, info-dump density, fragile branching, missing environmental storytelling, and missing localization plan — the failure modes that turn a planned story into a six-month rewrite mid-production.
 
 ## When to fire
 

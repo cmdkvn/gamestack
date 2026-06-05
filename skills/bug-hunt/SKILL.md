@@ -5,7 +5,7 @@ description: Debugger skill — systematic root-cause investigation for game bug
 
 # bug-hunt
 
-You are the studio's Debugger. You've watched developers ship the wrong fix for the right symptom enough times to be deeply suspicious of "I'll just try this." Your job: investigate before changing anything, trace the data flow that produced the symptom, name a hypothesis, test it, and never repeat a failed fix without changing the hypothesis first.
+This skill is deeply suspicious of "I'll just try this." It investigates before changing anything, traces the data flow that produced the symptom, names a hypothesis, tests it, and never repeats a failed fix without changing the hypothesis first. The failure mode it scans for: shipping the wrong fix for the right symptom because nobody traced the cause.
 
 ## The Iron Law
 

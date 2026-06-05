@@ -4,11 +4,11 @@ Accessibility is launch-readiness, not a feature backlog. The single best lever 
 
 Xbox is the strictest a11y gate of the three consoles. Microsoft enforces remappable controls, subtitles on by default, visual representation of important audio, and adjustable text size as P0 cert items — miss any one and the submission bounces. PS5 TRC and Switch lotcheck are softer on a11y specifically but still load-bearing on items that overlap (subtitle defaults, controller-disconnect handling, sleep/resume with assist features active). The Steam side is reputational rather than cert — but Steam's recent-review band moves on accessibility complaints faster than on any other category except "doesn't launch."
 
-This document is the gamestack reference for what the [`/a11y-audit`](../skills/a11y-audit/SKILL.md) skill actually walks against. It defines the Top-4 (non-negotiable for ship), the GAG basic/intermediate/advanced tiers (the rest of the floor), engine-specific implementation notes (Unity / Godot / Unreal — where things actually break), the two report formats (internal dev-TODO vs. public Steam-page report), and the platform-cert linkage. It is deliberately not a substitute for the published Game Accessibility Guidelines at [gameaccessibilityguidelines.com](https://gameaccessibilityguidelines.com/) — that document is the source of truth for the underlying checklist. When in doubt, cite GAG.
+This document is the gamestack reference for what the [`/critique --lens=a11y`](../skills/critique/SKILL.md) skill actually walks against. It defines the Top-4 (non-negotiable for ship), the GAG basic/intermediate/advanced tiers (the rest of the floor), engine-specific implementation notes (Unity / Godot / Unreal — where things actually break), the two report formats (internal dev-TODO vs. public Steam-page report), and the platform-cert linkage. It is deliberately not a substitute for the published Game Accessibility Guidelines at [gameaccessibilityguidelines.com](https://gameaccessibilityguidelines.com/) — that document is the source of truth for the underlying checklist. When in doubt, cite GAG.
 
 ## The Top-4
 
-These are non-negotiable. Top-4 ships or the game doesn't ship — full stop on Xbox, strongly so on PC, and the difference between a 78% and an 88% Steam recent-review band on launch week. Each is a P0 finding in [`/a11y-audit`](../skills/a11y-audit/SKILL.md) when failing. The order below is the order the audit walks them.
+These are non-negotiable. Top-4 ships or the game doesn't ship — full stop on Xbox, strongly so on PC, and the difference between a 78% and an 88% Steam recent-review band on launch week. Each is a P0 finding in [`/critique --lens=a11y`](../skills/critique/SKILL.md) when failing. The order below is the order the audit walks them.
 
 ### Remappable controls
 
@@ -103,11 +103,11 @@ One concrete note per engine per major Top-4 feature. These are the spots where 
 
 ## The two report formats
 
-[`/a11y-audit`](../skills/a11y-audit/SKILL.md) emits two files. They serve different audiences and never get merged.
+[`/critique --lens=a11y`](../skills/critique/SKILL.md) emits two files. They serve different audiences and never get merged.
 
 ### Internal dev-TODO
 
-Lives at `playtest/a11y-audit/dev-todo-YYYY-MM-DD.md`. Engineer-facing. Engine + estimated effort + priority per item. Fragment:
+Lives at `playtest/critique-a11y/dev-todo-YYYY-MM-DD.md`. Engineer-facing. Engine + estimated effort + priority per item. Fragment:
 
 ```
 P0 — block launch
@@ -130,7 +130,7 @@ P2 — nice-to-have
 
 ### Public Steam-page report
 
-Lives at `playtest/a11y-audit/public-report-v<version>.md` and at the equivalent path under the game's published `docs/accessibility.md`. Player-facing. Honest about what's in, what's coming, what doesn't apply. Drops on the Steam page per [`/steam-page-review`](../skills/steam-page-review/SKILL.md). Fragment:
+Lives at `playtest/critique-a11y/public-report-v<version>.md` and at the equivalent path under the game's published `docs/accessibility.md`. Player-facing. Honest about what's in, what's coming, what doesn't apply. Drops on the Steam page per [`/steam-page-review`](../skills/steam-page-review/SKILL.md). Fragment:
 
 ```
 # Lighthouse Keeper — Accessibility (v1.0.0)
@@ -175,7 +175,7 @@ Switch lotcheck doesn't enforce most a11y items at P0 — but localization width
 
 ## When to audit
 
-Run [`/a11y-audit`](../skills/a11y-audit/SKILL.md):
+Run [`/critique --lens=a11y`](../skills/critique/SKILL.md):
 
 - **Before launch.** Top-4 failures are P0 blockers; nothing ships with them unresolved.
 - **Before every patch.** Patches that touch UI, controls, audio, or rendering can regress a11y silently. The audit takes under an hour; a regressed colorblind palette discovered post-patch costs days.
@@ -183,7 +183,7 @@ Run [`/a11y-audit`](../skills/a11y-audit/SKILL.md):
 - **After any UI or controls change.** The most-common regression vector. New screen, new control scheme, new menu — re-audit.
 - **Auto-fires near the end of [`/autoplan`](../skills/autoplan/SKILL.md)** if no audit has run in 60 days.
 
-A11y also intersects [`/onboarding-audit`](../skills/onboarding-audit/SKILL.md) — controller detection, subtitle defaults, skippable tutorials, and difficulty-surfaced-before-first-failure are all first-15-minute concerns even though they're framed as accessibility. Players hit them before they hit anything else; an onboarding audit that ignores them misses half the friction.
+A11y also intersects [`/critique --lens=onboarding`](../skills/critique/SKILL.md) — controller detection, subtitle defaults, skippable tutorials, and difficulty-surfaced-before-first-failure are all first-15-minute concerns even though they're framed as accessibility. Players hit them before they hit anything else; an onboarding audit that ignores them misses half the friction.
 
 ## Where to learn more
 
@@ -195,7 +195,7 @@ A11y also intersects [`/onboarding-audit`](../skills/onboarding-audit/SKILL.md) 
 
 For the gamestack-side flow:
 
-- [`/a11y-audit`](../skills/a11y-audit/SKILL.md) — the audit skill.
+- [`/critique --lens=a11y`](../skills/critique/SKILL.md) — the audit skill.
 - [`/cert-readiness`](../skills/cert-readiness/SKILL.md) — platform cert walk; consumes Top-4 results.
-- [`/onboarding-audit`](../skills/onboarding-audit/SKILL.md) — first-15-minute friction; overlaps with a11y on-ramp items.
+- [`/critique --lens=onboarding`](../skills/critique/SKILL.md) — first-15-minute friction; overlaps with a11y on-ramp items.
 - [`/steam-page-review`](../skills/steam-page-review/SKILL.md) — where the public report lands on the storefront.

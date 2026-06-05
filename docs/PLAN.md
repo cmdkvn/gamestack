@@ -1,42 +1,86 @@
-# Implementation plan
+# Plan
 
-gamestack v1.0 shipped across four milestones organized as 16 groups, each ≤400k tokens (cache-friendly Claude Code sessions). The milestone-level summary below is the public roadmap; for what landed in v1.0 specifically, see [`../CHANGELOG.md`](../CHANGELOG.md).
+This doc is the realistic status of gamestack — what is functionally shipped, what is designed but not validated, and what is planned. The README has the user-facing version; this is the engineering-honest one.
 
-## Milestones
+## Stages
 
-### M0 — Skeleton (Week 1) — **✓ SHIPPED**
+A stage is "shipped" only when it has both a working implementation AND a credible validation signal. Functionality without validation lives in the "in progress" column.
 
-Group 1 of the implementation plan. Repo bones, host abstraction (Claude Code), setup script, 3 pilot skills (`/design-jam`, `/find-the-fun`, `/code-review-gamestack`), README v0.
+### v1.0.0 — Early access — **functionally shipped, validation in progress**
 
-### M1 — Plan + Build skills (Weeks 2–3) — **✓ SHIPPED**
+What landed:
 
-- **Group 2 — Plan skills (✓ shipped):** 7 `/plan-*` skills + `/autoplan` pipeline.
-- **Group 3 — Build skills (✓ shipped):** `/art-bible`, `/art-shotgun`, `/scene-prototype`, `/dialogue-write`.
+| Group | Scope | Functional | Validated end-to-end |
+|---|---|---|---|
+| Skeleton | Repo bones, host abstraction, setup script, 3 pilot skills, README | ✓ | ✓ on Claude Code |
+| Plan skills | 7 `/plan-*` skills + `/autoplan` | ✓ | Tested on reference design docs; not against a shipped game |
+| Build skills | `/art-bible`, `/art-shotgun`, `/scene-prototype`, `/dialogue-write` | ✓ | Reference scenarios; not against a shipped game |
+| Review skills | `/code-review-gamestack`, `/bug-hunt`, `/balance-review`, `/dialogue-review`, `/asset-audit` | ✓ | Reference scenarios |
+| Critique (consolidated) | `/critique` with 6 lenses (replaces 6 prior skills) | ✓ | Rubrics inherited from prior skills; no real-game retros |
+| Unity SDK | UPM package, loopback HTTP, `/state` `/screenshot` `/health` `/input` `/snapshot` `/restore` `/snapshots` `/breakpoint`, Samples~/Basic, EditMode tests | ✓ | Against in-process `Bun.serve()` fake. **Live engine validation pending.** |
+| Godot SDK | Full parity with Unity SDK at port 7332 | ✓ | Same caveat as Unity SDK |
+| `/playtest` SDK + offline + zero-SDK modes | Phase-aware. 6 reference scenarios. 9-primitive scenario format. | ✓ | SDK mode tested against fake. Zero-SDK + offline modes have unit tests. |
+| Ship skills | `/cert-readiness`, `/steam-page-review`, `/publish`, `/post-launch-monitor` | ✓ | Reference scenarios; no shipped game retrospective |
+| CLIs (9 total) | asset-audit, cert-checklist, steam-page-check, game-benchmark, playtest-daemon (with screenshot-diff), taste-update, model-benchmark, skill-feedback, skill-lint | ✓ | 89/89 Bun tests pass |
+| Reflect skills | `/patch-notes`, `/post-mortem`, `/learn` | ✓ | Reference scenarios |
+| Power tools | `/careful`, `/freeze`, `/unfreeze`, `/guard`, `/cert-freeze`, `/launch-day` | ✓ | Functional; conventions documented |
+| Multi-host | Claude Code, Codex, Cursor, OpenCode | ✓ | ✓ verified for Claude Code; Codex / Cursor / OpenCode follow the shared `_lib.sh` contract |
+| Multi-host (unverified) | Factory, Slate, Kiro, Hermes, GBrain | ✓ scripts exist | ✗ no end-to-end install confirmed in those hosts |
+| Project state file | `gamestack/state.json` schema + read/write conventions | ✓ | Schema spec + conventions doc; integration into every skill is in progress |
+| `/gamestack` router | Front door, bootstrap, recommends 1–2 next skills | ✓ | Functional; effectiveness depends on `/skill-feedback` adoption |
+| `/skill-feedback` + CLI | Local thumbs-up/down log + aggregator | ✓ | CLI tested |
+| Docs | `README.md`, `docs/skills.md`, `docs/STATE.md`, `docs/ZERO-SDK-PLAYTEST.md`, `docs/ENGINES.md`, `docs/CERT.md`, `docs/ACCESSIBILITY.md`, `docs/PLATFORMS.md`, `docs/ROLES.md`, 5 howto tutorials, 2 reference case studies | ✓ | Internally consistent; real-game retros pending |
 
-Engine SDKs still stubbed (full integration lands in M2).
+What did NOT land:
 
-### M2 — Review + Playtest + Unity SDK (Weeks 4–5) — **review + playtest offline + Unity SDK foundation shipped**
+- A retrospective of a real shipped game built with gamestack throughout. The case studies are reference walkthroughs of toy Unity / Godot projects.
+- Verified install scripts for Factory / Slate / Kiro / Hermes / GBrain.
+- Live engine validation of the Unity / Godot SDKs against a real game build.
+- Universal `state.json` integration across every shipped skill (some skills still read project state heuristically rather than from the canonical file).
+- The `/skill-feedback` improvement loop with enough volume to meaningfully prioritize rewrites.
 
-- **Group 4 — Review skills (✓ shipped):** `/bug-hunt`, `/balance-review`, `/dialogue-review`, `/asset-audit`.
-- **Group 5 — Playtest offline skills (✓ shipped):** `/game-feel-audit`, `/pacing-review`, `/onboarding-audit`, `/a11y-audit`, `/perf-benchmark`.
-- **Group 6 — Unity SDK foundation (✓ shipped):** UPM package, HTTP server (loopback), `GET /state`, `POST /screenshot`, `GET /health`, Editor menu + window, EditMode tests.
-- **Group 7 — Unity SDK extended (✓ shipped, v0.2.0):** `POST /input` (event dispatch), `POST /snapshot`, `GET /snapshots`, `POST /restore`, `POST /breakpoint`, `IGameStackSnapshotable`, `BreakpointProvider.Hit`, Samples~/Basic.
-- **Group 8 — `/playtest` + Unity integration (✓ shipped):** Phase-aware live playtest skill. 6 reference scenarios shipped at `skills/playtest/scenarios/`. JSON scenario format with 9 step primitives. Offline static-analysis fallback when SDK absent.
+### v1.1 — Validation milestone — **planned**
 
-### M3 — Ship + CLIs + Godot SDK (Week 6) — **✓ SHIPPED**
+The minimum bar for v1.1:
 
-- **Group 9 — Godot SDK (✓ shipped):** Full Unity-SDK contract parity at port 7332. Autoload singleton, TCPServer-based HTTP, all 5 providers (state/screenshot/input/snapshot/breakpoint), self-test scene, sample.
-- **Group 10 — Ship skills (✓ shipped):** `/cert-readiness`, `/steam-page-review`, `/publish`, `/post-launch-monitor`.
-- **Group 11 — CLIs batch A (✓ shipped):** `gamestack-asset-audit`, `gamestack-cert-checklist`, `gamestack-steam-page-check`. TypeScript/Bun under `bin/impl/`. 30 tests pass.
-- **Group 12 — CLIs batch B + daemon (✓ shipped):** `gamestack-game-benchmark`, `gamestack-playtest-daemon`, `gamestack-taste-update`, `gamestack-model-benchmark`. 78 tests pass. Daemon validated end-to-end against a fake engine SDK on `Bun.serve()`.
+- One real game shipped using gamestack throughout, with the post-launch retrospective published as a case study under `docs/case-studies/`.
+- Unity SDK + Godot SDK validated against that game's live build (not just `Bun.serve()` fakes).
+- `/skill-feedback` aggregates show at least 3 skills with >10 entries each, so rewrites are signal-driven, not vibes-driven.
+- At least one community-verified host beyond Claude Code (PRs welcome with screen recording / session transcript).
+- `state.json` integration completed across every shipped skill (audit + per-skill PR).
 
-### M4 — Reflect + docs + launch (Weeks 7–8) — **✓ SHIPPED — v1.0.0 launched 2026-06-05**
+### v1.x — Catalog expansion — **planned**
 
-- **Group 13 — Reflect + power tools + multi-host (✓ shipped):** 3 reflect skills (`/patch-notes`, `/post-mortem`, `/learn`), 6 power tools (`/careful`, `/freeze`, `/unfreeze`, `/guard`, `/cert-freeze`, `/launch-day`), 8 new host scripts (codex, opencode, cursor, factory, slate, kiro, hermes, gbrain) on a shared `hosts/_lib.sh`.
-- **Group 14 — README + skills.md (✓ shipped):** Launch-quality README rewrite + 38 skill deep-dives in `docs/skills.md` (~10,400 words across pitch, plan, build, review, playtest, ship, reflect, power tools, with a multi-host table at the end).
-- **Group 15 — Reference docs + tutorials (✓ shipped):** ROLES / ENGINES / CERT / ACCESSIBILITY / PLATFORMS reference + 5 howto-* tutorials at `docs/howto/`. ~28,700 words across 10 docs.
-- **Group 16 — Tests + case studies + launch (✓ shipped):** `gamestack-skill-lint` regression validator (8th CLI, 11 tests), 2 case studies at `docs/case-studies/` (Unity + Godot, ~3500 words each), [`docs/LAUNCH-CHECKLIST.md`](LAUNCH-CHECKLIST.md), [`CHANGELOG.md`](../CHANGELOG.md) v1.0.0 entry. 89/0 Bun tests pass.
+Driven by `/skill-feedback` aggregates. Likely areas:
+
+- Live-service / multiplayer skill set (matchmaking design review, retention-metric review, server-cost balancing).
+- Engine SDK rev'd against real-game findings.
+- Community-verified host expansion (one host moved from unverified to verified per release).
+- Unreal SDK (UPlugin).
+
+### v2.0 — TBD
+
+Reserved for breaking changes informed by v1.x findings.
+
+## How decisions get made
+
+- **A skill ships when its rubric is documented and at least one reference scenario exercises it.** Real-game validation happens in v1.1+.
+- **A host moves from unverified to verified when a maintainer or community contributor demonstrates an end-to-end install** (screen recording or session transcript). The bar is intentionally low; the point is to stop claiming things work that nobody has tried.
+- **A skill gets rewritten when `gamestack-skill-feedback --window=30d` shows < 50% useful with > 5 entries.** Below that volume, ratings are noise.
+- **Breaking changes happen at major versions.** v1.0 → v1.1 is additive only. v1.x → v2.0 is when collected lessons reshape contracts.
+
+## Open questions
+
+- How many skills is too many? v1.0 ships 32; the consolidation to `/critique` cut 5 from 38. The next plausible consolidation: the seven `/plan-*` skills into `/plan --discipline=<x>`. Decision deferred until v1.1 feedback comes in.
+- Is `state.json` the right shape? It might want to split into `project.json` (slow-moving) and `recent.json` (high-churn). Decision deferred.
+- Are the engine SDK contracts going to need to change for Unreal? Likely yes; the parity claim only covers Unity ↔ Godot.
 
 ## What's next
 
-v1.0 is the launch baseline. Post-v1 work tracks in [`../CHANGELOG.md`](../CHANGELOG.md). Contributions welcome — see [`../.claude/CLAUDE.md`](../.claude/CLAUDE.md) for the skill-development guide.
+If you want to help, the highest-impact contributions:
+
+1. Use gamestack on a real game and log `/skill-feedback` honestly. The aggregator tells the next rewrite what to fix.
+2. Verify one of the unverified hosts end-to-end. Open a PR moving it from "community / unverified" to "verified."
+3. Validate the Unity or Godot SDK against a live build (not the fake) and report what breaks.
+
+Contributions to v1.x feature work are also welcome, but the validation work above is the gate keeping v1.0 from being a credibly-shipped baseline.

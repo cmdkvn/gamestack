@@ -5,7 +5,7 @@ description: Senior Gameplay Engineer skill — finds runtime bugs that pass CI 
 
 # code-review-gamestack
 
-You are the studio's Senior Gameplay Engineer. Fifteen years of shipped games. You know the bug families that CI doesn't catch — the ones that crash the game on a specific input sequence two weeks after launch, or that silently corrupt the save file on power loss. Your review is rigorous, not exhaustive — five high-priority findings beat fifty bikeshed comments.
+This skill scans for the bug families that CI doesn't catch — the ones that crash the game on a specific input sequence two weeks after launch, or silently corrupt the save file on power loss. Engine-specific patterns for Unity, Godot, Unreal, GameMaker, and Bevy. The review is rigorous, not exhaustive — five high-priority findings beat fifty bikeshed comments.
 
 ## When to fire
 
@@ -94,17 +94,26 @@ Why it matters: GC spikes cause frame drops. Switch in particular is unforgiving
 
 ### Step 3 — categorize each finding
 
+The developer is reviewing solo. There is no second pair of eyes to catch a bad auto-fix. **Default to surfacing, not editing.**
+
 Tag every finding with one of:
 
-- **`[AUTO]`** — the fix is obvious and unambiguous (missing `OnDisable` unsubscribe, allocation easily refactored to a cached field, `string +=` → `StringBuilder`). **Apply the fix directly and report it.**
-- **`[ASK]`** — the fix requires a design choice (rename a field with `[FormerlySerializedAs]` vs. inline migration; throttle vs. fix the underlying perf bug). **Surface it and wait for the answer; do not apply.**
-- **`[FLAG]`** — a smell, not a bug. **Report it with severity but don't fix.**
+- **`[PROPOSE]`** *(default)* — describe the fix and the diff, but do **not** apply it. The developer applies after reading. This covers almost every finding the skill produces, including: events subscribed without unsubscribe, save fields renamed without `[FormerlySerializedAs]`, missing `CancellationToken`s, suspicious tick-order assumptions, every `[ASK]`-style design call from the old taxonomy, and most `[AUTO]`-style mechanical fixes.
+- **`[AUTO]`** — reserved for the narrow whitelist below. The fix is mechanical, local, behavior-preserving, and easily reverted via the same diff in reverse. **Apply the fix directly and report it.** Whitelist:
+  - `string +=` inside a per-frame method → `StringBuilder` (purely a perf rewrite).
+  - `GetComponent<T>()` / `FindObjectOfType<T>()` / `Camera.main` called per-frame → cache the lookup into an `Awake` / `OnEnable` field (purely a perf rewrite).
+  - LINQ `Where` / `Select` over a `List<T>` per frame → equivalent `for` loop building into a pre-allocated buffer.
+  - Empty `catch { }` → `catch (Exception ex) { Debug.LogException(ex); }` (still surface to the developer because empty catches usually hide a real bug; the autofix only makes the swallow visible).
+  - **Nothing involving Godot signal connect / disconnect, nothing changing serialized field names, nothing changing input handling, nothing touching save format, nothing changing thread affinity, nothing modifying a public API surface.** Those are always `[PROPOSE]`.
+- **`[FLAG]`** — a smell, not a bug. Report with severity but don't fix and don't propose a fix — the developer's call whether the smell merits investigation.
+
+If you're unsure whether a finding qualifies for `[AUTO]`, it doesn't. Default `[PROPOSE]`.
 
 Group findings by file. For each finding give:
 - File and line number.
 - The pattern that triggered the flag (e.g., `Family 1: per-frame allocation`).
 - Why it's a problem on the detected engine.
-- The fix (applied for `[AUTO]`; proposed for `[ASK]`/`[FLAG]`).
+- The fix (applied for `[AUTO]`; proposed diff for `[PROPOSE]`; description for `[FLAG]`).
 
 ### Step 4 — completeness sweep
 
@@ -123,17 +132,17 @@ If any were applicable and you didn't check, do another pass.
 ENGINE:      <detected engine>
 DIFF SCOPE:  <range of commits / unstaged changes>
 
-[AUTO]   N findings applied
-[ASK]    N findings need your input
-[FLAG]   N smells reported
+[AUTO]    N findings applied (whitelist only)
+[PROPOSE] N findings surfaced for your review (default)
+[FLAG]    N smells reported
 
 ── findings ──────────────────────────────────────
 
-<file>:<line>  [AUTO | ASK | FLAG]
+<file>:<line>  [AUTO | PROPOSE | FLAG]
   Pattern:  <family>.<subcategory>
   Why:      <one sentence>
-  Action:   <auto-fixed | needs your call | smell>
-  Detail:   <applied edit, or proposed change>
+  Action:   <auto-fixed | proposed diff | smell>
+  Detail:   <applied edit, or proposed diff, or smell description>
 
 ...
 ```
@@ -184,7 +193,8 @@ DIFF SCOPE:  <range of commits / unstaged changes>
 - **Don't review style.** "Use camelCase here" or "prefer `var`" belongs in a linter, not a senior code review.
 - **Don't suggest features.** Code review is correctness and runtime safety. Not design.
 - **Don't bikeshed.** If both options work, the existing one wins.
-- **Don't auto-fix anything that could change game behavior.** Caching `GetComponent` is safe. Refactoring how an input is read is not — that's an `[ASK]`.
+- **Don't auto-fix anything that could change game behavior.** Caching `GetComponent` is safe. Refactoring how an input is read is not — that's `[PROPOSE]`. When in doubt, `[PROPOSE]`.
+- **Don't expand the `[AUTO]` whitelist on the fly.** If a finding looks like it should be auto-fixed but isn't in the whitelist, that's a signal the whitelist needs review — log it as `[PROPOSE]` and flag it in the report for the maintainer.
 - **Don't pile on.** Five high-priority findings are useful. Fifty are noise that hides the real bugs.
 - **Don't review code outside the diff** unless you suspect a finding in the diff has roots elsewhere.
 
@@ -197,4 +207,4 @@ If the diff is empty, the engine is genuinely unrecognizable, or the user pointe
 Findings from `/code-review-gamestack` often feed into:
 - `/bug-hunt` (post-M2) — when an `[ASK]` reveals an underlying bug worth investigating deeply.
 - `/playtest` (post-M2) — once the review passes, drive a real session to confirm the fix doesn't introduce regressions.
-- `/perf-benchmark` (post-M2) — when Family 1 or 4 findings are dense, run a perf snapshot before and after the fixes to confirm impact.
+- `/critique --lens=perf` (post-M2) — when Family 1 or 4 findings are dense, run a perf snapshot before and after the fixes to confirm impact.

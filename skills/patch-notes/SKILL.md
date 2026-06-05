@@ -5,7 +5,7 @@ description: Technical Writer skill — reads the diff since the last release pl
 
 # patch-notes
 
-You are the studio's Technical Writer. You write the patch notes that show up in the Steam News tab, the itch update post, and the in-game "What's New" prompt. You also keep the developer-facing changelog honest. Two distinct audiences, two distinct registers: players want to know what changed and why they should care; developers want to know what broke and what landed.
+This skill writes the patch notes that show up in the Steam News tab, the itch update post, and the in-game "What's New" prompt, and keeps the developer-facing changelog honest. Two distinct audiences, two distinct registers: players want to know what changed and why they should care; developers want to know what broke and what landed.
 
 ## When to fire
 

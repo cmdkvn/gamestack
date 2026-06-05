@@ -14,7 +14,47 @@ if [[ -z "${GAMESTACK_DIR:-}" ]]; then
   return 1
 fi
 
+# Returns 0 if the skill is enabled (default), 1 if its frontmatter sets `enabled: false`.
+# Tolerates spaces / quotes / case in the frontmatter value. Only inspects the YAML
+# frontmatter block bounded by the first two `---` lines.
+_gamestack_skill_enabled() {
+  local skill_md="$1"
+  if [[ ! -f "$skill_md" ]]; then
+    return 0
+  fi
+  awk '
+    BEGIN { in_fm = 0; seen_first = 0 }
+    /^---[[:space:]]*$/ {
+      if (seen_first == 0) { in_fm = 1; seen_first = 1; next }
+      if (in_fm == 1)      { in_fm = 0; exit }
+    }
+    in_fm == 1 && /^[[:space:]]*enabled[[:space:]]*:/ {
+      val = $0
+      sub(/^[^:]*:[[:space:]]*/, "", val)
+      gsub(/["'\'']/, "", val)
+      gsub(/[[:space:]]+$/, "", val)
+      if (tolower(val) == "false" || val == "0" || tolower(val) == "no") {
+        print "disabled"
+      }
+    }
+  ' "$skill_md" | grep -q '^disabled$' && return 1
+  return 0
+}
+
 _gamestack_list_skills() {
+  find "$GAMESTACK_DIR/skills" -mindepth 1 -maxdepth 1 -type d \
+    | while read -r dir; do
+        if [[ -f "$dir/SKILL.md" ]]; then
+          if _gamestack_skill_enabled "$dir/SKILL.md"; then
+            basename "$dir"
+          fi
+        fi
+      done \
+    | sort
+}
+
+# Same as _gamestack_list_skills but includes disabled ones so status output can show them.
+_gamestack_list_skills_all() {
   find "$GAMESTACK_DIR/skills" -mindepth 1 -maxdepth 1 -type d \
     | while read -r dir; do
         if [[ -f "$dir/SKILL.md" ]]; then
@@ -114,19 +154,23 @@ _gamestack_status_to() {
   while IFS= read -r name; do
     [[ -z "$name" ]] && continue
     any=1
-    local status
-    status="$(_gamestack_skill_status "$name" "$target_dir")"
     local pretty
-    case "$status" in
-      linked-here)      pretty="✓ linked (this checkout)" ;;
-      linked-elsewhere) pretty="↪ linked elsewhere" ;;
-      conflict-dir)     pretty="✗ conflict (directory exists at target)" ;;
-      conflict-file)    pretty="✗ conflict (file exists at target)" ;;
-      missing)          pretty="… not installed" ;;
-      *)                pretty="? unknown ($status)" ;;
-    esac
+    if ! _gamestack_skill_enabled "$GAMESTACK_DIR/skills/$name/SKILL.md"; then
+      pretty="⊘ disabled (enabled: false in SKILL.md)"
+    else
+      local status
+      status="$(_gamestack_skill_status "$name" "$target_dir")"
+      case "$status" in
+        linked-here)      pretty="✓ linked (this checkout)" ;;
+        linked-elsewhere) pretty="↪ linked elsewhere" ;;
+        conflict-dir)     pretty="✗ conflict (directory exists at target)" ;;
+        conflict-file)    pretty="✗ conflict (file exists at target)" ;;
+        missing)          pretty="… not installed" ;;
+        *)                pretty="? unknown ($status)" ;;
+      esac
+    fi
     printf '  %-26s  %s\n' "$name" "$pretty"
-  done < <(_gamestack_list_skills)
+  done < <(_gamestack_list_skills_all)
 
   if [[ $any -eq 0 ]]; then
     echo "  (no skills found in $GAMESTACK_DIR/skills/)"

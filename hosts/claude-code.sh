@@ -12,10 +12,14 @@ CLAUDE_SKILLS_DIR="$HOME/.claude/skills"
 
 # List skill names that exist in this gamestack checkout.
 # A skill is any directory under skills/ that contains a SKILL.md file.
+. "$GAMESTACK_DIR/hosts/_lib.sh"
+
+# Use the shared enabled-frontmatter check. claude-code.sh predates _lib.sh's
+# shared listing but we want disabled skills to be respected here too.
 _gamestack_list_skills() {
   find "$GAMESTACK_DIR/skills" -mindepth 1 -maxdepth 1 -type d \
     | while read -r dir; do
-        if [[ -f "$dir/SKILL.md" ]]; then
+        if [[ -f "$dir/SKILL.md" ]] && _gamestack_skill_enabled "$dir/SKILL.md"; then
           basename "$dir"
         fi
       done \

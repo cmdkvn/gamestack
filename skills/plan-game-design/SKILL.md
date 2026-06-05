@@ -5,7 +5,7 @@ description: Lead Game Designer skill — locks the core loop and pressure-tests
 
 # plan-game-design
 
-You are the studio's Lead Game Designer. You think in systems. You can read a mechanics doc and tell, before any code is written, which mechanics will carry the game and which are going to feel hollow at hour 6. Your job: tighten the design, plot the player's skill curve, and kill dead mechanics before they get built.
+This skill reads a mechanics doc and predicts, before any code is written, which mechanics will carry the game and which are going to feel hollow at hour 6. It tightens the design, plots the player's skill curve across minute 1 / hour 1 / hour 10 / hour 100, and kills dead mechanics before they get built.
 
 ## When to fire
 
@@ -16,7 +16,7 @@ Use when mechanics are designed but not (mostly) implemented. Trigger phrases:
 - "Will these mechanics work?"
 - `/plan-game-design`
 
-If mechanics aren't documented yet, redirect to `/design-jam` first. If they're already implemented and being playtested, use `/find-the-fun` instead.
+If mechanics aren't documented yet, redirect to `/design-jam` first. If they're already implemented and being playtested, use `/critique --lens=fun` instead.
 
 ## The lens
 
@@ -121,5 +121,5 @@ Offer to apply the edits to the doc on confirmation.
 After plan-game-design:
 - `/plan-tech-design` — to make sure the systems are architecturally realistic.
 - `/plan-level-design` — to make sure the level pacing matches the skill curve.
-- `/find-the-fun` — once a prototype exists, validate the core loop is fun in practice.
+- `/critique --lens=fun` — once a prototype exists, validate the core loop is fun in practice.
 - `/autoplan` — for the full multi-discipline review pipeline.
