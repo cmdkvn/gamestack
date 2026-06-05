@@ -1,0 +1,54 @@
+{
+  "name": "vertical-slice-friction",
+  "phase": "vertical-slice",
+  "description": "Walks the vertical slice's critical path. Pauses at known friction points (loading, transitions, save points, tutorial gates) to capture before/after state and visuals. Used to diagnose where players get stuck.",
+  "endpoint": "http://localhost:7331",
+  "max_duration_seconds": 600,
+  "setup": [
+    { "type": "snapshot", "id": "vs-pre" },
+    { "type": "breakpoint", "action": "add-pause", "tag": "scene-load" },
+    { "type": "breakpoint", "action": "add-pause", "tag": "tutorial-gate" },
+    { "type": "breakpoint", "action": "add-pause", "tag": "save-point" }
+  ],
+  "steps": [
+    { "type": "wait_for_state", "tagged_key": "default.gameReady", "expected_value": true, "timeout_seconds": 10 },
+
+    { "type": "input", "events": [
+      { "device": "Keyboard", "action": "Press",   "control": "Start" },
+      { "device": "Keyboard", "action": "Release", "control": "Start" }
+    ]},
+
+    { "type": "wait_for_state", "tagged_key": "default.inPlay", "expected_value": true, "timeout_seconds": 15 },
+    { "type": "screenshot", "filename": "01-slice-start.png" },
+
+    { "type": "wait_for_state", "tagged_key": "default.atFirstGate", "expected_value": true, "timeout_seconds": 60 },
+    { "type": "screenshot", "filename": "02-first-gate.png" },
+    { "type": "assert_recent_breakpoint", "tag": "tutorial-gate" },
+    { "type": "breakpoint", "action": "resume" },
+
+    { "type": "input", "events": [
+      { "device": "Keyboard", "action": "Press",   "control": "Up" },
+      { "device": "Keyboard", "action": "Release", "control": "Up" }
+    ]},
+
+    { "type": "wait_for_state", "tagged_key": "default.atFirstSave", "expected_value": true, "timeout_seconds": 120 },
+    { "type": "screenshot", "filename": "03-first-save.png" },
+    { "type": "assert_recent_breakpoint", "tag": "save-point" },
+    { "type": "snapshot", "id": "vs-mid-save" },
+    { "type": "breakpoint", "action": "resume" },
+
+    { "type": "wait_for_state", "tagged_key": "default.atSliceEnd", "expected_value": true, "timeout_seconds": 300 },
+    { "type": "screenshot", "filename": "04-slice-end.png" },
+
+    { "type": "assert_state", "tagged_key": "default.softLocked", "expected_value": false }
+  ],
+  "teardown": [
+    { "type": "breakpoint", "action": "clear-pause" },
+    { "type": "restore", "id": "vs-pre" }
+  ],
+  "assertions_summary": [
+    "Player reaches every breakpoint tag in order (no skipped section).",
+    "No soft-lock between sections.",
+    "Wallclock per-section under target (loadings + transitions don't bloat)."
+  ]
+}

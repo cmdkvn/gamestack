@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# gamestack-asset-audit — per-platform asset budget audit (CI-friendly)
+#
+# Thin shim around bin/impl/asset-audit/index.ts. The TypeScript implementation
+# runs under Bun. Install: brew install bun (or see https://bun.sh).
+#
+# Wraps the same lens as the interactive /asset-audit skill (Technical Artist).
+set -euo pipefail
+
+if ! command -v bun >/dev/null 2>&1; then
+  echo "error: bun is required for gamestack CLIs." >&2
+  echo "  install:  brew install bun  (or see https://bun.sh)" >&2
+  exit 127
+fi
+
+GAMESTACK_BIN_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+exec bun run "$GAMESTACK_BIN_DIR/impl/asset-audit/index.ts" "$@"

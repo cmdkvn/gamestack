@@ -1,0 +1,37 @@
+# OS / editor
+.DS_Store
+*.swp
+*.swo
+*~
+.idea/
+.vscode/
+*.code-workspace
+
+# Env / secrets
+.env
+.env.local
+.env.*.local
+
+# Claude Code local
+.claude/settings.local.json
+
+# Node / Bun / TS build outputs
+node_modules/
+dist/
+build/
+*.tsbuildinfo
+.bun/
+
+# Engine SDK build artifacts (when added in M2/M3)
+engines/unity/Library/
+engines/unity/Temp/
+engines/unity/Obj/
+engines/godot/.godot/
+engines/godot/.import/
+
+# Test outputs
+coverage/
+.nyc_output/
+
+# Logs
+*.log

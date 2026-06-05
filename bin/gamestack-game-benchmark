@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+# gamestack-game-benchmark — cross-engine perf snapshot with baseline diff
+#
+# Polls the gamestack engine SDK (Unity / Godot) at GET /state and aggregates
+# FPS / frame time / draw calls / GC alloc / memory peak. Diffs against a
+# baseline JSON report to catch regressions in CI.
+set -euo pipefail
+
+if ! command -v bun >/dev/null 2>&1; then
+  echo "error: bun is required for gamestack CLIs." >&2
+  echo "  install:  brew install bun  (or see https://bun.sh)" >&2
+  exit 127
+fi
+
+GAMESTACK_BIN_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+exec bun run "$GAMESTACK_BIN_DIR/impl/game-benchmark/index.ts" "$@"

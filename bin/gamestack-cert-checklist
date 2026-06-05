@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+# gamestack-cert-checklist — platform cert readiness checklist
+#
+# Walks the public-knowledge high-failure-rate categories from PS5 TRC, Xbox
+# TCR/XR, and Switch lotcheck and surfaces a per-platform verdict against the
+# project's source.
+#
+# Wraps the same lens as the interactive /cert-readiness skill (Platform Cert
+# Officer). This is NOT a substitute for the NDA-protected checklist — always
+# download the current TRC/TCR/lotcheck from the platform portal before submit.
+set -euo pipefail
+
+if ! command -v bun >/dev/null 2>&1; then
+  echo "error: bun is required for gamestack CLIs." >&2
+  echo "  install:  brew install bun  (or see https://bun.sh)" >&2
+  exit 127
+fi
+
+GAMESTACK_BIN_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+exec bun run "$GAMESTACK_BIN_DIR/impl/cert-checklist/index.ts" "$@"

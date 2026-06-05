@@ -1,0 +1,52 @@
+{
+  "name": "cert-controller-disconnect",
+  "phase": "cert",
+  "description": "Cert-class scenario: simulate controller disconnect mid-gameplay and confirm the game pauses (or handles gracefully) without crashing or losing state. The single most common failure point in Switch lotcheck and PS5 TRC. Requires the game to expose a 'simulate-disconnect' breakpoint hit OR a tagged-key-driven disconnect simulation hook.",
+  "endpoint": "http://localhost:7331",
+  "max_duration_seconds": 120,
+  "setup": [
+    { "type": "snapshot", "id": "cert-disconnect-pre" }
+  ],
+  "steps": [
+    { "type": "wait_for_state", "tagged_key": "default.inPlay", "expected_value": true, "timeout_seconds": 15 },
+
+    { "type": "input", "events": [
+      { "device": "Gamepad", "action": "Value", "control": "Horizontal", "value": 1.0 }
+    ]},
+    { "type": "wait", "seconds": 1 },
+    { "type": "screenshot", "filename": "01-gameplay-active.png" },
+
+    { "type": "snapshot", "id": "pre-disconnect" },
+
+    { "type": "input", "events": [
+      { "device": "Custom", "action": "Custom", "control": "simulate-controller-disconnect", "custom": "primary" }
+    ]},
+    { "type": "wait_for_state", "tagged_key": "default.paused", "expected_value": true, "timeout_seconds": 5 },
+    { "type": "screenshot", "filename": "02-disconnected.png" },
+    { "type": "assert_state", "tagged_key": "default.playerControllerConnected", "expected_value": false },
+    { "type": "assert_state", "tagged_key": "default.savedDataIntact", "expected_value": true },
+
+    { "type": "input", "events": [
+      { "device": "Custom", "action": "Custom", "control": "simulate-controller-reconnect", "custom": "primary" }
+    ]},
+    { "type": "wait_for_state", "tagged_key": "default.playerControllerConnected", "expected_value": true, "timeout_seconds": 10 },
+    { "type": "screenshot", "filename": "03-reconnected.png" },
+
+    { "type": "input", "events": [
+      { "device": "Gamepad", "action": "Press", "control": "Confirm" }
+    ]},
+    { "type": "wait_for_state", "tagged_key": "default.paused", "expected_value": false, "timeout_seconds": 10 },
+    { "type": "screenshot", "filename": "04-resumed.png" },
+
+    { "type": "assert_state", "tagged_key": "default.gameCrashed", "expected_value": false }
+  ],
+  "teardown": [
+    { "type": "restore", "id": "cert-disconnect-pre" }
+  ],
+  "assertions_summary": [
+    "Game pauses (or handles gracefully) immediately on controller disconnect.",
+    "Saved game data is intact during the disconnected state.",
+    "Game resumes cleanly on reconnect without crash or progress loss.",
+    "No exception or null reference triggered during the disconnect cycle."
+  ]
+}

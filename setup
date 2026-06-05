@@ -1,0 +1,138 @@
+#!/usr/bin/env bash
+# gamestack — install AI agent skills for game development
+#
+# Usage:
+#   ./setup                        Install for the auto-detected host (Claude Code if present).
+#   ./setup --host <name>          Install for a specific host.
+#   ./setup --status               Show what's currently installed.
+#   ./setup --uninstall            Remove gamestack symlinks for the detected host.
+#   ./setup -h | --help            Show this help.
+#
+# Supported hosts (v0.1):
+#   claude-code  — auto-detected when ~/.claude/ exists.
+#
+# Planned hosts (post-v1): codex, opencode, cursor, factory, slate, kiro, hermes, gbrain.
+
+set -euo pipefail
+
+GAMESTACK_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+export GAMESTACK_DIR
+
+HOST=""
+MODE="install"
+
+usage() {
+  cat <<'EOF'
+Usage: ./setup [--host <name>] [--uninstall | --status]
+
+Install gamestack skills into your AI agent host.
+
+Options:
+  --host <name>   Override host detection.
+                  Supported (v0.1): claude-code
+  --uninstall     Remove gamestack symlinks from the host.
+  --status        Show install status without changing anything.
+  -h, --help      Show this help.
+
+Examples:
+  ./setup                           # auto-detect host and install
+  ./setup --status                  # see what's installed
+  ./setup --host claude-code        # explicit host
+  ./setup --uninstall               # remove all gamestack symlinks
+
+EOF
+}
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    --host)
+      if [[ $# -lt 2 ]]; then
+        echo "error: --host requires a value" >&2
+        exit 1
+      fi
+      HOST="$2"
+      shift 2
+      ;;
+    --host=*)
+      HOST="${1#*=}"
+      shift
+      ;;
+    --uninstall)
+      MODE="uninstall"
+      shift
+      ;;
+    --status)
+      MODE="status"
+      shift
+      ;;
+    *)
+      echo "error: unknown argument: $1" >&2
+      usage >&2
+      exit 1
+      ;;
+  esac
+done
+
+# Auto-detect host if not specified.
+if [[ -z "$HOST" ]]; then
+  if [[ -d "$HOME/.claude" ]]; then
+    HOST="claude-code"
+  else
+    echo "error: no host detected." >&2
+    echo "  Specify a host: --host <name>" >&2
+    echo "  Supported in v0.1: claude-code" >&2
+    exit 1
+  fi
+fi
+
+if [[ "$HOST" == _* ]]; then
+  echo "error: host names starting with underscore are reserved for internal use" >&2
+  exit 1
+fi
+
+HOST_SCRIPT="$GAMESTACK_DIR/hosts/${HOST}.sh"
+if [[ ! -f "$HOST_SCRIPT" ]]; then
+  available=$(find "$GAMESTACK_DIR/hosts" -maxdepth 1 -name "*.sh" ! -name '_*' -exec basename {} .sh \; 2>/dev/null | sort | tr '\n' ' ')
+  echo "error: unsupported host '$HOST'" >&2
+  echo "  Available host scripts: ${available:-(none)}" >&2
+  exit 1
+fi
+
+# Validate dependencies the host scripts assume are present.
+for cmd in git ln find basename; do
+  if ! command -v "$cmd" >/dev/null 2>&1; then
+    echo "error: missing required command: $cmd" >&2
+    exit 1
+  fi
+done
+
+# Load the host's implementation.
+# shellcheck source=/dev/null
+source "$HOST_SCRIPT"
+
+# Each host script must define: gamestack_install, gamestack_uninstall, gamestack_status.
+for fn in gamestack_install gamestack_uninstall gamestack_status; do
+  if ! declare -f "$fn" >/dev/null; then
+    echo "error: host script $HOST_SCRIPT does not define $fn" >&2
+    exit 1
+  fi
+done
+
+case "$MODE" in
+  install)
+    echo "==> Installing gamestack for $HOST..."
+    gamestack_install
+    ;;
+  uninstall)
+    echo "==> Uninstalling gamestack for $HOST..."
+    gamestack_uninstall
+    ;;
+  status)
+    echo "==> gamestack status for $HOST:"
+    gamestack_status
+    ;;
+esac

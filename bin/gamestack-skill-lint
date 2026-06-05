@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+# gamestack-skill-lint — regression validator for SKILL.md files + scenario JSON
+#
+# Walks the gamestack repo and catches drift: frontmatter integrity, required
+# sections, cross-link targets that don't exist, scenario step types that aren't
+# in the 9-primitive contract, README.md inside .claude/{skills,commands,agents}/
+# which auto-registers and pollutes the tool list.
+#
+# Run as part of CI. ERROR-level findings exit non-zero; --warn-as-error treats
+# WARNs as failures too.
+set -euo pipefail
+
+if ! command -v bun >/dev/null 2>&1; then
+  echo "error: bun is required for gamestack CLIs." >&2
+  echo "  install:  brew install bun  (or see https://bun.sh)" >&2
+  exit 127
+fi
+
+GAMESTACK_BIN_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+exec bun run "$GAMESTACK_BIN_DIR/impl/skill-lint/index.ts" "$@"

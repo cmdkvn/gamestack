@@ -1,0 +1,9 @@
+# Default line endings: LF
+* text=auto eol=lf
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+
+# Bash scripts are sensitive to line endings
+*.sh text eol=lf
+setup text eol=lf

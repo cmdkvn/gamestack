@@ -1,0 +1,29 @@
+{
+  "name": "com.alliance.gamestack",
+  "version": "0.2.0",
+  "displayName": "gamestack",
+  "description": "Localhost state/action server that lets gamestack skills (/playtest, /game-feel-audit, /perf-benchmark) drive a running Unity build. Loopback-only, editor-only by default. v0.2.0: adds input injection, snapshot/restore, and tagged breakpoints on top of v0.1.0's state observation + screenshot capture.",
+  "unity": "2021.3",
+  "license": "MIT",
+  "keywords": [
+    "tools",
+    "testing",
+    "automation",
+    "qa",
+    "gamestack"
+  ],
+  "author": {
+    "name": "Alliance Game Studio",
+    "url": "https://github.com/alliance/gamestack"
+  },
+  "dependencies": {
+    "com.unity.nuget.newtonsoft-json": "3.2.1"
+  },
+  "samples": [
+    {
+      "displayName": "Basic — input, snapshot, breakpoint",
+      "description": "Minimal MonoBehaviours showing how to subscribe to gamestack input events, expose state for snapshot/restore, and emit breakpoint hits.",
+      "path": "Samples~/Basic"
+    }
+  ]
+}

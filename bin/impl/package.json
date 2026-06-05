@@ -1,0 +1,29 @@
+{
+  "name": "gamestack-cli-impl",
+  "version": "1.0.0",
+  "private": true,
+  "description": "TypeScript/Bun implementations behind gamestack/bin/* CLIs (gamestack-asset-audit, gamestack-cert-checklist, gamestack-steam-page-check).",
+  "type": "module",
+  "license": "MIT",
+  "scripts": {
+    "test": "bun test",
+    "audit": "bun run asset-audit/index.ts",
+    "cert": "bun run cert-checklist/index.ts",
+    "steam": "bun run steam-page-check/index.ts",
+    "bench": "bun run game-benchmark/index.ts",
+    "taste": "bun run taste-update/index.ts",
+    "models": "bun run model-benchmark/index.ts",
+    "daemon": "bun run playtest-daemon/index.ts",
+    "lint": "bun run skill-lint/index.ts"
+  },
+  "dependencies": {
+    "image-size": "1.2.0",
+    "@anthropic-ai/sdk": "^0.27.0"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.1.0"
+  },
+  "engines": {
+    "bun": ">=1.1.0"
+  }
+}

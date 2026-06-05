@@ -1,0 +1,18 @@
+# All seven M3 CLIs are now in place.
+#
+# Group 11 (✓ shipped) — TypeScript/Bun under impl/
+#   gamestack-asset-audit       — texture-budget, atlas waste, audio bitrate, Unity .meta integrity
+#   gamestack-cert-checklist    — PS5 TRC / Xbox TCR / Switch lotcheck verdict runner
+#   gamestack-steam-page-check  — capsule sizes, trailer length, tag strategy, wishlist risk
+#
+# Group 12 (✓ shipped) — heavier CLIs + broker
+#   gamestack-game-benchmark    — cross-engine perf snapshot with baseline diff
+#   gamestack-playtest-daemon   — broker between Claude Code and a running engine build
+#   gamestack-taste-update      — persist /art-shotgun approvals with time-decay
+#   gamestack-model-benchmark   — cross-model prompt benchmarks (Anthropic SDK)
+#
+# Each CLI is a tiny bash shim in this directory that delegates to a Bun
+# TypeScript entry point under impl/. See bin/impl/README.md for the directory
+# layout and contribution conventions. The shared/ library under impl/shared/
+# contains the args parser, report writer, engine detection, scenario types,
+# platform budgets, Steam specs, cert categories, and a tiny HTTP client.

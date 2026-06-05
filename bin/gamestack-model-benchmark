@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+# gamestack-model-benchmark — cross-model prompt benchmark for gamestack workflows
+#
+# Runs a curated prompt suite against several Claude models, scores responses
+# on contains / regex / word-count expectations, and writes a comparison
+# report. Local results only — the CLI does not upload runs anywhere.
+#
+# Requires ANTHROPIC_API_KEY (env var or --api-key).
+set -euo pipefail
+
+if ! command -v bun >/dev/null 2>&1; then
+  echo "error: bun is required for gamestack CLIs." >&2
+  echo "  install:  brew install bun  (or see https://bun.sh)" >&2
+  exit 127
+fi
+
+GAMESTACK_BIN_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+exec bun run "$GAMESTACK_BIN_DIR/impl/model-benchmark/index.ts" "$@"

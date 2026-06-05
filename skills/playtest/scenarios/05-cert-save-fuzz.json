@@ -1,0 +1,61 @@
+{
+  "name": "cert-save-fuzz",
+  "phase": "cert",
+  "description": "Cert-class scenario: snapshot the player state, take random gameplay actions, restore the snapshot, and verify the player state matches exactly. Repeated many times to catch save / restore drift. Save corruption on power loss is a cert blocker on every console.",
+  "endpoint": "http://localhost:7331",
+  "max_duration_seconds": 180,
+  "continue_on_failure": false,
+  "setup": [
+    { "type": "snapshot", "id": "fuzz-baseline" }
+  ],
+  "steps": [
+    { "type": "wait_for_state", "tagged_key": "default.inPlay", "expected_value": true, "timeout_seconds": 15 },
+
+    { "type": "snapshot", "id": "fuzz-cycle-1" },
+    { "type": "input", "events": [
+      { "device": "Keyboard", "action": "Press",   "control": "PrimaryAction" },
+      { "device": "Keyboard", "action": "Release", "control": "PrimaryAction" },
+      { "device": "Keyboard", "action": "Press",   "control": "Right" },
+      { "device": "Keyboard", "action": "Release", "control": "Right" }
+    ]},
+    { "type": "wait", "seconds": 2 },
+    { "type": "restore", "id": "fuzz-cycle-1" },
+    { "type": "wait", "seconds": 0.5 },
+    { "type": "assert_state", "tagged_key": "player.hp", "expected_value": 100 },
+    { "type": "assert_state", "tagged_key": "player.score", "expected_value": 0 },
+
+    { "type": "snapshot", "id": "fuzz-cycle-2" },
+    { "type": "input", "events": [
+      { "device": "Keyboard", "action": "Press",   "control": "Up" },
+      { "device": "Keyboard", "action": "Release", "control": "Up" },
+      { "device": "Keyboard", "action": "Press",   "control": "SecondaryAction" },
+      { "device": "Keyboard", "action": "Release", "control": "SecondaryAction" }
+    ]},
+    { "type": "wait", "seconds": 2 },
+    { "type": "restore", "id": "fuzz-cycle-2" },
+    { "type": "wait", "seconds": 0.5 },
+    { "type": "assert_state", "tagged_key": "player.hp", "expected_value": 100 },
+    { "type": "assert_state", "tagged_key": "player.score", "expected_value": 0 },
+
+    { "type": "snapshot", "id": "fuzz-cycle-3" },
+    { "type": "input", "events": [
+      { "device": "Keyboard", "action": "Press",   "control": "PrimaryAction" },
+      { "device": "Keyboard", "action": "Press",   "control": "Right" },
+      { "device": "Keyboard", "action": "Release", "control": "PrimaryAction" },
+      { "device": "Keyboard", "action": "Release", "control": "Right" }
+    ]},
+    { "type": "wait", "seconds": 3 },
+    { "type": "restore", "id": "fuzz-cycle-3" },
+    { "type": "wait", "seconds": 0.5 },
+    { "type": "assert_state", "tagged_key": "player.hp", "expected_value": 100 },
+    { "type": "assert_state", "tagged_key": "player.score", "expected_value": 0 }
+  ],
+  "teardown": [
+    { "type": "restore", "id": "fuzz-baseline" }
+  ],
+  "assertions_summary": [
+    "Snapshot + restore round-trip preserves all tagged player state across 3 cycles.",
+    "No drift in HP, score, position, or inventory after restore.",
+    "No exception thrown during snapshot or restore."
+  ]
+}

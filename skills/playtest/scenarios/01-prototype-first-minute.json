@@ -1,0 +1,45 @@
+{
+  "name": "prototype-first-minute",
+  "phase": "prototype",
+  "description": "Times the first minute of play against onboarding targets: first verb < 10s, first reward < 60s, first failure 5-10 min. Captures screenshots at each beat. Pairs with /onboarding-audit for post-run analysis.",
+  "endpoint": "http://localhost:7331",
+  "max_duration_seconds": 120,
+  "setup": [
+    { "type": "snapshot", "id": "prototype-pre" }
+  ],
+  "steps": [
+    { "type": "wait_for_state", "tagged_key": "default.gameReady", "expected_value": true, "timeout_seconds": 10 },
+    { "type": "screenshot", "filename": "00-game-ready.png" },
+
+    { "type": "wait", "seconds": 1 },
+    { "type": "input", "events": [
+      { "device": "Keyboard", "action": "Press",   "control": "Start" },
+      { "device": "Keyboard", "action": "Release", "control": "Start" }
+    ]},
+    { "type": "wait_for_state", "tagged_key": "default.inPlay", "expected_value": true, "timeout_seconds": 10 },
+    { "type": "screenshot", "filename": "01-in-play.png" },
+
+    { "type": "breakpoint", "action": "add-pause", "tag": "first-verb" },
+    { "type": "input", "events": [
+      { "device": "Keyboard", "action": "Press",   "control": "PrimaryAction" }
+    ]},
+    { "type": "wait_for_state", "tagged_key": "default.firstVerbFired", "expected_value": true, "timeout_seconds": 5 },
+    { "type": "screenshot", "filename": "02-first-verb.png" },
+    { "type": "assert_recent_breakpoint", "tag": "first-verb" },
+    { "type": "breakpoint", "action": "resume" },
+    { "type": "breakpoint", "action": "remove-pause", "tag": "first-verb" },
+
+    { "type": "wait_for_state", "tagged_key": "default.firstRewardEarned", "expected_value": true, "timeout_seconds": 60 },
+    { "type": "screenshot", "filename": "03-first-reward.png" },
+
+    { "type": "assert_state", "tagged_key": "default.playerAlive", "expected_value": true }
+  ],
+  "teardown": [
+    { "type": "restore", "id": "prototype-pre" }
+  ],
+  "assertions_summary": [
+    "First verb fires within 10 seconds of starting play.",
+    "First reward is earned within 60 seconds.",
+    "Player survives the first minute (no premature failure)."
+  ]
+}

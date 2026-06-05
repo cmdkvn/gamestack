@@ -1,0 +1,48 @@
+{
+  "name": "polish-game-feel",
+  "phase": "polish",
+  "description": "Verifies polish-phase juice. Fires the primary verb, the secondary verbs, and an impact moment, capturing screenshots and state snapshots that /game-feel-audit reads to confirm hit-pause / screen-shake / particles fire when expected (and not when not).",
+  "endpoint": "http://localhost:7331",
+  "max_duration_seconds": 90,
+  "setup": [
+    { "type": "snapshot", "id": "polish-pre" }
+  ],
+  "steps": [
+    { "type": "wait_for_state", "tagged_key": "default.inPlay", "expected_value": true, "timeout_seconds": 10 },
+
+    { "type": "screenshot", "filename": "00-idle.png" },
+    { "type": "snapshot", "id": "idle-state" },
+
+    { "type": "breakpoint", "action": "add-pause", "tag": "impact" },
+    { "type": "input", "events": [
+      { "device": "Keyboard", "action": "Press",   "control": "PrimaryAction" }
+    ]},
+    { "type": "wait_for_state", "tagged_key": "default.impactFiring", "expected_value": true, "timeout_seconds": 3 },
+    { "type": "screenshot", "filename": "01-mid-impact.png" },
+    { "type": "assert_state", "tagged_key": "feel.hitPauseActive", "expected_value": true },
+    { "type": "assert_state", "tagged_key": "feel.screenShakeIntensity", "expected_range": [0.1, 1.0] },
+    { "type": "breakpoint", "action": "resume" },
+    { "type": "breakpoint", "action": "remove-pause", "tag": "impact" },
+
+    { "type": "wait", "seconds": 0.2 },
+    { "type": "screenshot", "filename": "02-post-impact.png" },
+    { "type": "assert_state", "tagged_key": "feel.hitPauseActive", "expected_value": false },
+
+    { "type": "input", "events": [
+      { "device": "Keyboard", "action": "Press",   "control": "Menu" },
+      { "device": "Keyboard", "action": "Release", "control": "Menu" }
+    ]},
+    { "type": "wait", "seconds": 0.2 },
+    { "type": "assert_state", "tagged_key": "feel.screenShakeIntensity", "expected_value": 0 },
+
+    { "type": "restore", "id": "idle-state" }
+  ],
+  "teardown": [
+    { "type": "restore", "id": "polish-pre" }
+  ],
+  "assertions_summary": [
+    "Hit-pause fires for the primary impact and only for the primary impact.",
+    "Screen-shake intensity is non-zero during impact, zero during menus and idle.",
+    "Post-impact state returns to baseline within 0.2s."
+  ]
+}

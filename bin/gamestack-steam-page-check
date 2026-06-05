@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# gamestack-steam-page-check — Steam store page validator
+#
+# Validates capsule dimensions, trailer length, short description, tag strategy,
+# screenshot count, and Next Fest fit against the public-knowledge Steam specs.
+#
+# Wraps the same lens as the interactive /steam-page-review skill (Marketing
+# Lead). The skill cross-references current top-sellers in your genre; the CLI
+# is what you wire into CI.
+set -euo pipefail
+
+if ! command -v bun >/dev/null 2>&1; then
+  echo "error: bun is required for gamestack CLIs." >&2
+  echo "  install:  brew install bun  (or see https://bun.sh)" >&2
+  exit 127
+fi
+
+GAMESTACK_BIN_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+exec bun run "$GAMESTACK_BIN_DIR/impl/steam-page-check/index.ts" "$@"

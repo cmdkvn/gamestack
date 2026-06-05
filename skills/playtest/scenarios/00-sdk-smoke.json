@@ -1,0 +1,39 @@
+{
+  "name": "sdk-smoke",
+  "phase": "any",
+  "description": "Verify every gamestack engine SDK endpoint responds. Run this first whenever the SDK is updated or the engine project changes. Leaves the world unchanged.",
+  "endpoint": "http://localhost:7331",
+  "max_duration_seconds": 30,
+  "setup": [
+    { "type": "snapshot", "id": "smoke-pre" }
+  ],
+  "steps": [
+    { "type": "wait_for_state", "tagged_key": "default.gameReady", "expected_value": true, "timeout_seconds": 5 },
+    { "type": "screenshot", "filename": "01-pre-input.png" },
+    { "type": "input", "events": [
+      { "device": "Keyboard", "action": "Press",   "control": "Space" },
+      { "device": "Keyboard", "action": "Release", "control": "Space" }
+    ]},
+    { "type": "wait", "seconds": 0.5 },
+    { "type": "screenshot", "filename": "02-post-input.png" },
+    { "type": "snapshot", "id": "smoke-mid" },
+    { "type": "input", "events": [
+      { "device": "Keyboard", "action": "Press",   "control": "A" },
+      { "device": "Keyboard", "action": "Release", "control": "A" }
+    ]},
+    { "type": "wait", "seconds": 0.5 },
+    { "type": "restore", "id": "smoke-mid" },
+    { "type": "breakpoint", "action": "add-pause", "tag": "smoke-paused" },
+    { "type": "breakpoint", "action": "pause-now", "tag": "smoke-paused" },
+    { "type": "breakpoint", "action": "resume" },
+    { "type": "breakpoint", "action": "clear-pause" }
+  ],
+  "teardown": [
+    { "type": "restore", "id": "smoke-pre" }
+  ],
+  "assertions_summary": [
+    "All endpoints respond 200.",
+    "Snapshot capture + restore round-trips cleanly.",
+    "Breakpoint pause + resume restores game time."
+  ]
+}

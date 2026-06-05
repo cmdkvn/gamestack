@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# gamestack-taste-update — persist /art-shotgun approvals into a taste profile
+#
+# Reads a JSON event (or array / NDJSON) describing variant approvals, updates
+# the project's .gamestack/taste.json, and surfaces emerging signals the next
+# /art-shotgun round should incorporate. Supports time-decay so old preferences
+# don't drown new directions.
+set -euo pipefail
+
+if ! command -v bun >/dev/null 2>&1; then
+  echo "error: bun is required for gamestack CLIs." >&2
+  echo "  install:  brew install bun  (or see https://bun.sh)" >&2
+  exit 127
+fi
+
+GAMESTACK_BIN_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+exec bun run "$GAMESTACK_BIN_DIR/impl/taste-update/index.ts" "$@"

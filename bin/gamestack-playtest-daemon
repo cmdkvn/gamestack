@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# gamestack-playtest-daemon — broker between Claude Code and a running engine build
+#
+# Loads a scenario JSON, connects to the gamestack engine SDK (Unity port 7331,
+# Godot port 7332), executes setup → steps → teardown, and writes a run log.
+# Exits non-zero on any failed assertion or timeout.
+#
+# Wraps the same workflow as the interactive /playtest skill — useful when you
+# want to script the playtest from CI or as a long-running background process.
+set -euo pipefail
+
+if ! command -v bun >/dev/null 2>&1; then
+  echo "error: bun is required for gamestack CLIs." >&2
+  echo "  install:  brew install bun  (or see https://bun.sh)" >&2
+  exit 127
+fi
+
+GAMESTACK_BIN_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+exec bun run "$GAMESTACK_BIN_DIR/impl/playtest-daemon/index.ts" "$@"
