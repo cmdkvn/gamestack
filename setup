@@ -28,11 +28,13 @@ Usage: ./setup [--host <name>] [--uninstall | --status]
 Install gamestack skills into your AI agent host.
 
 Options:
-  --host <name>   Override host detection.
-                  Supported (v0.1): claude-code
-  --uninstall     Remove gamestack symlinks from the host.
-  --status        Show install status without changing anything.
-  -h, --help      Show this help.
+  --host <name>      Override host detection.
+                     Supported (v0.1): claude-code
+  --uninstall        Remove gamestack symlinks from the host.
+  --status           Show install status without changing anything.
+  --check-updates    Compare local gamestack commit to origin/main.
+                     Local-only — no third-party network calls.
+  -h, --help         Show this help.
 
 Examples:
   ./setup                           # auto-detect host and install
@@ -69,6 +71,10 @@ while [[ $# -gt 0 ]]; do
       MODE="status"
       shift
       ;;
+    --check-updates)
+      MODE="check-updates"
+      shift
+      ;;
     *)
       echo "error: unknown argument: $1" >&2
       usage >&2
@@ -76,6 +82,39 @@ while [[ $# -gt 0 ]]; do
       ;;
   esac
 done
+
+if [[ "$MODE" == "check-updates" ]]; then
+  # Local-only drift check: compare the current commit to origin/main.
+  # No network call unless the developer has already configured a remote.
+  if ! git -C "$GAMESTACK_DIR" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+    echo "error: $GAMESTACK_DIR is not a git checkout — can't compute drift." >&2
+    exit 1
+  fi
+  current="$(git -C "$GAMESTACK_DIR" rev-parse --short HEAD)"
+  version="$(cat "$GAMESTACK_DIR/VERSION" 2>/dev/null | tr -d '[:space:]')"
+  echo "Local gamestack:  v${version:-unknown} @ ${current}"
+
+  if git -C "$GAMESTACK_DIR" rev-parse --verify origin/main >/dev/null 2>&1; then
+    if git -C "$GAMESTACK_DIR" fetch --quiet origin main 2>/dev/null; then
+      remote="$(git -C "$GAMESTACK_DIR" rev-parse --short origin/main)"
+      behind="$(git -C "$GAMESTACK_DIR" rev-list --count HEAD..origin/main 2>/dev/null || echo "?")"
+      ahead="$(git -C "$GAMESTACK_DIR" rev-list --count origin/main..HEAD 2>/dev/null || echo "?")"
+      echo "Remote main:      @ ${remote}"
+      if [[ "$current" == "$remote" ]]; then
+        echo "Status:           up to date"
+      else
+        echo "Status:           ${behind} commit(s) behind, ${ahead} commit(s) ahead"
+        echo
+        echo "To update: git -C \"$GAMESTACK_DIR\" pull --ff-only"
+      fi
+    else
+      echo "Status:           offline — couldn't fetch origin/main (skipping remote comparison)"
+    fi
+  else
+    echo "Status:           no origin/main remote configured — skipping remote comparison"
+  fi
+  exit 0
+fi
 
 # Auto-detect host if not specified.
 if [[ -z "$HOST" ]]; then

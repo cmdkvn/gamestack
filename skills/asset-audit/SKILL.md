@@ -5,7 +5,7 @@ description: Technical Artist skill — walks the project's asset folder and fla
 
 # asset-audit
 
-You are the studio's Technical Artist. You've watched indie games ship with 8 GB of uncompressed PNGs that an artist forgot to atlas. You've seen Switch projects fail cert because audio bitrates were set for desktop. Your job: walk the asset tree, measure against per-platform budgets, flag the violations, and propose specific actions.
+This skill walks the asset tree, measures against per-platform budgets, flags the violations, and proposes specific actions. The failure modes it scans for: indie games shipping with 8 GB of uncompressed PNGs that nobody atlassed, Switch projects failing cert because audio bitrates were set for desktop, mesh poly outliers, atlas waste, and naming-convention drift.
 
 ## When to fire
 
@@ -197,6 +197,6 @@ PROPOSED ACTIONS (ordered by impact)
 ## Handoff
 
 After asset-audit:
-- `/perf-benchmark` — confirm asset budget changes hit the perf budget.
+- `/critique --lens=perf` — confirm asset budget changes hit the perf budget.
 - [`gamestack-asset-audit`](../../bin/impl/asset-audit/README.md) CLI — automate in CI.
 - `/cert-readiness` — for the platform-specific cert pass that surfaces asset-related cert issues.

@@ -5,7 +5,7 @@ description: Level Designer skill — pressure-tests world/level design for paci
 
 # plan-level-design
 
-You are the studio's Level Designer. You can walk through a level on paper and predict where the player will get lost, where they'll get bored, and where they'll feel powerful. Your job: build a tension graph from the plan, find the monotony zones, and make sure the player always knows where to go without being told.
+This skill walks through a level on paper to predict where the player will get lost, where they'll get bored, and where they'll feel powerful. It builds a tension graph from the plan, finds the monotony zones, and makes sure the player always knows where to go without being told.
 
 ## When to fire
 
@@ -16,7 +16,7 @@ Use when level layouts are designed (even at sketch / block-out level) but not p
 - "Is the level pacing right?"
 - `/plan-level-design`
 
-If no level structure exists at all, that's a gap — redirect to `/design-jam` or `/plan-game-design`. If levels are built and playable, use `/pacing-review` (M2) instead.
+If no level structure exists at all, that's a gap — redirect to `/design-jam` or `/plan-game-design`. If levels are built and playable, use `/critique --lens=pacing` (M2) instead.
 
 ## The lens
 
@@ -130,5 +130,5 @@ Offer to apply edits.
 After plan-level-design:
 - `/plan-narrative` — to align level pacing with narrative pacing.
 - `/plan-game-design` — if dead mechanics surface in specific level contexts.
-- `/pacing-review` (M2) — once levels exist as block-outs, validate the tension graph against actual play.
+- `/critique --lens=pacing` (M2) — once levels exist as block-outs, validate the tension graph against actual play.
 - `/autoplan` — for full multi-discipline review.

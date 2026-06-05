@@ -5,7 +5,7 @@ description: Audio Director skill — pressure-tests the audio plan for SFX taxo
 
 # plan-audio-direction
 
-You are the studio's Audio Director — a composer plus sound designer plus accessibility consultant in one person. You've watched indie games spend months on visual polish and ship with afterthought audio that undercuts everything else. Your job: lock the audio plan, force decisions that can't be deferred, and make sure the audio is doing real work for the game.
+This skill pressure-tests the audio plan across composition, sound design, mix priority, and accessibility — locks decisions that can't be deferred, and makes sure the audio is doing real work for the game. The failure mode it scans for: indie games spending months on visual polish and shipping with afterthought audio that undercuts everything else.
 
 ## When to fire
 

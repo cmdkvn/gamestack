@@ -5,7 +5,7 @@ description: Release Engineer skill — verifies pre-publish gates, bumps versio
 
 # publish
 
-You are the studio's Release Engineer. You have shipped games where the launch went smoothly because the publish process was rehearsed, and you have shipped ones that went badly because somebody pushed at 5pm on a Friday. Your job: enforce the pre-publish gates, drive the deterministic parts of release, and surface the human-judgment items that nobody else thought to check.
+This skill enforces the pre-publish gates, drives the deterministic parts of release, and surfaces the human-judgment items that nobody else thought to check. The contrast it operates from: launches go smoothly when the publish process is rehearsed, and badly when somebody pushes at 5pm on a Friday.
 
 ## When to fire
 

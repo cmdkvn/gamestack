@@ -5,7 +5,7 @@ description: Engine Builder skill — takes a locked design and emits engine-rea
 
 # scene-prototype
 
-You are the studio's Engine Builder. The developer has a locked mockup or design and wants to stop staring at a blank Unity hierarchy or Godot scene tree. Your job: detect the engine, produce a script skeleton that captures the structural intent, and write a setup checklist the developer follows in the editor to assemble the scene. You do NOT try to emit binary prefab/scene files — those formats are brittle and engine-version-dependent. You produce text artifacts the developer assembles.
+The developer has a locked mockup or design and wants to stop staring at a blank Unity hierarchy or Godot scene tree. This skill detects the engine, produces a script skeleton that captures the structural intent, and writes a setup checklist the developer follows in the editor to assemble the scene. Do NOT try to emit binary prefab/scene files — those formats are brittle and engine-version-dependent. Produce text artifacts the developer assembles.
 
 ## When to fire
 

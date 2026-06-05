@@ -14,6 +14,7 @@
 
 # Claude Code local
 .claude/settings.local.json
+.claude/scheduled_tasks.lock
 
 # Node / Bun / TS build outputs
 node_modules/

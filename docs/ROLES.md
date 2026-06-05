@@ -23,7 +23,7 @@ How the role thinks. Every game has a kernel — one moment, one verb, one sensa
 
 Looks at the first playable build and tells the truth about whether the fun is there. Names the kernel if it exists, kills the mechanics that don't earn their slot, recommends three sharpening directions.
 
-- [`/find-the-fun`](../skills/find-the-fun/SKILL.md) — four diagnostic questions before any opinion forms (one specific working moment, one specific bad moment, what a playtester did with their hands, how long the dev has lived inside the prototype). Returns a kernel verdict, a dead-mechanics list, and three sharpening paths.
+- [`/critique --lens=fun`](../skills/critique/SKILL.md) — four diagnostic questions before any opinion forms (one specific working moment, one specific bad moment, what a playtester did with their hands, how long the dev has lived inside the prototype). Returns a kernel verdict, a dead-mechanics list, and three sharpening paths.
 
 How the role thinks. A prototype is a question, not a thesis. The Prototype Critic refuses to praise mechanics that haven't produced a working moment yet — dead mechanics dilute the live ones, and the kindest move is to tag them and propose cuts. If question one ("what's the one specific moment that worked?") returns nothing concrete, the kernel isn't there yet and the role says so plainly. The three sharpening directions are always concrete enough to start tomorrow: a specific verb to deepen, a specific subsystem to strip, a specific minute to surround with anticipation and consequence.
 
@@ -185,7 +185,7 @@ Playtest-phase specialists exercise the build. Game feel, pacing, onboarding, ac
 
 Audits game feel against the strength of the core loop. Hunts both under-juiced and over-juiced moments — juice that masks a weak loop is a polish failure, not a polish success.
 
-- [`/game-feel-audit`](../skills/game-feel-audit/SKILL.md) — eight dimensions per primary verb: animation curves, hit-pause, screen-shake, particles, audio sweeteners, camera response, haptics, input forgiveness (jump buffer, coyote-time).
+- [`/critique --lens=feel`](../skills/critique/SKILL.md) — eight dimensions per primary verb: animation curves, hit-pause, screen-shake, particles, audio sweeteners, camera response, haptics, input forgiveness (jump buffer, coyote-time).
 
 How the role thinks. Calibrated juice differentiates the indie game that gets screenshotted from the one that doesn't. The inverse is equally true: constant shake, particle storms on pickups, rumble always-on are tells that the verb itself isn't carrying. The role refuses to polish a weak verb — polish never rescues a verb that hasn't earned its slot. Hit-pause sits at 30-80 ms on real impacts and never on minor events; the role treats the shake budget as finite and audits whether it's being spent on the right moments.
 
@@ -193,7 +193,7 @@ How the role thinks. Calibrated juice differentiates the indie game that gets sc
 
 Builds a tension graph from implemented content and flags monotony, spike clusters, hollow middles, fatigue compound, and narrative misalignment.
 
-- [`/pacing-review`](../skills/pacing-review/SKILL.md) — segments playtime into 5-10-minute beats, scores each beat 0-5 on skill demand, stakes, and density. Three-line ASCII graph.
+- [`/critique --lens=pacing`](../skills/critique/SKILL.md) — segments playtime into 5-10-minute beats, scores each beat 0-5 on skill demand, stakes, and density. Three-line ASCII graph.
 
 How the role thinks. Three variables must oscillate on different cycles: skill demand, stakes, density. When they move together, the game is constantly boring or constantly exhausting. The role's recommendations frequently *cut* content rather than add it — a hollow middle is a structural problem, and routing the player to the next major beat earlier beats stuffing the gap with filler. Pacing is the most-failed indie dimension; strong mechanics ship into flat content and die of boredom at hour 3.
 
@@ -201,15 +201,15 @@ How the role thinks. Three variables must oscillate on different cycles: skill d
 
 Times new players to first-verb, first-decision, first-reward, first-failure, "I get it." Compares against genre retention benchmarks.
 
-- [`/onboarding-audit`](../skills/onboarding-audit/SKILL.md) — five timed thresholds (first verb under 10s, first decision under 30s, first reward under 60s, first failure 5-10 min, "I get it" by 15 min) plus a friction count (tutorial modals, unskippable cutscenes, "Press X" prompts) and a trailer-to-first-30-seconds alignment check.
+- [`/critique --lens=onboarding`](../skills/critique/SKILL.md) — five timed thresholds (first verb under 10s, first decision under 30s, first reward under 60s, first failure 5-10 min, "I get it" by 15 min) plus a friction count (tutorial modals, unskippable cutscenes, "Press X" prompts) and a trailer-to-first-30-seconds alignment check.
 
-How the role thinks. Steam's 2-hour refund window means onboarding determines half of refunds. Demos that don't hook in 15 minutes don't earn wishlists. The role is about getting the player *to* the fun, not generating it — if the kernel itself is unclear, the role redirects to `/find-the-fun`. Every unskippable element is a player-exit candidate; the role treats the friction count as the leading indicator of refund rate.
+How the role thinks. Steam's 2-hour refund window means onboarding determines half of refunds. Demos that don't hook in 15 minutes don't earn wishlists. The role is about getting the player *to* the fun, not generating it — if the kernel itself is unclear, the role redirects to `/critique --lens=fun`. Every unskippable element is a player-exit candidate; the role treats the friction count as the leading indicator of refund rate.
 
 ### Accessibility Consultant
 
 Full audit against the Game Accessibility Guidelines. Top-4 focus: remapping, text scale, colorblind modes, subtitles/CC.
 
-- [`/a11y-audit`](../skills/a11y-audit/SKILL.md) — basic + intermediate + advanced GAG tiers, with Xbox-tuned P0 routing (Xbox has the strictest a11y cert of the three consoles). Outputs a developer TODO and a public-facing Steam-page report.
+- [`/critique --lens=a11y`](../skills/critique/SKILL.md) — basic + intermediate + advanced GAG tiers, with Xbox-tuned P0 routing (Xbox has the strictest a11y cert of the three consoles). Outputs a developer TODO and a public-facing Steam-page report.
 
 How the role thinks. Top-4 ship or it doesn't ship. The role refuses to soften that — text scaling at 1.5× that breaks the UI is a launch blocker, not a v1.1 item. Subtitles default ON is non-negotiable; the cost of changing one config value is hours, the cost of cert resubmission is a week. The role splits findings into two artifacts deliberately: developer TODO is engineering work, public-facing report is marketing work, and they read differently.
 
@@ -217,7 +217,7 @@ How the role thinks. Top-4 ship or it doesn't ship. The role refuses to soften t
 
 Captures perf snapshots and diffs against a baseline. Identifies regressions, proposes investigation paths, never fixes.
 
-- [`/perf-benchmark`](../skills/perf-benchmark/SKILL.md) — frame rate (avg, 99th, 0.1th), frame-time distribution, draw calls, GC allocations, scene-load time, peak memory. Tagged by scene + activity + platform + build mode. CI wrapper: [`gamestack-game-benchmark`](../bin/impl/game-benchmark/README.md).
+- [`/critique --lens=perf`](../skills/critique/SKILL.md) — frame rate (avg, 99th, 0.1th), frame-time distribution, draw calls, GC allocations, scene-load time, peak memory. Tagged by scene + activity + platform + build mode. CI wrapper: [`gamestack-game-benchmark`](../bin/impl/game-benchmark/README.md).
 
 How the role thinks. A perf number without a scenario is meaningless. Average FPS hides the stutter that the 0.1th-percentile frame time catches; the role measures both. Regressions flag at -5% avg FPS, +10% 99th-pct frame time, any per-frame allocation increase, +5% memory peak. The role proposes hypotheses (per-frame `new ParticleParams()` in the burst manager) and investigation paths (pool the params struct) but stops short of auto-fixing — perf fixes touch hot paths and need human review.
 

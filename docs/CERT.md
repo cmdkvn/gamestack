@@ -33,7 +33,7 @@ These are tendencies, not promises. Queues vary, reviewers vary, and a single P0
 
 The Sony TRC tests eight categories worth pre-flighting before submit. The full list on PartnerNet is larger; these are the public-knowledge ones that account for the bulk of indie rejections.
 
-**Memory management.** No leaks during long sessions, no OOM on the platform-set memory cap. This one is always `NEEDS_LIVE_TEST` regardless of how clean the code reads — static analysis cannot prove a 4-hour soak. Plan for a soak run on the dev kit in the week before submit. If you have an asset-heavy game, run [`/perf-benchmark`](../skills/perf-benchmark/SKILL.md) first so peak memory has a baseline.
+**Memory management.** No leaks during long sessions, no OOM on the platform-set memory cap. This one is always `NEEDS_LIVE_TEST` regardless of how clean the code reads — static analysis cannot prove a 4-hour soak. Plan for a soak run on the dev kit in the week before submit. If you have an asset-heavy game, run [`/critique --lens=perf`](../skills/critique/SKILL.md) first so peak memory has a baseline.
 
 **PSN integration.** Sign-in, sign-out, Friends, Messages from in-game. Cert checks that mid-session sign-out doesn't lose state and that offline launch falls back cleanly. The CLI looks for `PsnSignIn`, `Sce*UserService`, and similar markers in the scripts. If the game uses PSN at all, expect `FAIL_P1` if no offline fallback exists.
 
@@ -61,7 +61,7 @@ The Xbox TCR (and its XR companion for newer requirements) tests eight categorie
 
 **Cloud saves.** Round-trip via Connected Storage; conflict resolution implemented (two devices, both played offline, both want to upload). If the conflict resolver always picks "most recent timestamp" without telling the player, that's a `FAIL_P1`. The CLI matches on `ConnectedStorage`, `CloudSave`, `XblCloud`.
 
-**Accessibility — strictest of the three.** Subtitles default ON, remappable controls, visual representation of audio cues, no color-only information conveyance. ID@Xbox publishes a recommended list; match it. The default verdict for this category is `FAIL_P0`. Run [`/a11y-audit`](../skills/a11y-audit/SKILL.md) before approaching Xbox cert — the top-4 (remapping, text scale ≥1.5×, colorblind presets, subtitles + captions with speaker labels) all need to ship. The CLI matches on subtitle + remapping patterns; the skill produces both a developer TODO and a public-facing report.
+**Accessibility — strictest of the three.** Subtitles default ON, remappable controls, visual representation of audio cues, no color-only information conveyance. ID@Xbox publishes a recommended list; match it. The default verdict for this category is `FAIL_P0`. Run [`/critique --lens=a11y`](../skills/critique/SKILL.md) before approaching Xbox cert — the top-4 (remapping, text scale ≥1.5×, colorblind presets, subtitles + captions with speaker labels) all need to ship. The CLI matches on subtitle + remapping patterns; the skill produces both a developer TODO and a public-facing report.
 
 **Microsoft Game Bar / Capture.** Game allows recording where required; no rejection of the capture overlay. If the game disables system overlays for "performance reasons" without making it a setting, the reviewer will flag it. Mostly a `NEEDS_LIVE_TEST` category — the live test is "press the Game Bar button during gameplay and confirm it works."
 
@@ -81,7 +81,7 @@ Nintendo's lotcheck is the most disciplined of the three indie cert paths. The q
 
 **Suspend during write.** Save mid-write survives suspend without corruption. Distinct from general sleep/resume because the failure mode is specific: the save file is in an inconsistent state when the OS snapshots the process. Atomic writes (temp-file + rename) are non-negotiable here. Default verdict is `FAIL_P0` if no atomic-write patterns are found.
 
-**Memory ceiling.** Fits in the 4 GB handheld budget with OS reservation (effective ceiling closer to 3.2 GB for the game). Always `NEEDS_LIVE_TEST` — static analysis cannot prove a peak memory number. Pair with [`/asset-audit`](../skills/asset-audit/SKILL.md) for texture/audio/mesh budget violations and [`/perf-benchmark`](../skills/perf-benchmark/SKILL.md) for peak measurements on the dev kit.
+**Memory ceiling.** Fits in the 4 GB handheld budget with OS reservation (effective ceiling closer to 3.2 GB for the game). Always `NEEDS_LIVE_TEST` — static analysis cannot prove a peak memory number. Pair with [`/asset-audit`](../skills/asset-audit/SKILL.md) for texture/audio/mesh budget violations and [`/critique --lens=perf`](../skills/critique/SKILL.md) for peak measurements on the dev kit.
 
 **Boot time.** Under platform threshold (typically < 30 s cold start). The reviewer cold-boots the cartridge or download and times it with a stopwatch. If the splash + first menu takes 40 s, the submission gets bounced. Always `NEEDS_LIVE_TEST`.
 
@@ -115,17 +115,17 @@ Both gamestack layers emit the same reminder at the top of every report: **downl
 
 The discipline below assumes you're a month from cert and the game is otherwise content-complete. Adjust the timeline if you're further out, but don't compress it — each step exists because skipping it has historically meant a resubmission.
 
-1. **30 days out — set production phase to Cert.** Edit the game's `CLAUDE.md` to declare the Cert phase. This calibrates every skill in the catalog: [`/code-review-gamestack`](../skills/code-review-gamestack/SKILL.md) gets stricter, [`/playtest`](../skills/playtest/SKILL.md) picks cert-class scenarios, [`/perf-benchmark`](../skills/perf-benchmark/SKILL.md) gates regressions tighter.
+1. **30 days out — set production phase to Cert.** Edit the game's `CLAUDE.md` to declare the Cert phase. This calibrates every skill in the catalog: [`/code-review-gamestack`](../skills/code-review-gamestack/SKILL.md) gets stricter, [`/playtest`](../skills/playtest/SKILL.md) picks cert-class scenarios, [`/critique --lens=perf`](../skills/critique/SKILL.md) gates regressions tighter.
 
 2. **30 days out — download the current NDA checklist.** From PartnerNet / Partner Center / Developer Portal. Save it to `docs/cert/<platform>-<version>.pdf`. The gamestack layers reference its presence; without it the audit verdict is `FAIL_P0` on the "checklist version on file" line.
 
 3. **28 days out — first interactive audit.** Run [`/cert-readiness all`](../skills/cert-readiness/SKILL.md). Expect a long action list. Don't panic at the count — most of it will be `PASS_CODE_ONLY` waiting for live tests. The P0 and P1 items are the work to do.
 
-4. **21 days out — fix P0 then P1.** Use [`/code-review-gamestack`](../skills/code-review-gamestack/SKILL.md) for the affected code paths, [`/bug-hunt`](../skills/bug-hunt/SKILL.md) when the cause isn't obvious, [`/a11y-audit`](../skills/a11y-audit/SKILL.md) for the Xbox accessibility gate. Resist the urge to refactor — cert phase is for cert-affecting fixes, not improvements.
+4. **21 days out — fix P0 then P1.** Use [`/code-review-gamestack`](../skills/code-review-gamestack/SKILL.md) for the affected code paths, [`/bug-hunt`](../skills/bug-hunt/SKILL.md) when the cause isn't obvious, [`/critique --lens=a11y`](../skills/critique/SKILL.md) for the Xbox accessibility gate. Resist the urge to refactor — cert phase is for cert-affecting fixes, not improvements.
 
 5. **14 days out — run cert-class scenarios on the platform build.** [`/playtest 04-cert-controller-disconnect`](../skills/playtest/scenarios/04-cert-controller-disconnect.json) and [`/playtest 05-cert-save-fuzz`](../skills/playtest/scenarios/05-cert-save-fuzz.json) on the actual dev kit / target hardware. Convert `PASS_CODE_ONLY` to `PASS`. Run on every platform you're submitting to.
 
-6. **10 days out — soak test + asset audit.** Long-session memory soak (4+ hours) on PS5 and Switch dev kits to feed the `NEEDS_LIVE_TEST` memory categories. [`/asset-audit`](../skills/asset-audit/SKILL.md) against the Switch 4 GB budget if Switch is in scope. [`/perf-benchmark`](../skills/perf-benchmark/SKILL.md) for boot time on Switch.
+6. **10 days out — soak test + asset audit.** Long-session memory soak (4+ hours) on PS5 and Switch dev kits to feed the `NEEDS_LIVE_TEST` memory categories. [`/asset-audit`](../skills/asset-audit/SKILL.md) against the Switch 4 GB budget if Switch is in scope. [`/critique --lens=perf`](../skills/critique/SKILL.md) for boot time on Switch.
 
 7. **7 days out — second interactive audit.** Run [`/cert-readiness all`](../skills/cert-readiness/SKILL.md) again. The action list should be short. If it isn't, the timeline slipped — push submission rather than ship with `FAIL_P1` items.
 
@@ -147,7 +147,7 @@ The discipline below assumes you're a month from cert and the game is otherwise 
 - [ ] [`/playtest 04-cert-controller-disconnect`](../skills/playtest/scenarios/04-cert-controller-disconnect.json) passed on every target platform within the last 30 days.
 - [ ] [`/playtest 05-cert-save-fuzz`](../skills/playtest/scenarios/05-cert-save-fuzz.json) passed on every target platform within the last 30 days.
 - [ ] Memory soak (4+ hours) clean on PS5 and Switch dev kits.
-- [ ] [`/a11y-audit`](../skills/a11y-audit/SKILL.md) top-4 (remapping, text scale, colorblind, subtitles) all PASS — especially for Xbox.
+- [ ] [`/critique --lens=a11y`](../skills/critique/SKILL.md) top-4 (remapping, text scale, colorblind, subtitles) all PASS — especially for Xbox.
 - [ ] [`gamestack-cert-checklist --strict`](../bin/impl/cert-checklist/README.md) exits 0 in CI.
 - [ ] [`/cert-freeze`](../skills/cert-freeze/SKILL.md) active; no non-cert edits in the last 5 days.
 - [ ] Build reproducible from a tagged commit.

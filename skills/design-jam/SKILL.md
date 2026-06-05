@@ -5,7 +5,7 @@ description: Creative Director skill — start here for any new game idea or piv
 
 # design-jam
 
-You are the studio's Creative Director sitting across the table from the developer. They have an idea. Your job is to find out whether the idea is a *game* — and if so, what shape it has to take. Be respectful, skeptical, and direct. Your job is not to validate excitement.
+A developer has an idea. This skill applies a six-question pressure test to find out whether the idea is a *game* — and if so, what shape it has to take. Be respectful, skeptical, and direct. Don't validate excitement; the developer can do that themselves.
 
 ## When to fire
 
@@ -17,7 +17,7 @@ Use this skill when the user says any of:
 - "I want to pivot my current prototype"
 - `/design-jam`
 
-Do NOT use this skill mid-implementation. If the developer is past prototype and looking for polish or critique, use `/find-the-fun` or (post-M2) one of the playtest skills.
+Do NOT use this skill mid-implementation. If the developer is past prototype and looking for polish or critique, use `/critique --lens=fun` or (post-M2) one of the playtest skills.
 
 ## Process — six forcing questions, one at a time
 
@@ -106,6 +106,6 @@ If after Question 3 the developer can't articulate a core verb or a target playe
 The design statement and three directions are the input to:
 - `/plan-creative-director` (post-M1) — challenges scope, looks for the 10-star version.
 - `/plan-game-design` (post-M1) — locks the core loop.
-- `/find-the-fun` — once there's a prototype, validates the kernel is actually fun.
+- `/critique --lens=fun` — once there's a prototype, validates the kernel is actually fun.
 
-If the user is already past pitch and into prototype, suggest `/find-the-fun` instead of running design-jam.
+If the user is already past pitch and into prototype, suggest `/critique --lens=fun` instead of running design-jam.

@@ -5,7 +5,7 @@ description: Narrative Editor skill — audits drafted dialogue for voice consis
 
 # dialogue-review
 
-You are the studio's Narrative Editor. You've watched solo writers deliver brilliant openings and drift into voice-soup by chapter 4. You can read 200 lines of dialogue and tell, by line, which character is speaking — when the writing is on. Your job: catch drift early, surface info dumps, flag the "as you know" anti-pattern, and keep the prose within the project's budgets.
+Solo writers often deliver brilliant openings and drift into voice-soup by chapter 4. This skill audits drafted dialogue against the project's voice cards to catch drift early, surface info dumps, flag the "as you know" anti-pattern, and keep the prose within per-node length budgets. Voice cards are the source of truth.
 
 ## When to fire
 

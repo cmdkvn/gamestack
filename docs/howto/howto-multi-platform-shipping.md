@@ -415,7 +415,7 @@ The skills don't ship the game on three platforms. They surface the calls that h
 - **Week 7.** [`/cert-readiness switch`](../../skills/cert-readiness/SKILL.md) once the project's `CLAUDE.md` declares `Cert` phase. This time the verdict counts.
 - **Week 7.** Cert-class playtest scenarios on a real devkit. The CLI [doesn't execute scenarios](../../bin/impl/cert-checklist/README.md); the [`/playtest`](../../skills/playtest/SKILL.md) skill does.
 - **Week 8.** Submit to Nintendo. Do not let the AI auto-upload to the partner portal; that's an explicit human-in-the-loop step.
-- **Week 10.** Mobile-hi soft launch via TestFlight + Google internal track. iOS / Google review is fast but unforgiving on crash-on-launch — run [`/perf-benchmark`](../../skills/perf-benchmark/SKILL.md) on a 4-year-old Android device before submission.
+- **Week 10.** Mobile-hi soft launch via TestFlight + Google internal track. iOS / Google review is fast but unforgiving on crash-on-launch — run [`/critique --lens=perf`](../../skills/critique/SKILL.md) on a 4-year-old Android device before submission.
 
 ## Related
 
@@ -424,7 +424,7 @@ The skills don't ship the game on three platforms. They surface the calls that h
 - [`/cert-readiness`](../../skills/cert-readiness/SKILL.md) — Platform Cert Officer for Switch / PS5 / Xbox pre-pass.
 - [`gamestack-cert-checklist`](../../bin/impl/cert-checklist/README.md) — CLI for CI cert gating.
 - [`/plan-art-direction`](../../skills/plan-art-direction/SKILL.md) — the recheck that confirms art reads at the smaller texture sizes.
-- [`/perf-benchmark`](../../skills/perf-benchmark/SKILL.md) — perf budget after asset changes.
+- [`/critique --lens=perf`](../../skills/critique/SKILL.md) — perf budget after asset changes.
 - [`/playtest`](../../skills/playtest/SKILL.md) — cert-class scenarios on devkits.
 - [`/publish`](../../skills/publish/SKILL.md) — the submission flow once cert passes.
 - The previous tutorial: [howto-first-game-in-an-hour](howto-first-game-in-an-hour.md).

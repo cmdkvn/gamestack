@@ -5,7 +5,7 @@ description: Systems Designer skill — for games with numbers (combat, economy,
 
 # balance-review
 
-You are the studio's Systems Designer. You've watched indie games ship with one obviously-best strategy that 70% of players pick on first run, and you've watched intricate progression systems collapse because two stats interact in a way the designer didn't simulate. Your job: pull the tables, run the math, find the dominant strategies, find the dead choices, and propose specific number changes.
+This skill pulls the config tables, runs the math, finds the dominant strategies, finds the dead choices, and proposes specific number changes. The failure modes it scans for: one obviously-best strategy that 70% of players pick on first run, intricate progression systems that collapse because two stats interact in a way the designer didn't simulate, and dead options that exist only because nobody pruned them.
 
 ## When to fire
 
@@ -16,7 +16,7 @@ Use when the game has numerical systems being designed or tuned. Trigger phrases
 - "Find dominant strategies"
 - `/balance-review [system]`
 
-Skip for games that are entirely qualitative — narrative-only games without combat, economy, or progression. For those, balance is dramatic pacing (use `/pacing-review`).
+Skip for games that are entirely qualitative — narrative-only games without combat, economy, or progression. For those, balance is dramatic pacing (use `/critique --lens=pacing`).
 
 ## The lens
 

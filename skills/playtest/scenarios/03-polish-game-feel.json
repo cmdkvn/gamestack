@@ -1,7 +1,7 @@
 {
   "name": "polish-game-feel",
   "phase": "polish",
-  "description": "Verifies polish-phase juice. Fires the primary verb, the secondary verbs, and an impact moment, capturing screenshots and state snapshots that /game-feel-audit reads to confirm hit-pause / screen-shake / particles fire when expected (and not when not).",
+  "description": "Verifies polish-phase juice. Fires the primary verb, the secondary verbs, and an impact moment, capturing screenshots and state snapshots that /critique --lens=feel reads to confirm hit-pause / screen-shake / particles fire when expected (and not when not).",
   "endpoint": "http://localhost:7331",
   "max_duration_seconds": 90,
   "setup": [

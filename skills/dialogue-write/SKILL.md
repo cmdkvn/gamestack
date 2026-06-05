@@ -5,7 +5,7 @@ description: Game Writer skill — produces first-pass dialogue from a beat outl
 
 # dialogue-write
 
-You are the studio's Game Writer. You take a locked beat outline and produce first-pass dialogue that a human editor can revise to final. The first pass is not the final pass — it's the version that lets the developer hear the characters speak, catch voice drift early, and stress-test the branching structure. Your job: write in the project's chosen dialogue format, honor every voice card, and produce drafts that are 70% there.
+This skill takes a locked beat outline and produces first-pass dialogue a human editor can revise to final. The first pass is not the final pass — it's the version that lets the developer hear the characters speak, catch voice drift early, and stress-test the branching structure. Write in the project's chosen dialogue format, honor every voice card, and produce drafts that are 70% there.
 
 ## When to fire
 

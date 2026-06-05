@@ -153,12 +153,12 @@ SCENARIO: 01-prototype-first-minute
 
 This is a real finding. The scenario is asking the right question — when *is* the game ready? — and the prototype hasn't answered it. Add the flag. Re-run. Pass.
 
-## Minute 55–63: find the fun (`/find-the-fun`)
+## Minute 55–63: find the fun (`/critique --lens=fun`)
 
 The prototype runs. The state machine ticks. You can cover the plant. But is it *fun?*
 
 ```
-/find-the-fun
+/critique --lens=fun
 ```
 
 Don't soft-pedal. The Prototype Critic has four questions and they're not warm-up:
@@ -201,7 +201,7 @@ RECOMMENDED: B for this week, then C next week. A is for week 4 if B+C
 hold up under human eyes.
 ```
 
-You bookmark `find-the-fun` output to `playtest/find-the-fun-2026-06-05.md`. The dead-mechanic kill list joins the cut list from `/design-jam`.
+You bookmark the critique output to `playtest/critique-fun-2026-06-05.md`. The dead-mechanic kill list joins the cut list from `/design-jam`.
 
 ## Minute 63–60-actual: capture what you learned (`/learn`)
 
@@ -216,7 +216,7 @@ TYPE:   process-learning
 WHEN:   2026-06-05; first prototype hour for Pip's Garden
 LESSON: A prototype with no scenario for the verb you're shipping is
         not testable. The verb (cover) needed a forecast UI before
-        find-the-fun could produce a real "working moment."
+        /critique --lens=fun could produce a real "working moment."
 
 TYPE:   workflow-shortcut
 WHEN:   2026-06-05; /playtest scenario 01 timeout
@@ -244,9 +244,9 @@ Without gamestack, the same hour usually produces an empty scene, a half-written
 ## What comes next
 
 - **Tomorrow.** Get one human in front of the prototype. The Prototype Critic flagged it; the only thing that produces real signal is a face.
-- **Next week.** Direction B (compress to overnight frost only). Run `/find-the-fun` again at the end of the week.
+- **Next week.** Direction B (compress to overnight frost only). Run `/critique --lens=fun` again at the end of the week.
 - **Hour 8.** [`/plan-art-direction`](../skills/plan-art-direction/SKILL.md) once you know the game holds up. Don't lock art before the verb does.
-- **Hour 12.** [`/game-feel-audit`](../skills/game-feel-audit/SKILL.md) once the verb is stable. Polish only on top of a working loop.
+- **Hour 12.** [`/critique --lens=feel`](../skills/critique/SKILL.md) once the verb is stable. Polish only on top of a working loop.
 
 ## Related
 
@@ -255,6 +255,6 @@ Without gamestack, the same hour usually produces an empty scene, a half-written
 - [`/plan-game-design`](../skills/plan-game-design/SKILL.md) — mechanics chain.
 - [`/scene-prototype`](../skills/scene-prototype/SKILL.md) — engine scaffolding.
 - [`/playtest`](../skills/playtest/SKILL.md) — SDK-driven runs.
-- [`/find-the-fun`](../skills/find-the-fun/SKILL.md) — the honest critique.
+- [`/critique --lens=fun`](../skills/critique/SKILL.md) — the honest critique.
 - [`/learn`](../skills/learn/SKILL.md) — persistence across sessions.
 - The next tutorial: [howto-art-pipeline](howto-art-pipeline.md) once the verb is stable.

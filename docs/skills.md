@@ -11,8 +11,8 @@ The catalog mirrors the pipeline gamestack is built around:
 If you're new to gamestack:
 
 1. **Start with [`/design-jam`](../skills/design-jam/SKILL.md)** — the entry skill. Even reading the deep-dive below is useful for thinking about a game idea.
-2. **Then [`/find-the-fun`](../skills/find-the-fun/SKILL.md)** — the framing it uses (kernel + dead mechanics + three directions) shows up across other gamestack skills.
-3. **Then [`/code-review-gamestack`](../skills/code-review-gamestack/SKILL.md)** — the engine-detection + bug-family taxonomy is reused by [`/bug-hunt`](../skills/bug-hunt/SKILL.md), [`/balance-review`](../skills/balance-review/SKILL.md), and [`/perf-benchmark`](../skills/perf-benchmark/SKILL.md).
+2. **Then [`/critique --lens=fun`](../skills/critique/SKILL.md)** — the framing it uses (kernel + dead mechanics + three directions) shows up across other gamestack skills.
+3. **Then [`/code-review-gamestack`](../skills/code-review-gamestack/SKILL.md)** — the engine-detection + bug-family taxonomy is reused by [`/bug-hunt`](../skills/bug-hunt/SKILL.md), [`/balance-review`](../skills/balance-review/SKILL.md), and [`/critique --lens=perf`](../skills/critique/SKILL.md).
 
 The deep-dives are intentionally readable as standalone essays on the role each skill simulates. Even if you never invoke `/design-jam` in a session, reading it is a fast tour of the Creative Director's job.
 
@@ -41,11 +41,11 @@ Skills are senior, opinionated, and skeptical. They push back rather than valida
 
 The pitch leaves the session sharper than it arrived. Code can start.
 
-**Related.** [`/plan-creative-director`](../skills/plan-creative-director/SKILL.md) right after — for the 10-star version of the now-locked pitch. [`/find-the-fun`](../skills/find-the-fun/SKILL.md) once a build exists. [`/plan-game-design`](../skills/plan-game-design/SKILL.md) when mechanics need locking.
+**Related.** [`/plan-creative-director`](../skills/plan-creative-director/SKILL.md) right after — for the 10-star version of the now-locked pitch. [`/critique --lens=fun`](../skills/critique/SKILL.md) once a build exists. [`/plan-game-design`](../skills/plan-game-design/SKILL.md) when mechanics need locking.
 
 ---
 
-### `/find-the-fun` — Prototype Critic
+### `/critique --lens=fun` — Prototype Critic
 
 > Run on an early prototype to identify the kernel of fun (if any), surface dead mechanics, and recommend three sharpening directions.
 
@@ -53,7 +53,7 @@ The pitch leaves the session sharper than it arrived. Code can start.
 
 **The lens.** The skill asks four questions before forming any opinion: one specific working moment, one specific bad moment, what a playtester did with their hands and face, and how long the developer has lived inside the prototype. If question one returns nothing concrete, the kernel isn't there yet and saying so plainly is the kindest move. Every implemented mechanic that hasn't produced a working moment gets tagged dead. Dead mechanics dilute the live ones.
 
-**What a session looks like.** Developer pushes a 3-month roguelite prototype. The working moment: a parry that snaps the camera. The dead moments: a crafting tree, three weapon classes, and a hub town nobody returns to. `/find-the-fun` proposes:
+**What a session looks like.** Developer pushes a 3-month roguelite prototype. The working moment: a parry that snaps the camera. The dead moments: a crafting tree, three weapon classes, and a hub town nobody returns to. `/critique --lens=fun` proposes:
 
 - A — Deepen: build five parry variations and playtest each.
 - B — Cut and rebuild: strip everything that isn't the parry.
@@ -61,7 +61,7 @@ The pitch leaves the session sharper than it arrived. Code can start.
 
 Recommends B. Names the next playtester: someone who has finished Sekiro.
 
-**Related.** [`/design-jam`](../skills/design-jam/SKILL.md) when the kernel isn't there and the premise needs re-challenging. [`/plan-creative-director`](../skills/plan-creative-director/SKILL.md) when the prototype works and it's time to scope up the bigger version. [`/game-feel-audit`](../skills/game-feel-audit/SKILL.md) once polish phase begins.
+**Related.** [`/design-jam`](../skills/design-jam/SKILL.md) when the kernel isn't there and the premise needs re-challenging. [`/plan-creative-director`](../skills/plan-creative-director/SKILL.md) when the prototype works and it's time to scope up the bigger version. [`/critique --lens=feel`](../skills/critique/SKILL.md) once polish phase begins.
 
 ---
 
@@ -85,7 +85,7 @@ Recommends B. Names the next playtester: someone who has finished Sekiro.
 
 > Locks the core loop and pressure-tests the mechanics plan. Plots the player's skill curve and kills dead mechanics at the plan stage so they don't get built.
 
-**When to fire.** Mechanics are documented but not yet implemented. After `/design-jam` and `/plan-creative-director`, before significant engine work begins. If mechanics already ship in a prototype, use `/find-the-fun` instead — this skill is for what's still cheap to cut.
+**When to fire.** Mechanics are documented but not yet implemented. After `/design-jam` and `/plan-creative-director`, before significant engine work begins. If mechanics already ship in a prototype, use `/critique --lens=fun` instead — this skill is for what's still cheap to cut.
 
 **The lens.** The chain is core loop → skill curve → progression → difficulty → win/loss → replay value. Each link gets articulated and checked against the next. The hour-10 mid-game row of the skill-curve table is where indie plans most often go vague — pressing on it is the value of this skill. Three well-tuned mechanics beat ten loosely-related ones; complexity is not depth.
 
@@ -113,13 +113,13 @@ Recommends B. Names the next playtester: someone who has finished Sekiro.
 
 > Pressure-tests world/level design for pacing, navigation, encounter rhythm, and gating logic. Builds a tension graph from the plan.
 
-**When to fire.** Level layouts are sketched or blocked out but not playable end to end. If no level structure exists yet, redirect to `/plan-game-design`. If levels are playable, use `/pacing-review` instead to audit against actual play data.
+**When to fire.** Level layouts are sketched or blocked out but not playable end to end. If no level structure exists yet, redirect to `/plan-game-design`. If levels are playable, use `/critique --lens=pacing` instead to audit against actual play data.
 
 **The lens.** Pacing is the most-failed dimension in indie games. The skill assigns tension, skill demand, and narrative density (1–10) to each major beat and plots the three lines over the planned runtime. Monotony zones (>15 minutes of similar values), spike clusters (three peaks back-to-back with no rest), and hollow middles get flagged. Wayfinding is designed, not discovered — if the developer can't articulate how the player knows where to go in a given space, that's the finding.
 
 **What a session looks like.** Developer's metroidvania has six regions and a planned 10-hour runtime. The tension graph shows a flat middle third — three regions of similar enemy difficulty and identical gating (key item → door). Critical path estimated at 95%, meaning the game is 6 hours, not 10. Two regions have no stated answer for "how does the player know where to go." Output: propose a hero shot for Region 4, a rest beat after Region 3's boss, and a backtracking-aware sight line in Region 2.
 
-**Related.** [`/plan-game-design`](../skills/plan-game-design/SKILL.md) when dead mechanics surface in specific level contexts. [`/pacing-review`](../skills/pacing-review/SKILL.md) once block-outs are playable.
+**Related.** [`/plan-game-design`](../skills/plan-game-design/SKILL.md) when dead mechanics surface in specific level contexts. [`/critique --lens=pacing`](../skills/critique/SKILL.md) once block-outs are playable.
 
 ---
 
@@ -161,7 +161,7 @@ Recommends B. Names the next playtester: someone who has finished Sekiro.
 
 **What a session looks like.** Developer's plan says "Unity, save to JSON, ship to PC and Switch eventually." The skill flags "Unity" without a version, generates a first-draft player state machine in ASCII from the design doc, proposes a save schema with `version: 1` and a temp-file-rename atomic write, and sets frame budgets at 16.67ms (PC 60) and 33.33ms (Switch handheld 30) with a proposed split. Surfaces three top risks: no test strategy, save-migration policy missing, Switch suspend/resume not addressed.
 
-**Related.** [`/plan-game-design`](../skills/plan-game-design/SKILL.md) when systems-level reconciliation is needed. [`/perf-benchmark`](../skills/perf-benchmark/SKILL.md) to validate frame-budget claims against a real build. [`/cert-readiness`](../skills/cert-readiness/SKILL.md) when nearing ship to audit the console-specific items called out here.
+**Related.** [`/plan-game-design`](../skills/plan-game-design/SKILL.md) when systems-level reconciliation is needed. [`/critique --lens=perf`](../skills/critique/SKILL.md) to validate frame-budget claims against a real build. [`/cert-readiness`](../skills/cert-readiness/SKILL.md) when nearing ship to audit the console-specific items called out here.
 
 ---
 
@@ -219,7 +219,7 @@ Recommends B. Names the next playtester: someone who has finished Sekiro.
 
 **What a session looks like.** Detects Unity from `Assets/` + `ProjectSettings/`. Writes `LighthouseScene/LighthouseController.cs` (entry orchestrator with `[SerializeField] private` tunables under `[Header]` groups), `LighthouseConfig.cs` (ScriptableObject), `LighthouseState.cs` (state machine), and `lighthouse-setup.md` listing the GameObject hierarchy to build and the inspector wiring. Ends with the developer's next five steps and known Unity gotchas (IL2CPP stripping, `Resources.Load` path differences).
 
-**Related.** [`/plan-tech-design`](../skills/plan-tech-design/SKILL.md) when the architectural conventions the kit should honor don't yet exist. [`/code-review-gamestack`](../skills/code-review-gamestack/SKILL.md) once the kit is filled in. [`/game-feel-audit`](../skills/game-feel-audit/SKILL.md) once the scene runs and the question is whether it feels right.
+**Related.** [`/plan-tech-design`](../skills/plan-tech-design/SKILL.md) when the architectural conventions the kit should honor don't yet exist. [`/code-review-gamestack`](../skills/code-review-gamestack/SKILL.md) once the kit is filled in. [`/critique --lens=feel`](../skills/critique/SKILL.md) once the scene runs and the question is whether it feels right.
 
 ---
 
@@ -251,7 +251,7 @@ Recommends B. Names the next playtester: someone who has finished Sekiro.
 
 **Why the `-gamestack` suffix.** Claude Code ships a built-in `/code-review`. gamestack's game-specific version coexists rather than shadows it.
 
-**Related.** [`/bug-hunt`](../skills/bug-hunt/SKILL.md) when a finding needs investigation rather than a fix. [`/perf-benchmark`](../skills/perf-benchmark/SKILL.md) when allocations show up at runtime. [`gamestack-asset-audit`](../bin/impl/asset-audit/README.md) when the diff touches importers.
+**Related.** [`/bug-hunt`](../skills/bug-hunt/SKILL.md) when a finding needs investigation rather than a fix. [`/critique --lens=perf`](../skills/critique/SKILL.md) when allocations show up at runtime. [`gamestack-asset-audit`](../bin/impl/asset-audit/README.md) when the diff touches importers.
 
 ---
 
@@ -265,7 +265,7 @@ Recommends B. Names the next playtester: someone who has finished Sekiro.
 
 **What a session looks like.** Symptom: signal fires twice in Godot. Family: signal leak. Data flow: `_ready()` connects, `_enter_tree()` also connects. Hypothesis: double `connect()` from both lifecycle hooks. Test: log connection count. Confirmed. Fix removes the `_enter_tree()` connect, adds a regression test, appends to `playtest/bug-log.md` with the hypothesis trail.
 
-**Related.** [`/code-review-gamestack`](../skills/code-review-gamestack/SKILL.md) to sweep for related code with the same family of bug. [`/perf-benchmark`](../skills/perf-benchmark/SKILL.md) when the family is allocation or GC and you need numbers to confirm the fix.
+**Related.** [`/code-review-gamestack`](../skills/code-review-gamestack/SKILL.md) to sweep for related code with the same family of bug. [`/critique --lens=perf`](../skills/critique/SKILL.md) when the family is allocation or GC and you need numbers to confirm the fix.
 
 ---
 
@@ -273,7 +273,7 @@ Recommends B. Names the next playtester: someone who has finished Sekiro.
 
 > Pulls config tables, runs Monte Carlo, finds dominant strategies and dead choices, proposes specific numeric edits.
 
-**When to fire.** The game has numerical systems (combat, economy, progression, crafting, loot, encounter curves) and balance feels off, or hasn't been pressure-tested before launch, or a major mechanic just changed. Skip for entirely qualitative games — narrative-only without combat or economy. For those, balance is dramatic pacing, which is `/pacing-review`.
+**When to fire.** The game has numerical systems (combat, economy, progression, crafting, loot, encounter curves) and balance feels off, or hasn't been pressure-tested before launch, or a major mechanic just changed. Skip for entirely qualitative games — narrative-only without combat or economy. For those, balance is dramatic pacing, which is `/critique --lens=pacing`.
 
 **The lens.** Four properties of a balanced system: no dominant strategy, no dead choices, real trade-offs on most decisions, and transparent failure modes when balance breaks. The skill audits one system at a time — cross-system passes come later. If the tables aren't in structured form (JSON, CSV, ScriptableObject), that's the top finding; you can't pressure-test hardcoded constants. Proposed edits are concrete: not "tune weapon B," but "raise weapon B damage 18→23 OR lower cost 50→35; either brings it within 10% of weapon A's cost-effectiveness."
 
@@ -307,13 +307,13 @@ Recommends B. Names the next playtester: someone who has finished Sekiro.
 
 **What a session looks like.** Target: Switch handheld. Scans `Assets/`. Finds 14 textures over 1024x1024, three with no compression set, two atlases at 32% packing ratio. Audio: four SFX in stereo at 44.1 kHz that should be mono Vorbis. Naming: 23 violations in `Assets/Sprites/` (spaces, mixed case). Estimated savings: 180 MB. Writes to `playtest/asset-audit/switch-2026-06-04.md` with proposed actions ordered by impact.
 
-**Related.** [`/plan-art-direction`](../skills/plan-art-direction/SKILL.md) when budget violations trace back to a direction that ignored the target platform. [`/cert-readiness`](../skills/cert-readiness/SKILL.md) for the platform-specific cert checks that surface asset-related cert failures. [`/perf-benchmark`](../skills/perf-benchmark/SKILL.md) to confirm budget changes hit the perf budget. [`gamestack-asset-audit`](../bin/impl/asset-audit/README.md) to automate this in CI.
+**Related.** [`/plan-art-direction`](../skills/plan-art-direction/SKILL.md) when budget violations trace back to a direction that ignored the target platform. [`/cert-readiness`](../skills/cert-readiness/SKILL.md) for the platform-specific cert checks that surface asset-related cert failures. [`/critique --lens=perf`](../skills/critique/SKILL.md) to confirm budget changes hit the perf budget. [`gamestack-asset-audit`](../bin/impl/asset-audit/README.md) to automate this in CI.
 
 ---
 
 ## Playtest
 
-### `/game-feel-audit` — Polish Coach
+### `/critique --lens=feel` — Polish Coach
 
 > Audits animation curves, hit-pause, screen-shake, particles, audio, camera response, haptics, and input forgiveness against the strength of the core loop.
 
@@ -331,11 +331,11 @@ Recommends B. Names the next playtester: someone who has finished Sekiro.
 
 Proposed top-3: add 50 ms hit-pause + 4-frame curve snap on wall contact, strip shake from regular jumps, add a 100 ms jump buffer.
 
-**Related.** [`/perf-benchmark`](../skills/perf-benchmark/SKILL.md) after — added VFX/audio can blow the frame budget. [`/playtest`](../skills/playtest/SKILL.md) to drive the audited action live. [`/scene-prototype`](../skills/scene-prototype/SKILL.md) if a missing feedback channel needs a scaffold.
+**Related.** [`/critique --lens=perf`](../skills/critique/SKILL.md) after — added VFX/audio can blow the frame budget. [`/playtest`](../skills/playtest/SKILL.md) to drive the audited action live. [`/scene-prototype`](../skills/scene-prototype/SKILL.md) if a missing feedback channel needs a scaffold.
 
 ---
 
-### `/pacing-review` — Pacing Designer
+### `/critique --lens=pacing` — Pacing Designer
 
 > Walks implemented content and builds a tension graph across skill demand, stakes, and density — flagging monotony, spike clusters, hollow middles, fatigue, and narrative misalignment.
 
@@ -345,25 +345,25 @@ Proposed top-3: add 50 ms hit-pause + 4-frame curve snap on wall contact, strip 
 
 **What a session looks like.** Run on a 4-hour metroidvania's chapter 2. The graph shows density at flat 3 for beats 12–18 — a 35-minute monotony zone of identical enemy encounters in identical corridors. Recommendation: don't *add* content. Cut beats 14–16 entirely and route the player to the boss earlier. The hollow middle is a structural problem, not a content one.
 
-**Related.** [`/plan-level-design`](../skills/plan-level-design/SKILL.md) when monotony traces back to level structure. [`/plan-narrative`](../skills/plan-narrative/SKILL.md) when emotional beats keep landing during fights. [`/onboarding-audit`](../skills/onboarding-audit/SKILL.md) for the first 60 seconds / 15 minutes specifically.
+**Related.** [`/plan-level-design`](../skills/plan-level-design/SKILL.md) when monotony traces back to level structure. [`/plan-narrative`](../skills/plan-narrative/SKILL.md) when emotional beats keep landing during fights. [`/critique --lens=onboarding`](../skills/critique/SKILL.md) for the first 60 seconds / 15 minutes specifically.
 
 ---
 
-### `/onboarding-audit` — First-60-Seconds Critic
+### `/critique --lens=onboarding` — First-60-Seconds Critic
 
 > Times new players to first-verb, first-decision, first-reward, first-failure, and first "I get it" — surfaces friction that drives Steam refunds.
 
-**When to fire.** Before launch and before any Next Fest entry. Steam's 2-hour refund window means onboarding determines half of refunds; demos that don't hook in 15 minutes don't earn wishlists. For prototype-stage critique of whether the kernel is fun at all, use `/find-the-fun` — onboarding is about getting the player *to* the fun, not generating it.
+**When to fire.** Before launch and before any Next Fest entry. Steam's 2-hour refund window means onboarding determines half of refunds; demos that don't hook in 15 minutes don't earn wishlists. For prototype-stage critique of whether the kernel is fun at all, use `/critique --lens=fun` — onboarding is about getting the player *to* the fun, not generating it.
 
 **The lens.** Five timed thresholds with genre-adjustable targets: first verb under 10s, first meaningful decision under 30s, first reward under 60s, first failure at 5–10 min, "I get it" by 15 min. Plus a friction count — tutorial pop-ups, unskippable cutscenes, "Press X to continue" prompts, pre-game modals — each one a player-exit candidate. Plus the trailer-to-first-30-seconds alignment check: if the gameplay opening doesn't match the storefront promise, that's launch-disappointment risk.
 
 **What a session looks like.** Run on a narrative-RPG demo. Times: first verb at 47s (target 10s — fail), first reward at 2:30, first failure at 14 min, "I get it" at 28 min. Friction count: 3 unskippable cutscenes, 6 tutorial modals before first combat. Top edit: make the opening cutscene skippable, move controls onto a hint overlay, hand the player a verb in the first screen. Expected effect — refund rate drops from ~18% to ~10%.
 
-**Related.** [`/find-the-fun`](../skills/find-the-fun/SKILL.md) if the kernel itself is unclear. [`/a11y-audit`](../skills/a11y-audit/SKILL.md) for the controller-detection and subtitle-default checks that surface in the first 15 minutes. [`/steam-page-review`](../skills/steam-page-review/SKILL.md) to align the trailer with the improved opening.
+**Related.** [`/critique --lens=fun`](../skills/critique/SKILL.md) if the kernel itself is unclear. [`/critique --lens=a11y`](../skills/critique/SKILL.md) for the controller-detection and subtitle-default checks that surface in the first 15 minutes. [`/steam-page-review`](../skills/steam-page-review/SKILL.md) to align the trailer with the improved opening.
 
 ---
 
-### `/a11y-audit` — Accessibility Consultant
+### `/critique --lens=a11y` — Accessibility Consultant
 
 > Full audit against the Game Accessibility Guidelines (basic, intermediate, advanced), with non-negotiable focus on remapping, text scale, colorblind modes, and subtitles/CC.
 
@@ -377,7 +377,7 @@ Proposed top-3: add 50 ms hit-pause + 4-frame curve snap on wall contact, strip 
 
 ---
 
-### `/perf-benchmark` — Performance Engineer
+### `/critique --lens=perf` — Performance Engineer
 
 > Captures frame rate (avg, 99th, 0.1th), frame-time distribution, draw calls, GC allocations, scene-load time, and peak memory — diffed against a baseline.
 
@@ -395,13 +395,13 @@ Proposed top-3: add 50 ms hit-pause + 4-frame curve snap on wall contact, strip 
 
 > Drives a running Unity / Godot build via the gamestack engine SDK — reads `/state`, posts inputs, captures screenshots, save-fuzzes, hits semantic breakpoints, files regression scenarios.
 
-**When to fire.** Whenever there's a build to exercise. The skill is phase-aware: it reads `## Current production phase` from the game's CLAUDE.md and picks scenarios accordingly — first-minute prototyping, friction in vertical slice, juice in polish, controller-disconnect + save-fuzz in cert. If there's no build (only code), the right skills are `/find-the-fun` or `/code-review-gamestack`.
+**When to fire.** Whenever there's a build to exercise. The skill is phase-aware: it reads `## Current production phase` from the game's CLAUDE.md and picks scenarios accordingly — first-minute prototyping, friction in vertical slice, juice in polish, controller-disconnect + save-fuzz in cert. If there's no build (only code), the right skills are `/critique --lens=fun` or `/code-review-gamestack`.
 
 **The lens.** Five scenario primitives: `wait`, `wait_for_state`, `input`, `screenshot`, `snapshot`/`restore`, `breakpoint`, `assert`. The skill probes the SDK at `localhost:7331/health` and either drives live or degrades to static analysis offline (flagging findings as `OFFLINE-MAYBE`). Findings are severity-tagged (P0 crash / cert / save corruption, P1 clear bug, P2 smell). Every confirmed P0/P1 spawns a trimmed regression scenario in `playtest/regression/` that joins the smoke suite.
 
 **What a session looks like.** Cert-phase Switch build. Scenario `05-cert-save-fuzz` runs: snapshot, inject inputs, restore, assert tagged save state matches. Finding: `tagged.player.inventory` empty after restore — P0 save corruption. The skill locates the offending atomic-write code via engine-detection, surfaces a fix proposal (refuses to auto-apply on cert-affecting code), trims the failing steps into `playtest/regression/save-restore-2026-06-04.json`, and recommends re-running after the fix lands.
 
-**Related.** [`/perf-benchmark`](../skills/perf-benchmark/SKILL.md) when a scenario surfaces frame-time regression. [`/cert-readiness`](../skills/cert-readiness/SKILL.md) when running cert-class scenarios. [`gamestack-playtest-daemon`](../bin/impl/playtest-daemon/README.md) for CI sweeps that batch many scenarios.
+**Related.** [`/critique --lens=perf`](../skills/critique/SKILL.md) when a scenario surfaces frame-time regression. [`/cert-readiness`](../skills/cert-readiness/SKILL.md) when running cert-class scenarios. [`gamestack-playtest-daemon`](../bin/impl/playtest-daemon/README.md) for CI sweeps that batch many scenarios.
 
 ---
 
@@ -553,7 +553,7 @@ Affects:
   - includes the vertical-slice playtest from 2025-11-12
 
 What's lost if this goes wrong:
-  - The vertical-slice baseline screenshots used by perf-benchmark
+  - The vertical-slice baseline screenshots used by /critique --lens=perf
 
 Proceed? (yes / no / propose alternative)
 ```
@@ -698,7 +698,7 @@ Each interactive skill above has a CI-friendly CLI sibling for the mechanical pa
 | [`gamestack-asset-audit`](../bin/impl/asset-audit/README.md) | [`/asset-audit`](../skills/asset-audit/SKILL.md) | Per-platform texture / audio / mesh / atlas / naming audit + Unity `.meta` integrity catastrophes. |
 | [`gamestack-cert-checklist`](../bin/impl/cert-checklist/README.md) | [`/cert-readiness`](../skills/cert-readiness/SKILL.md) | PS5 TRC / Xbox TCR-XR / Switch lotcheck high-failure-rate categories with PASS / PASS_CODE_ONLY / NEEDS_LIVE_TEST / FAIL_P0 / FAIL_P1 verdicts. |
 | [`gamestack-steam-page-check`](../bin/impl/steam-page-check/README.md) | [`/steam-page-review`](../skills/steam-page-review/SKILL.md) | Capsule dimensions, trailer length, short-description hook, tag strategy, screenshot count, Next Fest fit. Wishlist-conversion risk verdict. |
-| [`gamestack-game-benchmark`](../bin/impl/game-benchmark/README.md) | [`/perf-benchmark`](../skills/perf-benchmark/SKILL.md) | Polls engine SDK `/state` for FPS / frame time / draw calls / GC alloc / memory; diffs against a baseline. |
+| [`gamestack-game-benchmark`](../bin/impl/game-benchmark/README.md) | [`/critique --lens=perf`](../skills/critique/SKILL.md) | Polls engine SDK `/state` for FPS / frame time / draw calls / GC alloc / memory; diffs against a baseline. |
 | [`gamestack-playtest-daemon`](../bin/impl/playtest-daemon/README.md) | [`/playtest`](../skills/playtest/SKILL.md) | Broker between Claude Code and a running engine build. Walks the 9 scenario step primitives; per-step run log. |
 | [`gamestack-taste-update`](../bin/impl/taste-update/README.md) | [`/art-shotgun`](../skills/art-shotgun/SKILL.md) | Persists per-axis approval events into a project taste profile with exponential time-decay; surfaces emerging signals. |
 | [`gamestack-model-benchmark`](../bin/impl/model-benchmark/README.md) | _(reflective tool)_ | Runs a prompt suite against several Claude models; scores responses; picks a winner. Local-only. |

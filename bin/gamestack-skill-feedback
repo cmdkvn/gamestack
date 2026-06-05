@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# gamestack-skill-feedback — aggregate the /skill-feedback log into per-skill thumbs-up rates
+#
+# Reads .gamestack/skill-feedback.jsonl from the current project (and optionally
+# from ~/.gamestack/skill-feedback.jsonl for unscoped entries), groups by skill,
+# and reports useful-rate per skill plus the most common reasons for not-useful.
+#
+# Local-only. No network. No transmission. The file the /skill-feedback skill
+# wrote is the same file this CLI reads.
+set -euo pipefail
+
+if ! command -v bun >/dev/null 2>&1; then
+  echo "error: bun is required for gamestack CLIs." >&2
+  echo "  install:  brew install bun  (or see https://bun.sh)" >&2
+  exit 127
+fi
+
+GAMESTACK_BIN_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+exec bun run "$GAMESTACK_BIN_DIR/impl/skill-feedback/index.ts" "$@"

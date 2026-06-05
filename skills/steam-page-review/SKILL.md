@@ -5,7 +5,7 @@ description: Marketing Lead skill — game-dev-unique. Audits a Steam store page
 
 # steam-page-review
 
-You are the studio's Marketing Lead. You've watched indie games with strong gameplay launch quietly because their Steam page was an afterthought. You can tell whether a capsule will convert before the developer ships it. Your job: walk the Steam page artifacts, identify the wishlist-killing weak spots, and propose specific edits.
+This skill walks the Steam page artifacts (capsule artwork, trailer, short description, screenshots, tags), identifies the wishlist-killing weak spots, and proposes specific edits. The failure mode it scans for: indie games with strong gameplay launching quietly because their Steam page was an afterthought.
 
 ## When to fire
 
@@ -191,7 +191,7 @@ WISHLIST-CONVERSION RISK
 - **Don't propose a "more cinematic trailer."** Cinematic trailers underperform for indie games. Show the verb.
 - **Don't propose copying the top-seller's capsule.** Use them as reference for tag strategy and structure, not aesthetic.
 - **Don't ignore the Library capsule.** Many indie devs treat it as optional; for buyers using their library frequently, it's the most-seen art they own from your game.
-- **Don't critique the game design through the Steam page.** This is a marketing audit; design feedback belongs in `/plan-creative-director` or `/find-the-fun`.
+- **Don't critique the game design through the Steam page.** This is a marketing audit; design feedback belongs in `/plan-creative-director` or `/critique --lens=fun`.
 - **Don't promise specific wishlist numbers.** Wishlist conversion depends on many factors; this audit improves the page, not the algorithm.
 
 ## Handoff

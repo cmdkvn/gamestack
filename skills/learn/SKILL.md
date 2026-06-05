@@ -5,7 +5,7 @@ description: Memory skill — persists generalizable lessons (engine quirks, bug
 
 # learn
 
-You are the studio's Memory. Your job is to take the generalizable cores of recent experience and stash them so future sessions can recall them without having to re-derive them. You are NOT an LLM running an autobiography — you are a precise, low-noise note-taker who only stores the lessons worth keeping.
+This skill takes the generalizable cores of recent experience and stashes them so future sessions can recall them without having to re-derive them. It is NOT an autobiography — it's a precise, low-noise note-taker that only stores lessons worth keeping.
 
 ## When to fire
 

@@ -5,7 +5,7 @@ description: Visual Explorer skill — structured visual exploration. For one na
 
 # art-shotgun
 
-You are the studio's Visual Explorer. The developer needs to see options before choosing. Your job: take one subject, generate 4–6 *distinct* prompt variants, structure the comparison so the developer can pick what works, capture their feedback in a way that improves the next round, and iterate until something lands.
+The developer needs to see options before choosing. This skill takes one subject, generates 4–6 *distinct* prompt variants, structures the comparison so the developer can pick what works, captures their feedback in a way that improves the next round, and iterates until something lands.
 
 ## When to fire
 

@@ -5,7 +5,7 @@ description: QA Lead skill — drives a real Unity / Godot build via the gamesta
 
 # playtest
 
-You are the studio's QA Lead. You drive a running build the way a human playtester would, but tirelessly and with perfect memory of every input and state delta. Your job: pick the right scenario for the current production phase, execute it via the gamestack engine SDK, capture findings, fix what you can, and produce a regression scenario for every bug found.
+This skill drives a running build the way a human playtester would, but tirelessly and with perfect memory of every input and state delta. It picks the right scenario for the current production phase, executes it via the gamestack engine SDK, captures findings, fixes what it can, and produces a regression scenario for every bug found.
 
 ## When to fire
 
@@ -16,7 +16,19 @@ Use when there's a build to exercise. Trigger phrases:
 - "Test scenario X"
 - `/playtest [scenario | phase | --offline]`
 
-If there's no build (just a prototype, just code), the right skill is `/find-the-fun` or `/code-review-gamestack`.
+If there's no build (just a prototype, just code), the right skill is `/critique --lens=fun` or `/code-review-gamestack`.
+
+## Three modes
+
+`/playtest` runs in one of three modes. Pick the cheapest one that fits the question you're asking.
+
+| Mode | Trigger | Requires | Capability |
+|---|---|---|---|
+| **SDK live** | `/playtest` (default if SDK reachable) | Unity SDK / Godot SDK installed + build running with the SDK active | Full: input injection, state inspection, snapshot/restore, breakpoints, screenshots. |
+| **Zero-SDK screenshot-diff** | `/playtest --mode=screenshot-diff` | A running build the developer manually drives + a screenshots directory the developer populates (engine screenshot hotkey, OBS, `screencapture` on macOS, etc.) | Visual regression only. Compares new screenshots to a baseline, flags diffs over a threshold. No input injection, no state inspection. |
+| **Offline static** | `/playtest --offline` | The source code | Static analysis. Reads scripts, scenes, save format; tells you what the live modes would have caught. |
+
+**Default to zero-SDK** for solo devs who haven't installed the engine SDK yet. The SDK upgrade is opt-in — see [`docs/ENGINES.md`](../../docs/ENGINES.md). The zero-SDK mode is documented in detail at [`docs/ZERO-SDK-PLAYTEST.md`](../../docs/ZERO-SDK-PLAYTEST.md).
 
 ## The phase decides everything
 
@@ -36,9 +48,11 @@ If the phase doesn't match a default, ask the developer to point at a scenario f
 
 ## Process
 
-### Step 1 — probe the SDK
+### Step 1 — probe the SDK (or pick the mode)
 
-Find the SDK endpoint. Default Unity port: 7331. Default Godot port: 7332 (post-M3).
+If the developer explicitly passed `--mode=screenshot-diff` or `--offline`, skip the probe and use the chosen mode.
+
+Otherwise, probe the SDK at the default port (Unity: 7331, Godot: 7332):
 
 ```bash
 curl -sf -m 2 http://localhost:7331/health
@@ -46,11 +60,10 @@ curl -sf -m 2 http://localhost:7331/health
 
 | Outcome | Mode |
 |---|---|
-| HTTP 200 with `ok: true` | **Live mode.** SDK is reachable; drive scenarios end-to-end. |
-| Connection refused / timeout | **Offline mode.** Fall back to static analysis. Surface what live mode would have caught. |
+| HTTP 200 with `ok: true` | **SDK live mode.** Drive scenarios end-to-end. |
+| Connection refused / timeout, and the developer has a build running | Offer **zero-SDK screenshot-diff mode** as the next-best option. Don't silently downgrade to static analysis if there's a running build. |
+| Connection refused / timeout, no running build | **Offline static mode.** Surface what live mode would have caught. |
 | HTTP error with `ok: false` | Report and ask the developer to check the in-Unity status (Tools > gamestack > Open Status Window). |
-
-If the developer passed `--offline`, skip the probe and stay offline.
 
 ### Step 2 — load or select scenarios
 
@@ -149,15 +162,43 @@ To `playtest/playtest-<phase>-<date>.md`:
 <scenario(s) to run after fixes land>
 ```
 
-### Step 8 — offline mode (when SDK is absent)
+### Step 8 — zero-SDK screenshot-diff mode (when there's a running build but no SDK)
 
-If the SDK isn't reachable:
+This is the default fallback for solo devs who haven't installed the engine SDK. It captures visual regressions, which is most of what early-prototype playtests need.
+
+Setup the developer has done before invoking `/playtest --mode=screenshot-diff`:
+1. The game is running, on screen.
+2. They have a way to drop a screenshot at a known path on each meaningful moment — common options: in-engine screenshot hotkey wired to `playtest/screenshots/`, macOS `screencapture -i`, OBS scene-bound hotkey, or any system screenshot tool.
+3. A baseline directory at `playtest/baseline/<scenario>/` (skipped if this is the first run — that run becomes the baseline).
+
+The skill orchestrates the run:
+1. Picks the scenario (phase-driven, same as live mode).
+2. For each step that has a `screenshot` primitive, prints a clear "do this now" line to the developer: *"Press your screenshot hotkey when the title screen finishes fading in."*
+3. Waits for a new file to land in `playtest/screenshots/` (the [`gamestack-playtest-daemon`](../../bin/impl/playtest-daemon/README.md) `--mode=screenshot-diff` flag watches the directory).
+4. Diffs the new screenshot against the baseline at the same step name using a perceptual-hash threshold (default 5% pixel-delta). Anything over threshold is a finding.
+5. Skips `input`, `wait_for_state`, `snapshot`, `restore`, and `breakpoint` primitives — they require the SDK. Reports each skipped step under "Coverage gap — zero-SDK mode".
+
+Findings in this mode are tagged `VISUAL-REGRESSION`. They're useful for:
+- Catching unintended UI changes after a refactor.
+- Detecting art-direction drift across a content branch.
+- Spot-checking that the trailer-able moments still look like themselves.
+
+What zero-SDK mode **doesn't** catch:
+- Anything that requires reading game state (`tagged.player.hp`).
+- Any non-visual regression (audio, controller rumble, frame budget).
+- Anything that requires saving / restoring / fuzzing save data.
+
+When the developer wants those, the SDK upgrade is one install: [`engines/unity/README.md`](../../engines/unity/README.md) or [`engines/godot/README.md`](../../engines/godot/README.md).
+
+### Step 9 — offline static mode (no build, no SDK)
+
+If neither the SDK is reachable nor a build is running, fall back to static analysis:
 1. **Read the scenarios anyway** — they describe what the live test WOULD have done. Surface in the report under "Coverage gap — live mode unavailable".
 2. **Static-analyze** the relevant code paths for each scenario step. For example: a scenario step that asserts `tagged.player.hp` decreases after a hit becomes a static check that the damage path actually mutates the tagged field.
-3. **Recommend installing the SDK** — point at `engines/unity/README.md` install instructions.
+3. **Recommend installing the SDK** — point at [`docs/ENGINES.md`](../../docs/ENGINES.md).
 4. **File the offline findings** with severity tagged `OFFLINE-MAYBE` (the dev should confirm in live mode).
 
-Offline mode is a fallback, not a substitute. Always recommend running the live scenario as soon as the SDK is set up.
+Offline static mode is a last-resort fallback. The screenshot-diff mode is almost always available and almost always more useful.
 
 ## Output format (in-chat summary)
 

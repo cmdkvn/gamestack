@@ -4,7 +4,7 @@ Two packages, one contract. The Unity SDK and the Godot SDK expose the same HTTP
 
 ## What the SDKs are for
 
-A gamestack engine SDK is a small server that lives inside your running game and lets gamestack skills drive it. [`/playtest`](../skills/playtest/SKILL.md) uses it to walk scenarios end to end. [`/perf-benchmark`](../skills/perf-benchmark/SKILL.md) uses it to capture frame data tagged with the player's actual situation. [`/game-feel-audit`](../skills/game-feel-audit/SKILL.md) uses it to fire a verb a hundred times and watch the response. Without the SDK, those skills degrade to static analysis — they read the code instead of running it, and miss the bugs that only show up in motion.
+A gamestack engine SDK is a small server that lives inside your running game and lets gamestack skills drive it. [`/playtest`](../skills/playtest/SKILL.md) uses it to walk scenarios end to end. [`/critique --lens=perf`](../skills/critique/SKILL.md) uses it to capture frame data tagged with the player's actual situation. [`/critique --lens=feel`](../skills/critique/SKILL.md) uses it to fire a verb a hundred times and watch the response. Without the SDK, those skills degrade to static analysis — they read the code instead of running it, and miss the bugs that only show up in motion.
 
 The SDK is not a save system. It is not a debugger. It does not ship in your retail build. It is the interface between your game and the rest of gamestack, and its single job is to make a running build inspectable, drivable, and reproducible from outside.
 

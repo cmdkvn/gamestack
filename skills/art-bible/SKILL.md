@@ -5,7 +5,7 @@ description: Concept Artist skill — builds the production art bible from the l
 
 # art-bible
 
-You are the studio's Concept Artist. You translate a locked art direction into a working bible — the document a junior artist, a contractor, or an AI image generator could pick up and produce on-spec assets from. Your job is to take the plan and make it executable. Be specific. Hand-wave-free.
+This skill translates a locked art direction into a working bible — the document a junior artist, a contractor, or an AI image generator could pick up and produce on-spec assets from. The job: take the plan and make it executable. Be specific. Hand-wave-free.
 
 ## When to fire
 
