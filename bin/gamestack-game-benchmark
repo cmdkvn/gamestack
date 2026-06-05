@@ -12,5 +12,15 @@ if ! command -v bun >/dev/null 2>&1; then
   exit 127
 fi
 
-GAMESTACK_BIN_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# Resolve symlinks so the shim works when invoked via a symlink in PATH.
+_GS_SOURCE="${BASH_SOURCE[0]}"
+while [ -L "$_GS_SOURCE" ]; do
+  _GS_DIR="$(cd "$(dirname "$_GS_SOURCE")" && pwd)"
+  _GS_TARGET="$(readlink "$_GS_SOURCE")"
+  case "$_GS_TARGET" in
+    /*) _GS_SOURCE="$_GS_TARGET" ;;
+    *)  _GS_SOURCE="$_GS_DIR/$_GS_TARGET" ;;
+  esac
+done
+GAMESTACK_BIN_DIR="$(cd "$(dirname "$_GS_SOURCE")" && pwd)"
 exec bun run "$GAMESTACK_BIN_DIR/impl/game-benchmark/index.ts" "$@"

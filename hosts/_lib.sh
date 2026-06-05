@@ -180,6 +180,181 @@ _gamestack_uninstall_to() {
   echo "✓ gamestack uninstalled ($removed removed, $untouched left untouched)"
 }
 
+# ─── CLI symlink management ─────────────────────────────────────────────────
+#
+# Skills are markdown the host loads from its discovery path; CLIs are Bun
+# scripts the developer invokes from a shell. They live in different places
+# but both need install / cleanup / status / uninstall — the helpers below
+# mirror the skill ones.
+
+# Echoes every gamestack-* shim in bin/, one per line.
+_gamestack_list_clis() {
+  find "$GAMESTACK_DIR/bin" -mindepth 1 -maxdepth 1 -type f -name 'gamestack-*' \
+    -exec basename {} \; 2>/dev/null \
+    | sort
+}
+
+# Auto-detect a writable, on-PATH directory to symlink CLIs into. Priority
+# order: /opt/homebrew/bin (macOS arm64 homebrew), /usr/local/bin (Intel +
+# many Linux), ~/.local/bin (XDG conventional). Echoes the path or empty
+# string if none found.
+_gamestack_detect_cli_dir() {
+  local candidate
+  for candidate in /opt/homebrew/bin /usr/local/bin "$HOME/.local/bin"; do
+    if [[ -d "$candidate" && -w "$candidate" ]] && [[ ":$PATH:" == *":$candidate:"* ]]; then
+      echo "$candidate"
+      return 0
+    fi
+  done
+  echo ""
+}
+
+# Echoes one of: linked-here, linked-elsewhere, conflict-file, missing
+_gamestack_cli_status() {
+  local name="$1"
+  local target_dir="$2"
+  local src="$GAMESTACK_DIR/bin/$name"
+  local target="$target_dir/$name"
+  if [[ -L "$target" ]]; then
+    if [[ "$(readlink "$target")" == "$src" ]]; then
+      echo "linked-here"
+    else
+      echo "linked-elsewhere"
+    fi
+  elif [[ -e "$target" ]]; then
+    echo "conflict-file"
+  else
+    echo "missing"
+  fi
+}
+
+# Remove symlinks in cli_dir that point into this gamestack checkout's bin/
+# directory but whose target no longer exists (e.g. a CLI that was renamed
+# or removed upstream). Mirrors _gamestack_clean_stale_symlinks for skills.
+_gamestack_clean_stale_cli_symlinks() {
+  local cli_dir="$1"
+  local source_prefix="$GAMESTACK_DIR/bin/"
+  local cleaned=0
+  if [[ ! -d "$cli_dir" ]]; then
+    return 0
+  fi
+  while IFS= read -r entry; do
+    [[ -z "$entry" ]] && continue
+    local link_target
+    link_target="$(readlink "$entry" 2>/dev/null || true)"
+    [[ -z "$link_target" ]] && continue
+    case "$link_target" in
+      "$source_prefix"*) ;;
+      *) continue ;;
+    esac
+    if [[ ! -e "$link_target" ]]; then
+      rm "$entry"
+      echo "  - $(basename "$entry") (stale CLI; removed)"
+      cleaned=$((cleaned+1))
+    fi
+  done < <(find "$cli_dir" -mindepth 1 -maxdepth 1 -type l -name 'gamestack-*')
+  if [[ $cleaned -gt 0 ]]; then
+    echo "  (cleaned $cleaned stale CLI symlink(s))"
+  fi
+}
+
+_gamestack_install_clis_to() {
+  local cli_dir="$1"
+  if [[ -z "$cli_dir" ]]; then
+    echo "  ! no writable on-PATH directory found for CLIs" >&2
+    echo "    pass --cli-dir=<path> or add ~/.local/bin to PATH" >&2
+    return 1
+  fi
+  mkdir -p "$cli_dir"
+  _gamestack_clean_stale_cli_symlinks "$cli_dir"
+  local added=0 reused=0 skipped=0
+  while IFS= read -r name; do
+    [[ -z "$name" ]] && continue
+    local src="$GAMESTACK_DIR/bin/$name"
+    local target="$cli_dir/$name"
+    local status
+    status="$(_gamestack_cli_status "$name" "$cli_dir")"
+    case "$status" in
+      linked-here)
+        echo "  · $name (already linked)"
+        reused=$((reused+1))
+        ;;
+      linked-elsewhere)
+        echo "  ! $name — already symlinked to a different gamestack checkout; skipping" >&2
+        skipped=$((skipped+1))
+        ;;
+      conflict-file)
+        echo "  ! $name — $target exists and is not a gamestack symlink; remove it manually to install gamestack's" >&2
+        skipped=$((skipped+1))
+        ;;
+      missing)
+        ln -s "$src" "$target"
+        echo "  + $name"
+        added=$((added+1))
+        ;;
+    esac
+  done < <(_gamestack_list_clis)
+  echo
+  echo "✓ gamestack CLIs ($added added, $reused already present, $skipped skipped) → $cli_dir"
+}
+
+_gamestack_uninstall_clis_to() {
+  local cli_dir="$1"
+  if [[ -z "$cli_dir" || ! -d "$cli_dir" ]]; then
+    return 0
+  fi
+  local removed=0 untouched=0
+  while IFS= read -r name; do
+    [[ -z "$name" ]] && continue
+    local status
+    status="$(_gamestack_cli_status "$name" "$cli_dir")"
+    case "$status" in
+      linked-here)
+        rm "$cli_dir/$name"
+        echo "  - $name"
+        removed=$((removed+1))
+        ;;
+      linked-elsewhere|conflict-file)
+        echo "  · $name (left in place — not owned by this gamestack checkout)"
+        untouched=$((untouched+1))
+        ;;
+      missing)
+        ;;
+    esac
+  done < <(_gamestack_list_clis)
+  echo
+  echo "✓ gamestack CLIs uninstalled ($removed removed, $untouched left untouched)"
+}
+
+_gamestack_status_clis_to() {
+  local cli_dir="$1"
+  printf '  %-30s  %s\n' "CLI" "Status"
+  printf '  %-30s  %s\n' "---" "------"
+  if [[ -z "$cli_dir" ]]; then
+    echo "  (no writable on-PATH directory detected; pass --cli-dir=<path> to install)"
+    return 0
+  fi
+  while IFS= read -r name; do
+    [[ -z "$name" ]] && continue
+    local status
+    status="$(_gamestack_cli_status "$name" "$cli_dir")"
+    local pretty
+    case "$status" in
+      linked-here)      pretty="✓ linked (this checkout)" ;;
+      linked-elsewhere) pretty="↪ linked elsewhere" ;;
+      conflict-file)    pretty="✗ conflict (file exists at target)" ;;
+      missing)          pretty="… not installed" ;;
+      *)                pretty="? unknown ($status)" ;;
+    esac
+    printf '  %-30s  %s\n' "$name" "$pretty"
+  done < <(_gamestack_list_clis)
+  echo
+  echo "  CLIs resolved against: $cli_dir"
+  echo "  Source: $GAMESTACK_DIR/bin/"
+}
+
+# ────────────────────────────────────────────────────────────────────────────
+
 _gamestack_status_to() {
   local target_dir="$1"
   printf '  %-26s  %s\n' "Skill" "Status"
