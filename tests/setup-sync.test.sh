@@ -110,10 +110,11 @@ test_plan_skills_detects_stale_symlink() {
   local target="$HOME/.claude/skills"
   mkdir -p "$target"
   # Point a symlink at a non-existent skill under this checkout.
-  ln -s "$GAMESTACK_DIR/skills/__deleted-skill" "$target/__deleted-skill"
+  local stale_name="zz-deleted-by-test-$$"
+  ln -s "$GAMESTACK_DIR/skills/$stale_name" "$target/$stale_name"
   local output
   output="$(_gamestack_plan_skills "$target")"
-  assert_contains "$output" "$(printf 'stale\t__deleted-skill')" \
+  assert_contains "$output" "$(printf 'stale\t%s' "$stale_name")" \
     "dead symlink into this checkout is detected as stale"
 }
 
@@ -161,16 +162,102 @@ test_plan_clis_in_sync_emits_nothing() {
 test_plan_clis_detects_stale_symlink() {
   local cli_dir="$HOME/bin"
   mkdir -p "$cli_dir"
-  ln -s "$GAMESTACK_DIR/bin/gamestack-__deleted" "$cli_dir/gamestack-__deleted"
+  local stale_name="gamestack-zz-deleted-by-test-$$"
+  ln -s "$GAMESTACK_DIR/bin/$stale_name" "$cli_dir/$stale_name"
   local output
   output="$(_gamestack_plan_clis "$cli_dir")"
-  assert_contains "$output" "$(printf 'stale\tgamestack-__deleted')" \
+  assert_contains "$output" "$(printf 'stale\t%s' "$stale_name")" \
     "dead CLI symlink into this checkout is detected as stale"
 }
 
 run_test test_plan_clis_empty_dir_emits_add_for_every_cli
 run_test test_plan_clis_in_sync_emits_nothing
 run_test test_plan_clis_detects_stale_symlink
+
+test_plan_skills_detects_conflict_file() {
+  local target="$HOME/.claude/skills"
+  mkdir -p "$target"
+  local known_skill
+  known_skill="$(_gamestack_list_skills | head -1)"
+  : > "$target/$known_skill"  # regular file at target path
+  local output
+  output="$(_gamestack_plan_skills "$target")"
+  assert_contains "$output" "$(printf 'conflict\t%s' "$known_skill")" \
+    "regular file at target for known skill produces a conflict line"
+}
+
+test_plan_skills_detects_skip_for_linked_elsewhere() {
+  local target="$HOME/.claude/skills"
+  mkdir -p "$target"
+  local known_skill
+  known_skill="$(_gamestack_list_skills | head -1)"
+  # Symlink to a fabricated other-checkout path so the status reads as linked-elsewhere.
+  local foreign="$HOME/foreign-gamestack/skills/$known_skill"
+  mkdir -p "$(dirname "$foreign")"
+  : > "$foreign"
+  ln -s "$foreign" "$target/$known_skill"
+  local output
+  output="$(_gamestack_plan_skills "$target")"
+  assert_contains "$output" "$(printf 'skip\t%s' "$known_skill")" \
+    "symlink pointing into a different checkout produces a skip line"
+}
+
+test_plan_skills_ignores_foreign_dead_symlinks() {
+  local target="$HOME/.claude/skills"
+  mkdir -p "$target"
+  # Dead symlink that does NOT point into this checkout — must be left alone.
+  ln -s "$HOME/elsewhere/never-existed" "$target/foreign-orphan"
+  local output
+  output="$(_gamestack_plan_skills "$target")"
+  assert_not_contains "$output" "foreign-orphan" \
+    "dead symlinks pointing outside this checkout are not flagged stale"
+}
+
+test_plan_clis_detects_conflict_file() {
+  local cli_dir="$HOME/bin"
+  mkdir -p "$cli_dir"
+  local sample_cli
+  sample_cli="$(_gamestack_list_clis | head -1)"
+  : > "$cli_dir/$sample_cli"  # regular file at target path
+  local output
+  output="$(_gamestack_plan_clis "$cli_dir")"
+  assert_contains "$output" "$(printf 'conflict\t%s' "$sample_cli")" \
+    "regular file at target for known CLI produces a conflict line"
+}
+
+test_plan_clis_detects_skip_for_linked_elsewhere() {
+  local cli_dir="$HOME/bin"
+  mkdir -p "$cli_dir"
+  local sample_cli
+  sample_cli="$(_gamestack_list_clis | head -1)"
+  local foreign="$HOME/foreign-gamestack/bin/$sample_cli"
+  mkdir -p "$(dirname "$foreign")"
+  : > "$foreign"
+  ln -s "$foreign" "$cli_dir/$sample_cli"
+  local output
+  output="$(_gamestack_plan_clis "$cli_dir")"
+  assert_contains "$output" "$(printf 'skip\t%s' "$sample_cli")" \
+    "CLI symlink pointing into a different checkout produces a skip line"
+}
+
+test_plan_clis_ignores_foreign_dead_symlinks() {
+  local cli_dir="$HOME/bin"
+  mkdir -p "$cli_dir"
+  # Note: planner restricts stale scan to gamestack-* CLI names; check both
+  # foreign-prefix and gamestack-prefix dead symlinks pointing outside checkout.
+  ln -s "$HOME/elsewhere/never-existed-cli" "$cli_dir/gamestack-foreign-orphan"
+  local output
+  output="$(_gamestack_plan_clis "$cli_dir")"
+  assert_not_contains "$output" "gamestack-foreign-orphan" \
+    "dead gamestack-* symlinks pointing outside this checkout are not flagged stale"
+}
+
+run_test test_plan_skills_detects_conflict_file
+run_test test_plan_skills_detects_skip_for_linked_elsewhere
+run_test test_plan_skills_ignores_foreign_dead_symlinks
+run_test test_plan_clis_detects_conflict_file
+run_test test_plan_clis_detects_skip_for_linked_elsewhere
+run_test test_plan_clis_ignores_foreign_dead_symlinks
 
 # ── summary ─────────────────────────────────────────────────────────────────
 
