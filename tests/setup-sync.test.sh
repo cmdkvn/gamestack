@@ -333,6 +333,29 @@ test_install_to_default_still_prints_already_linked() {
 run_test test_install_to_quiet_noops_suppresses_already_linked_lines
 run_test test_install_to_default_still_prints_already_linked
 
+test_host_claude_code_install_quiet_noops() {
+  local target="$HOME/.claude/skills"
+  mkdir -p "$target"
+  local sample_name
+  sample_name="$(_gamestack_list_skills | head -1)"
+  ln -s "$GAMESTACK_DIR/skills/$sample_name" "$target/$sample_name"
+
+  # Source the host so gamestack_install is defined for this test.
+  # Re-sourcing _lib.sh is idempotent.
+  (
+    # shellcheck source=../hosts/claude-code.sh
+    source "$GAMESTACK_DIR/hosts/claude-code.sh"
+    GAMESTACK_QUIET_NOOPS=1 gamestack_install 2>&1
+  ) >"$HOME/output.txt"
+
+  local output
+  output="$(cat "$HOME/output.txt")"
+  assert_not_contains "$output" "(already linked)" \
+    "claude-code host gamestack_install honors GAMESTACK_QUIET_NOOPS"
+}
+
+run_test test_host_claude_code_install_quiet_noops
+
 # ── summary ─────────────────────────────────────────────────────────────────
 
 echo

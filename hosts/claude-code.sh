@@ -59,7 +59,7 @@ gamestack_install() {
     status="$(_gamestack_skill_status "$name")"
     case "$status" in
       linked-here)
-        echo "  · $name (already linked)"
+        [[ "${GAMESTACK_QUIET_NOOPS:-0}" == "1" ]] || echo "  · $name (already linked)"
         reused=$((reused+1))
         ;;
       linked-elsewhere)
@@ -107,7 +107,8 @@ gamestack_uninstall() {
         removed=$((removed+1))
         ;;
       linked-elsewhere|conflict-dir|conflict-file)
-        echo "  · $name (left in place — not owned by this gamestack checkout)"
+        [[ "${GAMESTACK_QUIET_NOOPS:-0}" == "1" ]] || \
+          echo "  · $name (left in place — not owned by this gamestack checkout)"
         untouched=$((untouched+1))
         ;;
       missing)
