@@ -356,6 +356,23 @@ test_host_claude_code_install_quiet_noops() {
 
 run_test test_host_claude_code_install_quiet_noops
 
+# End-to-end: run ./setup against a temp HOME and inspect output / exit / disk.
+# Returns the captured stdout+stderr in $RUN_OUTPUT and exit code in $RUN_EXIT.
+run_setup() {
+  RUN_OUTPUT="$("$GAMESTACK_DIR/setup" "$@" 2>&1)"
+  RUN_EXIT=$?
+}
+
+test_setup_install_against_empty_home_prints_plan_section() {
+  run_setup --skills
+  assert_eq "0" "$RUN_EXIT" "exit 0 on first install"
+  assert_contains "$RUN_OUTPUT" "would apply these changes" \
+    "first install prints a plan section header"
+  assert_contains "$RUN_OUTPUT" "Skills:" "plan groups skills under 'Skills:' heading"
+}
+
+run_test test_setup_install_against_empty_home_prints_plan_section
+
 # ── summary ─────────────────────────────────────────────────────────────────
 
 echo

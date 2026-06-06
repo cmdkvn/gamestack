@@ -67,6 +67,54 @@ anything new and clean up stale symlinks from removals.
 EOF
 }
 
+# Render a planner TSV section under a heading, e.g. "Skills" / "CLIs".
+# Lines are read from stdin in the TSV schema:
+#   add\t<name>
+#   stale\t<basename>\t<dead_target>
+#   conflict\t<name>\t<reason>
+#   skip\t<name>\t<reason>
+#   remove\t<name>
+# Prints nothing if there are no lines.
+_gamestack_render_plan_section() {
+  local heading="$1"
+  local input
+  input="$(cat)"
+  if [[ -z "$input" ]]; then
+    return 0
+  fi
+  echo "  $heading:"
+  while IFS=$'\t' read -r action name extra; do
+    case "$action" in
+      add)
+        printf '    + %s\n' "$name"
+        ;;
+      remove)
+        printf '    - %s\n' "$name"
+        ;;
+      stale)
+        printf '    - %s   (stale symlink)\n' "$name"
+        ;;
+      conflict)
+        printf '    ! %s   (conflict — %s; skipping)\n' "$name" "$extra"
+        ;;
+      skip)
+        printf '    · %s   (%s)\n' "$name" "$extra"
+        ;;
+    esac
+  done <<<"$input"
+}
+
+# Format a target-path string for human display. Replaces $HOME with ~ so paths
+# stay short in plan output.
+_gamestack_display_path() {
+  local p="$1"
+  if [[ -n "${HOME:-}" && "$p" == "$HOME"* ]]; then
+    printf '~%s\n' "${p#$HOME}"
+  else
+    printf '%s\n' "$p"
+  fi
+}
+
 while [[ $# -gt 0 ]]; do
   case "$1" in
     -h|--help)
