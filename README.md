@@ -80,7 +80,7 @@ If you don't want the CLIs on `$PATH`, pass `--skills` to install only the skill
 
 ### Updating
 
-When new gamestack releases land, pull and re-run setup. The script removes stale symlinks (both skills and CLIs) for things that were deleted upstream and adds links for anything new:
+When new gamestack releases land, pull and re-run setup. The script is idempotent: it detects drift, prints what will change (added links, stale symlinks to remove), and exits with "Already in sync" when there's nothing to do:
 
 ```bash
 cd ~/.gamestack && git pull --ff-only && ./setup

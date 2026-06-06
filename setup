@@ -61,8 +61,9 @@ Examples:
   ./setup --uninstall --skills      # remove skills, leave CLIs in place
   ./setup --uninstall               # remove both
 
-After developing changes in this checkout, re-run `./setup` to re-link
-anything new and clean up stale symlinks from removals.
+./setup is idempotent. Re-run it any time (for example after `git pull`)
+to sync ~/.claude with this checkout. It detects drift, prints what will
+change, and exits with "Already in sync" when there is nothing to do.
 
 EOF
 }
