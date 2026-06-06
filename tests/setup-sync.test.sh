@@ -447,6 +447,35 @@ run_test test_setup_install_after_one_symlink_deleted_announces_just_that_one
 run_test test_setup_install_with_stale_symlink_cleans_it
 run_test test_setup_install_with_conflict_dir_skips_but_exits_zero
 
+test_setup_uninstall_on_clean_home_says_nothing_to_uninstall() {
+  run_setup --uninstall --skills --cli --cli-dir "$HOME/bin"
+  assert_eq "0" "$RUN_EXIT" "uninstall on clean home exits 0"
+  assert_contains "$RUN_OUTPUT" "Nothing to uninstall" \
+    "uninstall on clean home reports nothing to do"
+}
+
+test_setup_uninstall_after_install_removes_everything_owned() {
+  run_setup --skills --cli --cli-dir "$HOME/bin"
+  assert_eq "0" "$RUN_EXIT" "install exits 0"
+  run_setup --uninstall --skills --cli --cli-dir "$HOME/bin"
+  assert_eq "0" "$RUN_EXIT" "uninstall exits 0"
+  assert_contains "$RUN_OUTPUT" "would apply these changes" \
+    "uninstall with owned symlinks prints plan header"
+  # Spot-check that one known skill's symlink is now gone.
+  local sample_name
+  sample_name="$(_gamestack_list_skills | head -1)"
+  if [[ -L "$HOME/.claude/skills/$sample_name" ]]; then
+    echo "  ✗ skill symlink for $sample_name still exists after uninstall"
+    FAIL=$((FAIL+1))
+  else
+    echo "  ✓ skill symlink for $sample_name removed by uninstall"
+    PASS=$((PASS+1))
+  fi
+}
+
+run_test test_setup_uninstall_on_clean_home_says_nothing_to_uninstall
+run_test test_setup_uninstall_after_install_removes_everything_owned
+
 # ── summary ─────────────────────────────────────────────────────────────────
 
 echo
