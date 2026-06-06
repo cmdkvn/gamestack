@@ -272,13 +272,54 @@ fi
 
 case "$MODE" in
   install)
+    # Compute the plan(s) for the selected scopes. Both are captured up front so
+    # we can decide "nothing to do" before printing anything user-facing.
+    skills_plan=""
+    clis_plan=""
     if [[ $SELECT_SKILLS -eq 1 ]]; then
-      echo "==> Installing gamestack skills for $HOST..."
+      skills_plan="$(_gamestack_plan_skills "$CLAUDE_SKILLS_DIR")"
+    fi
+    if [[ $SELECT_CLI -eq 1 && -n "$CLI_DIR" ]]; then
+      clis_plan="$(_gamestack_plan_clis "$CLI_DIR")"
+    fi
+
+    if [[ -z "$skills_plan" && -z "$clis_plan" ]]; then
+      echo "==> Checking gamestack install for $HOST..."
+      summary=""
+      if [[ $SELECT_SKILLS -eq 1 ]]; then
+        skill_count="$(_gamestack_list_skills | wc -l | tr -d '[:space:]')"
+        summary="$skill_count skills"
+      fi
+      if [[ $SELECT_CLI -eq 1 ]]; then
+        cli_count="$(_gamestack_list_clis | wc -l | tr -d '[:space:]')"
+        if [[ -n "$summary" ]]; then
+          summary="$summary and $cli_count CLIs"
+        else
+          summary="$cli_count CLIs"
+        fi
+      fi
+      echo "✓ Already in sync — $summary all linked to this checkout."
+      exit 0
+    fi
+
+    echo "==> gamestack would apply these changes for $HOST:"
+    echo
+    if [[ -n "$skills_plan" ]]; then
+      printf '%s\n' "$skills_plan" | _gamestack_render_plan_section "Skills"
+    fi
+    if [[ -n "$clis_plan" ]]; then
+      [[ -n "$skills_plan" ]] && echo
+      printf '%s\n' "$clis_plan" | _gamestack_render_plan_section "CLIs"
+    fi
+    echo
+    echo "==> Applying..."
+
+    export GAMESTACK_QUIET_NOOPS=1
+    if [[ $SELECT_SKILLS -eq 1 ]]; then
       gamestack_install
     fi
-    if [[ $SELECT_CLI -eq 1 ]]; then
+    if [[ $SELECT_CLI -eq 1 && -n "$CLI_DIR" ]]; then
       [[ $SELECT_SKILLS -eq 1 ]] && echo
-      echo "==> Installing gamestack CLIs..."
       _gamestack_install_clis_to "$CLI_DIR"
     fi
     ;;

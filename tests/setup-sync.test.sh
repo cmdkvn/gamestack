@@ -373,6 +373,80 @@ test_setup_install_against_empty_home_prints_plan_section() {
 
 run_test test_setup_install_against_empty_home_prints_plan_section
 
+test_setup_install_then_rerun_says_already_in_sync() {
+  run_setup --skills --cli --cli-dir "$HOME/bin"
+  assert_eq "0" "$RUN_EXIT" "first install exits 0"
+  run_setup --skills --cli --cli-dir "$HOME/bin"
+  assert_eq "0" "$RUN_EXIT" "second install exits 0"
+  assert_contains "$RUN_OUTPUT" "Already in sync" \
+    "re-run on synced state reports 'Already in sync'"
+  assert_not_contains "$RUN_OUTPUT" "would apply these changes" \
+    "re-run does not print plan header when in sync"
+  assert_not_contains "$RUN_OUTPUT" "(already linked)" \
+    "re-run does not print per-item already-linked lines"
+}
+
+test_setup_install_after_one_symlink_deleted_announces_just_that_one() {
+  run_setup --skills
+  assert_eq "0" "$RUN_EXIT" "first install exits 0"
+
+  # Delete one symlink to simulate drift.
+  local removed_name
+  removed_name="$(_gamestack_list_skills | head -1)"
+  rm "$HOME/.claude/skills/$removed_name"
+
+  run_setup --skills
+  assert_eq "0" "$RUN_EXIT" "drift-recovery install exits 0"
+  assert_contains "$RUN_OUTPUT" "would apply these changes" \
+    "drift run prints plan header"
+  assert_contains "$RUN_OUTPUT" "+ $removed_name" \
+    "drift run plans to add the missing skill"
+  # The other skills should not appear in the plan section.
+  local other_name
+  other_name="$(_gamestack_list_skills | sed -n '2p')"
+  if [[ -n "$other_name" ]]; then
+    local plan_section
+    plan_section="$(printf '%s\n' "$RUN_OUTPUT" | awk '/would apply these changes/,/Applying/')"
+    assert_not_contains "$plan_section" "+ $other_name" \
+      "drift run does not announce already-linked skills in the plan section"
+  fi
+}
+
+test_setup_install_with_stale_symlink_cleans_it() {
+  run_setup --skills
+  ln -s "$GAMESTACK_DIR/skills/__deleted-skill" "$HOME/.claude/skills/__deleted-skill"
+  run_setup --skills
+  assert_eq "0" "$RUN_EXIT" "stale-cleanup install exits 0"
+  assert_contains "$RUN_OUTPUT" "__deleted-skill" \
+    "plan or apply section mentions the stale symlink"
+  if [[ -e "$HOME/.claude/skills/__deleted-skill" || -L "$HOME/.claude/skills/__deleted-skill" ]]; then
+    echo "  ✗ stale symlink was not removed"
+    FAIL=$((FAIL+1))
+  else
+    echo "  ✓ stale symlink removed from disk"
+    PASS=$((PASS+1))
+  fi
+}
+
+test_setup_install_with_conflict_dir_skips_but_exits_zero() {
+  local sample_name
+  sample_name="$(_gamestack_list_skills | head -1)"
+  mkdir -p "$HOME/.claude/skills/$sample_name"
+  touch "$HOME/.claude/skills/$sample_name/.placeholder"
+
+  run_setup --skills
+  assert_eq "0" "$RUN_EXIT" "conflict run exits 0 (user-resolvable)"
+  assert_contains "$RUN_OUTPUT" "conflict" \
+    "conflict is reported in the plan"
+  assert_contains "$RUN_OUTPUT" "$sample_name" \
+    "conflict references the skill name"
+}
+
+run_test test_setup_install_then_rerun_says_already_in_sync
+run_test test_setup_install_after_one_symlink_deleted_announces_just_that_one
+run_test test_setup_install_with_stale_symlink_cleans_it
+run_test test_setup_install_with_conflict_dir_skips_but_exits_zero
+
 # ── summary ─────────────────────────────────────────────────────────────────
 
 echo
