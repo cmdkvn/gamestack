@@ -85,6 +85,60 @@ _gamestack_skill_status() {
   fi
 }
 
+# Emit TSV lines describing pending install actions against target_dir.
+# Empty output = nothing to do. Read-only.
+#
+# Schema (tab-separated):
+#   add\t<name>                          — skill is missing; install will link it
+#   stale\t<basename>\t<dead_target>     — symlink in target_dir points into this
+#                                          checkout's skills/ but the target is gone
+#   conflict\t<name>\t<reason>           — non-symlink occupant blocks install
+#   skip\t<name>\t<reason>               — symlink points to a different checkout
+#
+# Already-linked skills emit nothing. That is the whole point.
+_gamestack_plan_skills() {
+  local target_dir="$1"
+  local source_prefix="$GAMESTACK_DIR/skills/"
+
+  while IFS= read -r name; do
+    [[ -z "$name" ]] && continue
+    local status
+    status="$(_gamestack_skill_status "$name" "$target_dir")"
+    case "$status" in
+      missing)
+        printf 'add\t%s\n' "$name"
+        ;;
+      linked-here)
+        ;;
+      linked-elsewhere)
+        printf 'skip\t%s\tsymlink points to a different gamestack checkout\n' "$name"
+        ;;
+      conflict-dir)
+        printf 'conflict\t%s\tdirectory exists at %s/%s\n' "$name" "$target_dir" "$name"
+        ;;
+      conflict-file)
+        printf 'conflict\t%s\tfile exists at %s/%s\n' "$name" "$target_dir" "$name"
+        ;;
+    esac
+  done < <(_gamestack_list_skills)
+
+  if [[ -d "$target_dir" ]]; then
+    while IFS= read -r entry; do
+      [[ -z "$entry" ]] && continue
+      local link_target
+      link_target="$(readlink "$entry" 2>/dev/null || true)"
+      [[ -z "$link_target" ]] && continue
+      case "$link_target" in
+        "$source_prefix"*) ;;
+        *) continue ;;
+      esac
+      if [[ ! -e "$link_target" ]]; then
+        printf 'stale\t%s\t%s\n' "$(basename "$entry")" "$link_target"
+      fi
+    done < <(find "$target_dir" -mindepth 1 -maxdepth 1 -type l)
+  fi
+}
+
 # Remove symlinks in target_dir that point into this gamestack checkout's
 # skills/ directory but whose target no longer exists (e.g. a skill that was
 # consolidated or deleted upstream). Idempotent. Never touches symlinks
@@ -225,6 +279,54 @@ _gamestack_cli_status() {
     echo "conflict-file"
   else
     echo "missing"
+  fi
+}
+
+# Emit TSV lines describing pending CLI install actions against cli_dir.
+# Mirror of _gamestack_plan_skills, but against bin/.
+#
+# Schema (tab-separated):
+#   add\t<name>
+#   stale\t<basename>\t<dead_target>
+#   conflict\t<name>\t<reason>
+#   skip\t<name>\t<reason>
+_gamestack_plan_clis() {
+  local cli_dir="$1"
+  local source_prefix="$GAMESTACK_DIR/bin/"
+
+  while IFS= read -r name; do
+    [[ -z "$name" ]] && continue
+    local status
+    status="$(_gamestack_cli_status "$name" "$cli_dir")"
+    case "$status" in
+      missing)
+        printf 'add\t%s\n' "$name"
+        ;;
+      linked-here)
+        ;;
+      linked-elsewhere)
+        printf 'skip\t%s\tsymlink points to a different gamestack checkout\n' "$name"
+        ;;
+      conflict-file)
+        printf 'conflict\t%s\tfile exists at %s/%s\n' "$name" "$cli_dir" "$name"
+        ;;
+    esac
+  done < <(_gamestack_list_clis)
+
+  if [[ -d "$cli_dir" ]]; then
+    while IFS= read -r entry; do
+      [[ -z "$entry" ]] && continue
+      local link_target
+      link_target="$(readlink "$entry" 2>/dev/null || true)"
+      [[ -z "$link_target" ]] && continue
+      case "$link_target" in
+        "$source_prefix"*) ;;
+        *) continue ;;
+      esac
+      if [[ ! -e "$link_target" ]]; then
+        printf 'stale\t%s\t%s\n' "$(basename "$entry")" "$link_target"
+      fi
+    done < <(find "$cli_dir" -mindepth 1 -maxdepth 1 -type l -name 'gamestack-*')
   fi
 }
 
