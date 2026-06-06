@@ -1,8 +1,8 @@
 # gamestack — Godot addon
 
-> Foundation + extended release (v0.2.0). State observation, screenshot capture, input dispatch, snapshot/restore, and tagged breakpoints. Same HTTP contract as the Unity SDK so the same `/playtest` scenarios run unchanged.
+> v0.2.0 — state observation, screenshot capture, input dispatch, snapshot/restore, and tagged breakpoints. Same HTTP contract as the Unity and iOS SDKs so the same `/playtest` scenarios run unchanged.
 
-This Godot addon exposes a loopback-only HTTP server that the gamestack `/playtest`, `/perf-benchmark`, and `/game-feel-audit` skills use to drive a running Godot 4.x build. The contract matches the Unity SDK endpoint-for-endpoint.
+This Godot addon exposes a loopback-only HTTP server that gamestack skills — `/playtest`, `/critique --lens=feel`, `/critique --lens=perf` — use to drive a running Godot 4.x build. The contract matches the Unity ([`../unity/`](../unity/)) and iOS ([`../ios/`](../ios/)) SDKs endpoint-for-endpoint.
 
 ## Install
 

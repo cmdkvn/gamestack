@@ -104,6 +104,6 @@ The rules deliberately err on the side of WARN over ERROR. ERROR-level rules sho
 
 ## Related
 
-- [`gamestack/skills/playtest/scenarios/README.md`](../../skills/playtest/scenarios/README.md) — the scenario format spec (the contract `scenario/step-type-known` enforces).
-- [`gamestack/.claude/README.md`](../../.claude/README.md) — explains why `README.md` in `.claude/skills/` is bad.
+- [`gamestack/skills/playtest/scenarios/README.md`](../../../skills/playtest/scenarios/README.md) — the scenario format spec (the contract `scenario/step-type-known` enforces).
+- [`gamestack/.claude/CLAUDE.md`](../../../.claude/CLAUDE.md) — repo-internal conventions for editing skills.
 - Every other CLI under [`../../bin/`](../README.md) — same shim shape, same exit code scheme.

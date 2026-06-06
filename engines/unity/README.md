@@ -1,8 +1,8 @@
 # gamestack — Unity package
 
-> Extended release (v0.2.0). State observation, screenshot capture, **input injection**, **snapshot/restore**, and **tagged breakpoints**. Live `/playtest` integration (Group 8 of the implementation plan) is next.
+> v0.2.0 — state observation, screenshot capture, **input injection**, **snapshot/restore**, and **tagged breakpoints**.
 
-This Unity Package Manager (UPM) package exposes a loopback-only HTTP server that gamestack skills (`/playtest`, `/game-feel-audit`, `/perf-benchmark`) use to drive a running Unity build. It's the Unity half of the engine-SDK contract; the Godot equivalent ships in v0.3.0.
+This Unity Package Manager (UPM) package exposes a loopback-only HTTP server that gamestack skills — `/playtest`, `/critique --lens=feel`, `/critique --lens=perf` — use to drive a running Unity build. It's the Unity implementation of the engine-SDK contract; Godot ([`../godot/`](../godot/)) and iOS ([`../ios/`](../ios/)) ship the same contract on ports 7332 and 7333.
 
 ## Install
 

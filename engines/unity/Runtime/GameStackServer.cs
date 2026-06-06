@@ -11,7 +11,7 @@ namespace Gamestack
 {
     /// <summary>
     /// Hosts a loopback HTTP server exposing /state, /screenshot, and /health
-    /// for the gamestack /playtest, /game-feel-audit, and /perf-benchmark skills.
+    /// for the gamestack /playtest and /critique skills.
     ///
     /// Drop this MonoBehaviour into a scene root and assign a <see cref="GameStackConfig"/>.
     /// The server starts on enable and stops on disable. Editor-only by default.

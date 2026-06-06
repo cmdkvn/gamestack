@@ -247,16 +247,16 @@ Without gamestack, the same hour usually produces an empty scene, a half-written
 
 - **Tomorrow.** Get one human in front of the prototype. The Prototype Critic flagged it; the only thing that produces real signal is a face.
 - **Next week.** Direction B (compress to overnight frost only). Run `/critique --lens=fun` again at the end of the week.
-- **Hour 8.** [`/plan-art-direction`](../skills/plan-art-direction/SKILL.md) once you know the game holds up. Don't lock art before the verb does.
-- **Hour 12.** [`/critique --lens=feel`](../skills/critique/SKILL.md) once the verb is stable. Polish only on top of a working loop.
+- **Hour 8.** [`/plan-art-direction`](../../skills/plan-art-direction/SKILL.md) once you know the game holds up. Don't lock art before the verb does.
+- **Hour 12.** [`/critique --lens=feel`](../../skills/critique/SKILL.md) once the verb is stable. Polish only on top of a working loop.
 
 ## Related
 
-- [`/design-jam`](../skills/design-jam/SKILL.md) — the entry skill walked through here.
-- [`/plan-creative-director`](../skills/plan-creative-director/SKILL.md) — pitch pressure test.
-- [`/plan-game-design`](../skills/plan-game-design/SKILL.md) — mechanics chain.
-- [`/scene-prototype`](../skills/scene-prototype/SKILL.md) — engine scaffolding.
-- [`/playtest`](../skills/playtest/SKILL.md) — SDK-driven runs.
-- [`/critique --lens=fun`](../skills/critique/SKILL.md) — the honest critique.
-- [`/learn`](../skills/learn/SKILL.md) — persistence across sessions.
+- [`/design-jam`](../../skills/design-jam/SKILL.md) — the entry skill walked through here.
+- [`/plan-creative-director`](../../skills/plan-creative-director/SKILL.md) — pitch pressure test.
+- [`/plan-game-design`](../../skills/plan-game-design/SKILL.md) — mechanics chain.
+- [`/scene-prototype`](../../skills/scene-prototype/SKILL.md) — engine scaffolding.
+- [`/playtest`](../../skills/playtest/SKILL.md) — SDK-driven runs.
+- [`/critique --lens=fun`](../../skills/critique/SKILL.md) — the honest critique.
+- [`/learn`](../../skills/learn/SKILL.md) — persistence across sessions.
 - The next tutorial: [howto-art-pipeline](howto-art-pipeline.md) once the verb is stable.
