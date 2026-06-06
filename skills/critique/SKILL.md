@@ -73,7 +73,7 @@ Read `gamestack/state.json` per [`_state-conventions.md`](../_state-conventions.
 
 From the state file, read:
 - `project.phase` — used to gate lenses that don't fit. E.g. `--lens=feel` on `phase: prototype` should redirect to `--lens=fun` first.
-- `project.engine` and `project.platforms` — relevant for `--lens=perf` and `--lens=a11y` (Xbox cert).
+- `project.engine` and `project.platforms` — relevant for `--lens=perf` and `--lens=a11y` (Xbox cert tightens a11y; iOS adds VoiceOver / Dynamic Type / Reduce Motion to the audit; iOS perf adds thermal state, MetricKit, and energy log).
 - `artifacts.pitch` — needed for `--lens=fun` and `--lens=feel` (to know what the primary verb is).
 
 If the prerequisite artifact for the chosen lens is missing, redirect to the producing skill.
@@ -173,7 +173,13 @@ Calibrate by genre — narrative slow-burn stretches; roguelike compresses.
 3. **Count the friction points** — tutorial pop-ups, unskippable cutscenes, "press X" prompts, pre-game menus, pre-game modals. For each, is it justified, skippable, deferrable?
 4. **Trailer ↔ first-30-seconds alignment.** If the actual first 30 seconds don't match the trailer / capsule promise, that's a launch-disappointment risk.
 5. **Accessibility on-ramp.** Controller / keyboard auto-detection, subtitles default ON, tutorial skippable for replays, difficulty options before the first hard moment.
-6. **Propose edits.** Each edit: what changes, expected effect, cost. Usual fixes — cut content before first verb; make cutscenes skippable / shorter; move "explain the controls" to hint overlay; add a one-line reward earlier.
+6. **iOS-specific first-launch patterns.** When the project targets iOS, audit these in addition to the cross-platform items:
+   - **App Tracking Transparency (ATT) prompt placement.** The prompt should fire *after* the player has seen what the app does — typically 2–3 screens in, never on cold launch. Apps that prompt on first launch with no context get refused. The Guideline 5.1.2 rejection rate here is high; surface as P0 if the prompt fires before the first verb.
+   - **Notification permission prompt timing.** Same discipline: don't prompt on cold launch. Prompt when the player just did something that implies they'd want a future notification (saving progress, scheduling a task). If the game never sends notifications, don't request the permission at all.
+   - **Photo / camera / microphone permission timing.** Each prompt fires in-context, with a clear `Info.plist` description string the player can read in the system prompt. Pre-warning the player with a custom modal before the system prompt fires improves acceptance rate ~2x.
+   - **App Store first-launch metrics.** The reviewer cold-launches the build. If the splash screen dwells > 2 s, or the first interactive frame takes > 3 s on a 3-year-old iPhone, flag as P1 — Guideline 4 rejections cite "slow launch" as a frequent reason.
+   - **iCloud sync prompt timing.** If the game uses iCloud saves, the first-launch sync dialog should be deferred until after the player has completed onboarding — interrupting the first 60 seconds with "Resolve iCloud conflict?" is a refund-risk moment.
+7. **Propose edits.** Each edit: what changes, expected effect, cost. Usual fixes — cut content before first verb; make cutscenes skippable / shorter; move "explain the controls" to hint overlay; add a one-line reward earlier; on iOS, move permission prompts past the first verb.
 
 ### Output (`--lens=onboarding`)
 
@@ -366,6 +372,20 @@ Use before launch, before every shipped patch, and during cert prep. Xbox has th
 - Hold-to-press alternative for any rapid-tap mechanic.
 - Larger hit targets for menus / interactables.
 
+### iOS-specific a11y (when shipping to App Store)
+
+iOS exposes accessibility APIs the OS owns; the game has to opt in to them or it ships inaccessible to a large slice of the iOS user base.
+
+- **VoiceOver labels.** Every interactive UI element needs `accessibilityLabel`, `accessibilityHint` (where the action isn't obvious), and `accessibilityTraits` (`.button`, `.image`, `.staticText`, etc.) set. Decorative elements use `accessibilityElementsHidden = true`. SwiftUI: `.accessibilityLabel(_:)`, `.accessibilityHint(_:)`, `.accessibilityHidden(_:)`.
+- **Dynamic Type.** Player-facing text uses `UIFont.preferredFont(forTextStyle:)` or SwiftUI's `.font(.body)` / `.scaledFont(_:)` so it scales to the player's system text-size setting. Hardcoded point sizes break Dynamic Type. The audit walks the UI at the largest accessibility content-size category (`accessibility5XL`) and flags clipping or overlap.
+- **Reduce Motion.** Read `UIAccessibility.isReduceMotionEnabled`. If true, skip parallax, screen-shake, FOV pulses, and decorative camera moves. Critical animations (transitions that carry meaning) stay; cosmetic motion goes. Listen for `UIAccessibility.reduceMotionStatusDidChangeNotification` to react mid-session.
+- **Smart Invert Colors / Reduce Transparency.** Smart Invert flips the screen but skips images / videos with `accessibilityIgnoresInvertColors = true`. Audit that decorative UI passes Smart Invert without becoming unreadable. Reduce Transparency (`UIAccessibility.isReduceTransparencyEnabled`) means blurs and translucency should fall back to opaque fills.
+- **Switch Control / AssistiveTouch.** The game must be playable end-to-end via Switch Control (one switch, scanning). This usually means: no required swipe gestures, no required multi-touch (offer single-touch alternative), no time-pressure inputs without a setting to disable.
+- **Closed Captions.** iOS has system-wide closed caption preferences (`MediaAccessibility` framework). If you ship video content (cutscenes, trailers), respect `MACaptionAppearanceGetDisplayType`. For in-game dialogue, ship CC as part of the subtitle system regardless.
+- **Audio descriptions.** For narrative-heavy games on iOS, consider an audio-description track — checked via `UIAccessibility.isAudioDescriptionEnabled`.
+
+The audit: walk the build with VoiceOver on (Settings → Accessibility → VoiceOver). Tap every interactive element. If VoiceOver reads a generic "button" or "image" instead of a meaningful label, that's a P0 finding.
+
 ### Steps
 
 1. **Inventory the settings menus** — what accessibility options exist? Where? Default state?
@@ -429,6 +449,21 @@ Use before / after perf-sensitive changes, at milestone gates, or during cert pr
 | GC allocations per frame | Per-frame allocation = future GC spike. |
 | Scene-load times | Switch lotcheck cares about cold-start time. |
 | Peak memory | Switch hard-caps; mobile crashes silently. |
+
+### iOS-specific perf metrics
+
+When `project.engine` is `ios native` (or the platform list includes `ios`), add these to the snapshot:
+
+| Metric | How | Why |
+|---|---|---|
+| `CADisplayLink` frame time | Subscribe to a `CADisplayLink`; the `targetTimestamp - timestamp` delta is the per-frame budget; the actual `timestamp - lastTimestamp` is the realized frame time. | The hardware refresh on ProMotion devices is variable (10–120 Hz); a 60 FPS measurement is meaningless without referencing the display's current target. |
+| `ProcessInfo.processInfo.thermalState` | Read at snapshot start and end. States: `.nominal` → `.fair` → `.serious` → `.critical`. | Anything past `.fair` is a perf finding — the OS is already throttling. Sustained `.serious` over 30 s of gameplay is a P1; `.critical` is a P0 (the system will start killing background work and your frame budget collapses). |
+| MetricKit (`MXMetricPayload`) | Conform a singleton to `MXMetricManagerSubscriber`; `didReceive` fires once a day with `MXFrameRateMetric`, `MXMemoryMetric`, `MXCPUMetric`, `MXAppLaunchMetric`. | This is the only on-device metric source that aggregates across real player sessions. Pull it into the report when available. |
+| Memory pressure / `didReceiveMemoryWarning` | Hook `UIApplication.didReceiveMemoryWarningNotification`. | Count warnings received during the scenario. >0 means you're flirting with OOM-kill; iOS terminates apps that don't free memory after the second warning. |
+| Energy log (Xcode → Energy gauge) | Manual capture from Xcode Organizer; report as "energy impact" (% CPU and screen-on cost). | Apps that drain battery faster than peers get App Store complaints. Energy log is the canonical reference. |
+| App launch time | `MXAppLaunchMetric.histogrammedTimeToFirstDraw`. | App Store reviewers cold-launch and watch the splash dwell; >2 s to first frame is a Guideline 4 risk. |
+
+Capture method note: the iOS engine SDK (`engines/ios`) exposes thermal state and FPS via `/state` directly — no extra wiring needed. For MetricKit and energy log, the data only exists in production sessions; surface as "OFFLINE — Instruments capture required" if no live data is available.
 
 ### Steps
 

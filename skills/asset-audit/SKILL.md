@@ -32,7 +32,10 @@ Per-platform budgets vary by an order of magnitude. The same asset budget that's
 | **PS5 / Xbox Series X** | 4096×4096 | 2048 MB | 256–320 kbps | 200k | 30k |
 | **Mobile (high-end)** | 1024×1024 | 256 MB | 128 kbps | 30k | 8k |
 | **Mobile (low-end)** | 512×512 | 128 MB | 96–128 kbps | 15k | 5k |
+| **iOS (App Store)** | 1024×1024 (mobile-hi) / 512×512 (mobile-lo) | 256 MB / 128 MB | 64–128 kbps | 30k / 15k | 8k / 5k |
 | **Web (itch / portals)** | 512×512 | 50 MB total (load-size budget) | 96 kbps | 10k | 4k |
+
+iOS resolves to mobile-hi by default (modern iPhone / iPad). Drop to mobile-lo if shipping to iOS 13-era devices or if your category is `casual` and you target the budget-iPhone audience. iOS adds two **hard** distribution caps on top of the asset budgets: **4 GB universal binary limit** (the IPA itself can't exceed 4 GB total) and **200 MB cellular download cap** (anything over 200 MB requires the player be on WiFi to download from the App Store, and Apple's auto-update never fires on cellular). Anything bigger than 200 MB needs **App Thinning** (on-demand resources / asset slicing) to bring the initial download under the cap. Audit IPA size, not just runtime assets.
 
 If the project's `design/tech-design.md` has overrides, use those.
 
@@ -48,6 +51,7 @@ Find the canonical asset locations:
 - Unity: `Assets/` (excluding `Assets/Editor/`, `Assets/Plugins/`).
 - Godot: project root for committed assets, `addons/` for plugin assets.
 - Unreal: `Content/`.
+- iOS native: `*.xcassets/` (asset catalogs), `Resources/` folder groups, and any `Sources/<Target>/Assets/` referenced by SPM. Source `.psd`/`.sketch` files in `Design/` or `Art/` are source-only and don't ship.
 - Engine-agnostic: `assets/`.
 
 Also scan source asset locations (Aseprite, Blender, Photoshop sources):
@@ -193,6 +197,15 @@ PROPOSED ACTIONS (ordered by impact)
 ### Unreal
 - Audit Bulk Data settings on UTextures (streaming, mip levels).
 - Sound Cue settings: compression quality per Sound Class.
+
+### iOS native (Swift / SpriteKit / SceneKit / Metal / RealityKit)
+- **Asset catalog (`.xcassets`).** Every shipping image goes through an asset catalog. Audit each `.imageset` for: missing 1x/2x/3x variants (or single-scale vector PDF/SVG when the source is vector), oversized PNGs that should be sliced or vectorized, and image sets used by exactly one screen (candidates for on-demand resource grouping).
+- **App icon set.** The required icon sizes are non-negotiable for App Review. Required: 1024×1024 marketing icon (App Store Connect upload), iPhone 60×60@2x and @3x, iPad 76×76@2x, and the Settings / Spotlight variants (29, 40 at @2x / @3x). Missing the 1024 marketing icon fails the build at upload; missing device variants triggers App Review rejection.
+- **Launch screen.** Must be a storyboard or SwiftUI `LaunchScreen` view (Apple removed static-PNG launch images in iOS 14+). Audit `LaunchScreen.storyboard` exists and is referenced in `Info.plist` (`UILaunchStoryboardName`).
+- **Texture compression.** Use **ASTC** (4×4 for hero textures, 6×6 or 8×8 for backgrounds) on iOS 8+. **PVRTC is deprecated** as of iOS 16 — audit for any `.pvr` files in the build and flag them for re-encoding to ASTC. Audio: `AAC` is the default; flag any `.wav` larger than ~3 seconds of audio (too big to ship uncompressed).
+- **App Thinning / on-demand resources.** If the IPA approaches the 200 MB cellular cap or the 4 GB universal cap, flag candidates for on-demand resource tagging in the asset catalog (rarely-used scenes, optional language packs, bonus content). The `Info.plist` `NSBundleResourceRequest`-related keys signal whether on-demand resources are already configured.
+- **Bitcode deprecated.** Xcode 14+ removed bitcode. If `ENABLE_BITCODE` is `YES` in the project's build settings, flag as `P1` — current Xcode will warn / fail; future Xcode will refuse the upload entirely. The fix is `ENABLE_BITCODE = NO` in the `xcconfig`.
+- **Privacy manifest.** From May 2024 onward, third-party SDKs must ship a `PrivacyInfo.xcprivacy` file. Audit any vendored frameworks in `Frameworks/` or SPM packages for missing privacy manifests; surface as a P0 if the binary won't pass App Store upload.
 
 ## Handoff
 

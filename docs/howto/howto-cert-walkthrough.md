@@ -369,7 +369,7 @@ The skills don't ship the game. They surface the questions cert is going to ask,
 - **Launch day.** [`/launch-day`](../../skills/launch-day/SKILL.md) — Steam page goes live, build flips to public on the eShop, post-launch monitor kicks on.
 - **First 30 days.** [`/post-launch-monitor`](../../skills/post-launch-monitor/SKILL.md) daily — Steam reviews, crash rate, refund trend, top community complaints.
 - **First patch.** Anything that touches platform-affecting code re-opens the cert surface. Re-run [`/cert-readiness`](../../skills/cert-readiness/SKILL.md) before submitting the patch.
-- **Second platform.** Same shape, swap `switch` for `ps5` or `xbox`. Xbox accessibility cert is the strictest of the three; budget extra time.
+- **Second platform.** Same shape, swap `switch` for `ps5` or `xbox`. Xbox accessibility cert is the strictest of the three; budget extra time. For an iOS App Store port, the discipline is similar but the categories differ — see [`/cert-readiness ios`](../../skills/cert-readiness/SKILL.md) (ATT prompt placement, privacy manifest, StoreKit 2 receipt validation, TestFlight dress rehearsal). App Store Review is 24-72 h per round-trip; budget for 1-2 round-trips on the first iOS submission.
 
 ## Related
 

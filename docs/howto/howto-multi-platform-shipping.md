@@ -354,6 +354,56 @@ Note the skill's [explicit limit](../../skills/cert-readiness/SKILL.md): this is
 
 The Steam launch in 6 weeks doesn't require cert-readiness. But run it for the iOS / Android-equivalent store policies (subscription policy, IAP policy if any, age rating consistency). Apple and Google's review will catch missing privacy declarations and crash-on-launch but not save corruption.
 
+## Week 4.5: iOS / App Store pre-pass
+
+If mobile-hi includes iOS as a target — and as of mid-2026 mobile-hi almost always means "iOS first, Android second" — the App Store Review path adds its own pre-pass. The iOS App Store has no TRC-class technical cert, but Guideline 4 (crash-on-launch) and Guideline 5.1.1 (privacy manifest) reject more indie submissions than any console category does.
+
+```
+/cert-readiness ios
+```
+
+```
+PLATFORM: iOS (App Store)
+CHECKLIST VERSION ON FILE: App Store Review Guidelines (live page, pulled 2026-06-05)
+BUILD: f02d811 (xcarchive, debug build — re-run on Release before submit)
+
+PASS  PASS-CODE-ONLY  NEEDS-LIVE-TEST  FAIL-P0  FAIL-P1  N/A
+  3        2                1             1        2      1
+
+──────────────────────────────────────────
+CATEGORY                              VERDICT       DETAIL
+──────────────────────────────────────────
+ATT prompt placement                  FAIL_P0       Prompt fires from
+                                                    applicationDidFinishLaunching.
+                                                    Move to after first save.
+Privacy manifest                      FAIL_P1       App-level PrivacyInfo.xcprivacy
+                                                    present. Vendored Firebase SDK
+                                                    is missing its manifest — bump
+                                                    to 10.27.0 or later.
+Info.plist usage descriptions         PASS_CODE_ONLY  All required keys present.
+Guideline 2.5 — APIs only             PASS
+Guideline 4 — design quality          NEEDS_LIVE_TEST  Run on iPhone XS (lowest tier).
+TestFlight beta gate                  FAIL_P1       No external TestFlight build
+                                                    distributed. Submit one before
+                                                    App Store submission.
+StoreKit 2 receipt validation         N/A           No IAP in Tideglass.
+Privacy nutrition labels              PASS_CODE_ONLY  Labels filled in App Store
+                                                    Connect. Re-verify before submit.
+64-bit only                           PASS
+Cross-region listings                 PASS
+
+SUBMISSION READINESS — iOS: BLOCKED
+  1 P0 (ATT prompt placement), 2 P1 (Firebase manifest, TestFlight),
+  1 live test (Guideline 4 device cold-launch).
+  Estimated work: 2-3 days. Re-run cert-readiness after fixes.
+```
+
+This catches the ATT-prompt-on-launch rejection (the most-cited indie App Store rejection in 2024-2026) four weeks before submission instead of at App Store Review. The fix is a one-line move — wait until after the player completes onboarding to call `requestTrackingAuthorization`.
+
+The Firebase manifest issue is a dependency-bump, not a code fix; cert-readiness flags it specifically because privacy-manifest-less SDKs fail at App Store Connect upload.
+
+The TestFlight gate is the dress rehearsal. Submit a build to external TestFlight 5-7 days before App Store submission. Beta App Review (24-48 h) is faster and catches most issues App Review would.
+
 ## Week 5: gate cert-readiness in CI too
 
 Same shape as the asset-audit CI gate, on the same JSON contract from the [cert-checklist CLI](../../bin/impl/cert-checklist/README.md).
@@ -388,8 +438,11 @@ Realistic post-Steam timeline:
             Run /playtest 05-cert-save-fuzz on devkit.
 2026-08-08  Switch lotcheck submission (assumes 2 weeks of cert fixes).
             Lotcheck turnaround: 2-3 weeks.
-2026-08-22  Mobile-hi soft launch (iOS TestFlight + Google internal track).
-2026-09-12  Switch eShop + mobile public release (target).
+2026-08-22  iOS TestFlight external testing opens (Beta App Review pass).
+            Google Play internal track opens.
+2026-09-05  iOS App Store submission (Beta-tested build).
+            Google Play closed beta opens.
+2026-09-12  Switch eShop + iOS App Store + Android public release (target).
 ```
 
 The version that didn't go through the asset-audit / cert-readiness loop submits to lotcheck in week 7, fails on atomic-save, eats a 2-week resubmission cycle, and slips Switch to October.
@@ -415,7 +468,7 @@ The skills don't ship the game on three platforms. They surface the calls that h
 - **Week 7.** [`/cert-readiness switch`](../../skills/cert-readiness/SKILL.md) once the project's `CLAUDE.md` declares `Cert` phase. This time the verdict counts.
 - **Week 7.** Cert-class playtest scenarios on a real devkit. The CLI [doesn't execute scenarios](../../bin/impl/cert-checklist/README.md); the [`/playtest`](../../skills/playtest/SKILL.md) skill does.
 - **Week 8.** Submit to Nintendo. Do not let the AI auto-upload to the partner portal; that's an explicit human-in-the-loop step.
-- **Week 10.** Mobile-hi soft launch via TestFlight + Google internal track. iOS / Google review is fast but unforgiving on crash-on-launch — run [`/critique --lens=perf`](../../skills/critique/SKILL.md) on a 4-year-old Android device before submission.
+- **Week 10.** Mobile-hi soft launch via TestFlight + Google internal track. iOS / Google review is fast but unforgiving on crash-on-launch — run [`/critique --lens=perf`](../../skills/critique/SKILL.md) on a 4-year-old Android device AND an iPhone XS-tier iOS device before submission. For iOS specifically, run [`/cert-readiness ios`](../../skills/cert-readiness/SKILL.md) ahead of TestFlight to catch ATT-prompt placement and privacy-manifest gaps before Beta App Review does.
 
 ## Related
 
