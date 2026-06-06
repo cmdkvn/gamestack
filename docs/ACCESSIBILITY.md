@@ -101,6 +101,21 @@ One concrete note per engine per major Top-4 feature. These are the spots where 
 - **Colorblind modes — Post Process Volume with three LUT textures.** Ship three `T_LUT_CVD_*` 1024×32 lookup textures (one per CVD type) and switch the active LUT via the global Post Process Volume's `ColorGrading_Misc_BlueCorrection` slot. The shader-side branch is cheaper than dedicated materials.
 - **Subtitles + CC — `USoundBase::SubtitleText` for dialogue, a separate `USubtitleManager` for non-dialogue cues.** Unreal's built-in subtitle system handles dialogue but not closed captions for ambient/event audio — write a thin `USubtitleManager` that posts captions to the same widget on a separate event bus.
 
+### iOS native (Swift / SpriteKit / SceneKit / SwiftUI / UIKit)
+
+iOS has the strongest accessibility-platform alignment of the engines listed here — the OS owns the assistive technologies and the game has to opt in. The mapping from GAG to iOS API is direct:
+
+- **Remapping — `GCController` extended gamepad + custom input layer.** The system handles controller hot-swap (DualSense, Xbox, MFi); the game owns the action-to-input map. There is no shared "remap UI widget" in UIKit/SwiftUI — write one. Keyboard support is implicit via `GCKeyboard` on iOS 14+; respect `UIKeyCommand` for menu / accelerator bindings.
+- **Text scale — Dynamic Type via `UIFont.preferredFont(forTextStyle:)` (UIKit) or `.font(.body)` / `.scaledFont(_:)` (SwiftUI).** The system text-size setting (including Accessibility Sizes) is exposed via `UIApplication.shared.preferredContentSizeCategory`. Test the build at `accessibility5XL` — that's the largest size a player can set. Hard-coded `.font(.system(size: 12))` breaks Dynamic Type; flag every occurrence.
+- **VoiceOver labels — `accessibilityLabel`, `accessibilityHint`, `accessibilityTraits` on every interactive element.** SwiftUI: `.accessibilityLabel(_:)`, `.accessibilityHint(_:)`, `.accessibilityAddTraits(_:)`. Decorative views: `.accessibilityHidden(true)`. Walk the build with VoiceOver enabled (Settings → Accessibility → VoiceOver) — anything that reads as a generic "button" or "image" is a P0 finding. Required for App Store featuring and for Apple's Accessibility Spotlight inclusion.
+- **Colorblind modes — game-side palette swap or post-processing LUT.** iOS exposes `UIAccessibility.isInvertColorsEnabled` (Smart Invert) but not direct CVD modes — the game implements them. Common pattern: ship three palette variants and a high-contrast mode, switchable from the settings menu. `accessibilityIgnoresInvertColors = true` on decorative images that should NOT be inverted under Smart Invert.
+- **Reduce Motion — `UIAccessibility.isReduceMotionEnabled`.** If true: skip parallax, screen-shake, FOV pulses, decorative camera moves, particle storms. Listen to `UIAccessibility.reduceMotionStatusDidChangeNotification` to react mid-session. Critical animations that carry meaning (a transition that signals "you moved to the next room") stay; cosmetic motion goes.
+- **Reduce Transparency — `UIAccessibility.isReduceTransparencyEnabled`.** Blurs and translucent overlays (`UIBlurEffect`, SwiftUI `.background(.ultraThinMaterial)`) should fall back to opaque fills.
+- **Switch Control / AssistiveTouch — single-switch playability.** The game should be playable end-to-end via Switch Control's scanning mode (one switch, sequential focus traversal). Practically: no required swipe gestures, no required multi-touch, no time-pressure inputs without a setting to disable. Test with Settings → Accessibility → Switch Control enabled.
+- **Closed Captions — system CC preferences via `MediaAccessibility` framework.** `MACaptionAppearanceGetDisplayType(.user)` returns whether the user has CC enabled; `MACaptionAppearanceCopyForegroundColor` / `Background` return their styling preferences. If you ship video cutscenes via `AVPlayer`, respect these. For in-game dialogue, ship CC as part of the subtitle system regardless of the OS preference.
+- **Audio Descriptions — `UIAccessibility.isAudioDescriptionEnabled`.** For narrative-heavy iOS games, consider an audio-description track or audio cues that describe key visual moments. Required for VoiceOver-only play of narrative games.
+- **Mono audio output.** iOS exposes `UIAccessibility.isMonoAudioEnabled`. If true, hard-panned stereo cues become inaudible — collapse to center. This is a system-wide setting; respect it instead of building a separate game-side mono toggle (or do both).
+
 ## The two report formats
 
 [`/critique --lens=a11y`](../skills/critique/SKILL.md) emits two files. They serve different audiences and never get merged.
@@ -162,12 +177,13 @@ Model after Celeste and The Last of Us Part II — both publish accessibility re
 
 ## Cert linkage
 
-| Top-4 item | Xbox (TCR/XR) | PS5 (TRC) | Switch (lotcheck) |
-|---|---|---|---|
-| Remappable controls | P0 — required | Strongly recommended | Strongly recommended |
-| Adjustable text size | P0 — required | Not enforced | Recommended |
-| Colorblind modes | Recommended | Not enforced | Not enforced |
-| Subtitles + CC (default ON) | P0 — required | Subtitles default ON enforced | Recommended |
+| Top-4 item | Xbox (TCR/XR) | PS5 (TRC) | Switch (lotcheck) | iOS (App Store Review) |
+|---|---|---|---|---|
+| Remappable controls | P0 — required | Strongly recommended | Strongly recommended | Recommended; required for Apple's Accessibility featuring |
+| Adjustable text size | P0 — required | Not enforced | Recommended | **Dynamic Type support expected** — apps that don't scale with system text size are flagged in Guideline 4 design reviews and excluded from Accessibility featuring |
+| Colorblind modes | Recommended | Not enforced | Not enforced | Not enforced by App Review but expected for featured / curated placement |
+| Subtitles + CC (default ON) | P0 — required | Subtitles default ON enforced | Recommended | Respect system CC preferences (`MediaAccessibility`); subtitles default ON expected |
+| VoiceOver labels | N/A | N/A | N/A | **Required for App Store featuring** and for any "Accessibility" tag in App Store Connect |
 
 Xbox enforces the most. ID@Xbox publishes a recommended a11y list — match it or expect rework. Quick Resume failures are usually save-system bugs surfacing as accessibility regressions (the assist-mode toggle didn't survive resume) — see [`/cert-readiness`](../skills/cert-readiness/SKILL.md) for the platform-specific walk.
 

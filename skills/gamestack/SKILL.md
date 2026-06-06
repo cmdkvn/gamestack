@@ -28,14 +28,15 @@ Look for `<project>/gamestack/state.json`.
 **If absent**, you bootstrap it now. Ask the developer:
 
 1. **"What is this project's working name?"** (slug derived as kebab-case)
-2. **"Which engine?"** (Unity / Godot / Unreal / GameMaker / Bevy / web / unknown). Auto-detect from marker files first; ask only if ambiguous:
+2. **"Which engine?"** (Unity / Godot / Unreal / GameMaker / Bevy / iOS native / web / unknown). Auto-detect from marker files first; ask only if ambiguous:
    - `Assets/`, `ProjectSettings/` → Unity.
    - `project.godot`, `*.tscn` → Godot.
    - `*.uproject` → Unreal.
    - `*.yyp` → GameMaker.
    - `Cargo.toml` with `bevy` dependency → Bevy.
    - `package.json` with phaser / three / pixi / babylon → Web.
-3. **"Which platforms is this targeting?"** (multi-select: pc, mac, linux, switch, ps5, xbox, ios, android, web). Drives per-platform budgets and cert requirements.
+   - `*.xcodeproj` / `*.xcworkspace` / `Package.swift` with iOS target / `*.swift` under `Sources/` → **iOS native** (SpriteKit / SceneKit / Metal / RealityKit / SwiftUI / UIKit). Identify the rendering framework if discoverable from imports.
+3. **"Which platforms is this targeting?"** (multi-select: pc, mac, linux, switch, ps5, xbox, ios, android, web). Drives per-platform budgets and cert requirements. `ios` selection routes cert work through the App Store Review path, not console TRC/lotcheck.
 4. **"Which production phase?"** Read [`docs/PHASES.md`](../../docs/PHASES.md) if you need definitions. The six phases:
    - `pitch` — no build yet, idea-stage.
    - `prototype` — first working build, finding the fun.
@@ -83,7 +84,7 @@ Recommendations are phase-driven. Apply this table; pick the 1–2 most-relevant
 | `vertical-slice` | `/critique --lens=onboarding`, `/critique --lens=pacing`, `/balance-review`, `/playtest`. |
 | `production` | `/playtest`, `/critique --lens=pacing`, `/asset-audit`, `/code-review-gamestack` per merge. |
 | `polish` | `/critique --lens=feel`, `/critique --lens=onboarding`, `/critique --lens=a11y`, `/critique --lens=perf`. |
-| `cert` | `/cert-readiness`, `/critique --lens=a11y`, `/critique --lens=perf`, `/asset-audit`. Recommend `/cert-freeze` for discipline. |
+| `cert` | `/cert-readiness`, `/critique --lens=a11y`, `/critique --lens=perf`, `/asset-audit`. Recommend `/cert-freeze` for discipline. For `ios` targets, the cert path is App Store Review (ATT prompt, privacy manifest, StoreKit 2 receipt validation, TestFlight dress rehearsal) — `/cert-readiness ios` walks it. |
 | `launched` | `/post-launch-monitor` daily; `/patch-notes` per patch; `/post-mortem` weekly + after launch. |
 
 Also check **artifact gaps**. If `artifacts.voice_cards` is empty and the project has narrative content (`artifacts.narrative` present), recommend a voice-cards step inside `/plan-narrative` or `/dialogue-write`. If `artifacts.art_bible` is empty and `phase` is past `prototype`, recommend `/art-bible`.

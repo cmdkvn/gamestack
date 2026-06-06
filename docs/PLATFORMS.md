@@ -20,6 +20,7 @@ All numbers below mirror [`bin/impl/shared/platforms.ts`](../bin/impl/shared/pla
 | **Xbox Series X/S** (`xbox-series-x`, aka `xbox`) | 4096 | 2048 | 192–320 | 200,000 | 30,000 | — |
 | **Mobile hi-end** (`mobile-hi`, aka `mobile` / `ios` / `android`) | 1024 | 256 | 64–128 | 30,000 | 8,000 | — |
 | **Mobile low-end** (`mobile-lo`) | 512 | 128 | 64–128 | 15,000 | 5,000 | — |
+| **iOS (App Store)** | 1024 / 512 (per device tier) | 256 / 128 | 64–128 | 30,000 / 15,000 | 8,000 / 5,000 | **200 MB cellular cap, 4 GB IPA hard cap** |
 | **Web** (`web`, aka `itch`) | 512 | 50 | 64–96 | 10,000 | 4,000 | **50 MB total** |
 
 Two things to internalize:
@@ -109,9 +110,47 @@ But the SKU split matters. The Series S has less GPU and 8 GB usable RAM (vs Ser
 
 Cross-link: see Xbox section in [`/cert-readiness`](../skills/cert-readiness/SKILL.md).
 
+## iOS (App Store)
+
+**Resolves to:** `mobile-hi` (modern iPhone / iPad) or `mobile-lo` (older device targeting). Texture max 1024 / 512, atlas 256 / 128 MB, audio 64–128 kbps, env 30k / 15k tris, char 8k / 5k tris. iOS-specific distribution caps sit on top of those.
+
+**Cert authority.** Apple App Store Review. Reviews are 24–72 h typical; first submissions for indies often need 1–2 round-trips. Review Guidelines change frequently — pull current text from [Apple's App Store Review Guidelines](https://developer.apple.com/app-store/review/guidelines/) the week before submission.
+
+**App size caps that don't show up in the asset budget.**
+
+- **4 GB universal binary limit.** The IPA itself cannot exceed 4 GB. Universal binaries (arm64 only since iOS 11) make this rarely-binding for a narrative indie, but heavy 3D + audio can hit it.
+- **200 MB cellular download cap.** Anything over 200 MB requires WiFi to download from the App Store, and Apple's auto-update doesn't fire on cellular for over-cap apps. Day-1 player loss is real; aim for ≤ 200 MB initial download.
+- **App Thinning.** Asset slicing via the asset catalog + on-demand resources lets you split content so the initial download is small and additional content streams later. Mandatory above the 200 MB cap; nice-to-have below it.
+
+**Supported devices.** As of mid-2026, iOS 15+ is a reasonable minimum. iOS 17+ unlocks the strictest StoreKit 2 / privacy manifest paths but cuts off the iPhone 8 / X-era devices. Pick by audience: casual / narrative indies target iOS 15+; technical / AR titles target iOS 17+.
+
+**Texture format guidance.**
+
+- **ASTC** (Adaptive Scalable Texture Compression). The modern default. Use ASTC 4×4 for hero textures, ASTC 6×6 or 8×8 for environments / backgrounds. Supported on every iPhone since the 6s.
+- **PVRTC** is **deprecated** as of iOS 16. Don't ship new content with it; re-encode existing PVRTC assets to ASTC during the iOS port.
+- **Bitcode is deprecated** (Xcode 14+). Set `ENABLE_BITCODE = NO` in your `xcconfig`.
+
+**Common App Review rejections (top 5 for indie games).**
+
+1. **Guideline 4 — crashes / bugs on launch.** The reviewer cold-launches on a real device; crashes = instant rejection. Test on the lowest-tier device you claim to support before submitting.
+2. **Guideline 5.1.1 — missing privacy manifest** (`PrivacyInfo.xcprivacy`). Required for the app and every third-party SDK since May 2024. Upload fails at submission if missing.
+3. **Guideline 5.1.2 — ATT prompt before context.** Prompting `requestTrackingAuthorization` on first launch with no explanation is the canonical rejection. Show what the app does first; prompt later.
+4. **Guideline 3.1.1 — client-side receipt validation.** IAP must be validated server-side or via StoreKit 2's server-validated entitlements. Local-only `verifyReceipt` is rejected.
+5. **Guideline 1 / 2 — incomplete metadata.** Privacy nutrition labels missing or inaccurate, age rating inconsistent across regions, missing localized screenshots for shipped languages.
+
+**TestFlight.** Beta channel managed through App Store Connect. External testing requires a Beta App Review (24–48 h turnaround) — the same checklist as App Store but lighter on metadata. Use TestFlight as a dress rehearsal for App Store: if Beta Review bounces it, App Review will too.
+
+**Privacy nutrition labels.** Filled in App Store Connect, not the binary. Update with every release whose data-collection surface changes.
+
+**Portrait vs landscape.** Pick one (or wire both with a per-orientation UI pass; rare for indies). Narrative indies almost always want landscape; pixel-art interactive fiction is the portrait exception.
+
+**App Store Connect setup.** Allow 1–2 weeks for first-app setup: enrollment in the Apple Developer Program ($99/year), bundle ID registration, App Store Connect record creation, signing certificate generation, provisioning profile, privacy questionnaire, screenshots per device class (iPhone 6.7", iPhone 5.5", iPad), localized listing per shipped language. The technical upload is fast; the setup before it isn't.
+
+Cross-link: see App Store section in [`/cert-readiness`](../skills/cert-readiness/SKILL.md), [iOS engine SDK](../engines/ios/README.md), and [docs/CERT.md](CERT.md#app-store-ios) for the cert category walk.
+
 ## Mobile (high-end)
 
-**Resolves to:** `mobile-hi`. Texture max 1024, atlas 256 MB, audio 64–128 kbps, env 30k tris, char 8k tris.
+**Resolves to:** `mobile-hi`. Texture max 1024, atlas 256 MB, audio 64–128 kbps, env 30k tris, char 8k tris. This is the generic mobile bucket; for iOS-specific cert and conventions see the [iOS section above](#ios-app-store).
 
 **Cert authority.** Apple App Store Review (iOS) and Google Play Store policy review (Android). Both are policy / content reviews more than technical cert — there's no sleep/resume audit. The technical bar is implicit (your app crashes, you get pulled).
 

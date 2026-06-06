@@ -17,15 +17,15 @@ Every finding lands in one of six verdicts:
 
 The rest of this doc walks each platform's category list, explains the two cert-class playtest scenarios, draws the skill / CLI / NDA boundary clearly, and ends with a recommended cert flow you can lift from.
 
-## The three platforms at a glance
+## The platforms at a glance
 
-| | PS5 (TRC) | Xbox (TCR / XR) | Switch (lotcheck) |
-|---|---|---|---|
-| Cert authority | Sony PartnerNet | Microsoft Partner Center | Nintendo Developer Portal |
-| Typical indie lead time | 2–3 weeks | 2–3 weeks | 4–6 weeks |
-| Hardest single category | DualSense use beyond default rumble | Quick Resume (a save-system gate in disguise) | Sleep / resume (suspend during every state) |
-| Strictest a11y gate | Moderate | **Strictest of the three** — match ID@Xbox | Moderate |
-| Most-failed item | Trophy completeness + sleep/resume | Quick Resume + accessibility | Sleep / resume (single most-failed item in lotcheck) |
+| | PS5 (TRC) | Xbox (TCR / XR) | Switch (lotcheck) | iOS (App Store Review) |
+|---|---|---|---|---|
+| Cert authority | Sony PartnerNet | Microsoft Partner Center | Nintendo Developer Portal | Apple App Store Connect |
+| Typical indie lead time | 2–3 weeks | 2–3 weeks | 4–6 weeks | 24–72 h per review, 1–2 round-trips typical |
+| Hardest single category | DualSense use beyond default rumble | Quick Resume (a save-system gate in disguise) | Sleep / resume (suspend during every state) | ATT prompt placement / privacy manifest completeness |
+| Strictest a11y gate | Moderate | **Strictest of the four** — match ID@Xbox | Moderate | Moderate (Dynamic Type + VoiceOver required for App Store featuring) |
+| Most-failed item | Trophy completeness + sleep/resume | Quick Resume + accessibility | Sleep / resume (single most-failed item in lotcheck) | Guideline 4 (crash-on-launch) + Guideline 5.1.1 (missing PrivacyInfo.xcprivacy) |
 
 These are tendencies, not promises. Queues vary, reviewers vary, and a single P0 failure in any category bounces you regardless of how clean the rest is.
 
@@ -89,6 +89,28 @@ Nintendo's lotcheck is the most disciplined of the three indie cert paths. The q
 
 **Age rating consistency.** Same rating shown in eShop listing, in-game splash, parental control panel. Three places, one number. The cert reviewer cross-checks. Always `NEEDS_LIVE_TEST` because the verification is across surfaces the CLI can't see.
 
+## App Store (iOS)
+
+Apple's App Store Review is a combined policy and technical review. The publicly-listed [App Store Review Guidelines](https://developer.apple.com/app-store/review/guidelines/) are the source of truth — they change frequently (typically with each WWDC + ad-hoc updates), and the version on file should be the live page the week of submission, not a saved copy from six months ago. The categories below cover the highest-failure-rate items for indie games as of 2024–2026.
+
+**App Tracking Transparency (ATT) prompt placement.** If the app calls `requestTrackingAuthorization` (any analytics SDK with cross-app attribution does), the prompt must fire *in context* — after the player has seen the value of the app, not on cold launch. `Info.plist` must include `NSUserTrackingUsageDescription` with a clear, specific reason. Guideline 5.1.2 rejections cluster here; the cure is "delay the prompt until the player completes onboarding." Default verdict is `FAIL_P0` if the prompt is on the cold-launch path with no contextual explanation.
+
+**Privacy manifest (`PrivacyInfo.xcprivacy`).** Required for the app binary and for every third-party SDK shipped, starting May 2024. The manifest enumerates: data types collected, tracking categories, third-party domains contacted, and Required-Reason API declarations (why the app uses `UserDefaults`, `FileTimestamp`, `BootTime`, `SystemBootTime`, etc.). Missing or incomplete privacy manifests fail at App Store Connect upload — the binary doesn't even reach the reviewer. Default verdict is `FAIL_P0` if `PrivacyInfo.xcprivacy` is absent from the binary or any embedded framework.
+
+**`Info.plist` usage descriptions.** Every runtime permission the app requests requires a player-facing `Info.plist` description key: `NSPhotoLibraryUsageDescription`, `NSCameraUsageDescription`, `NSMicrophoneUsageDescription`, `NSLocationWhenInUseUsageDescription`, `NSContactsUsageDescription`, `NSMotionUsageDescription`, `NSBluetoothAlwaysUsageDescription`, `NSLocalNetworkUsageDescription`, `NSUserTrackingUsageDescription`. Boilerplate ("required for the app to function") is rejected; the reason must be specific. Default verdict is `FAIL_P0` if any used-permission's plist key is missing or boilerplate.
+
+**Guideline 2.5 — Software Requirements.** No private API calls, no JIT'd arbitrary code, no downloaded executable code that changes behavior. The app must function (in some form) without downloading additional executables at runtime. On-demand asset resources are fine; downloading game logic / scripts that alter the app's behavior is a 2.5.2 rejection. Bitcode is deprecated; do not enable.
+
+**Guideline 4 — Design.** Crashes on launch on the reviewer's device is an instant rejection — the single most common indie rejection cause. The reviewer cold-launches on a real device matched to the lowest tier the app claims to support. Test on the lowest-tier device you list as supported before submission. Slow launches (> 2 s to first frame, > 5 s to first interactive) get cited under Guideline 4 as "incomplete" or "unfinished."
+
+**TestFlight beta gate.** External TestFlight testing requires a Beta App Review (24–48 h turnaround) — uses much of the same checklist as App Store Review with lighter metadata requirements. Use TestFlight as a dress rehearsal for App Store. If Beta Review bounces it, App Store Review will too. The cert-readiness skill flips this category to `PASS` only if a recent TestFlight build has been distributed to external testers.
+
+**StoreKit 2 receipt validation.** If the app uses IAP, receipts must be validated server-side. The modern path is StoreKit 2's `Transaction.currentEntitlements` async stream — server-validated by Apple, no extra infrastructure required. The legacy `verifyReceipt` endpoint is deprecated and on borrowed time; client-only receipt parsing is a cheating risk AND a Guideline 3.1.1 risk. Default verdict is `FAIL_P0` if `Bundle.main.appStoreReceiptURL` is parsed locally without server-side validation, or `FAIL_P1` if StoreKit 1 is used at all.
+
+**Privacy nutrition labels.** Filled in App Store Connect (not the binary). Categories of data collected, link to data type, whether the data is used for tracking. Missing or inaccurate labels are a Connect-side rejection at submission. Update with every release whose data-collection surface changes.
+
+**App Store Review playtest scenario.** The cert-class controller-disconnect / save-fuzz scenarios in [`skills/playtest/scenarios/`](../skills/playtest/scenarios/) apply to iOS too — save-fuzz especially. The iOS app lifecycle (background → suspended → killed for memory) means the player's state must survive `applicationWillResignActive` / `sceneWillResignActive` with atomic file writes. Run the save-fuzz scenario on the iOS engine SDK port (default `7333`) against a real device build before submission. A clean run flips the lifecycle-related categories from `NEEDS_LIVE_TEST` to `PASS`.
+
 ## The cert-class playtest scenarios
 
 Two scenarios in [`skills/playtest/scenarios/`](../skills/playtest/scenarios/) elevate cert categories from `NEEDS_LIVE_TEST` to `PASS`. They run via the gamestack engine SDK at `localhost:7331` against a running build — Unity, Godot, or equivalent. They snapshot state, inject inputs, restore, and assert. They are the only thing that flips a `PASS_CODE_ONLY` verdict to a real `PASS`.
@@ -135,7 +157,7 @@ The discipline below assumes you're a month from cert and the game is otherwise 
 
 10. **Day of submission — verify against the NDA checklist line by line.** This is the step gamestack does not replace. Open the PDF you downloaded 30 days ago (or a fresher copy if the portal has updated it), check each line against your build, sign off.
 
-11. **Submit via [`/publish`](../skills/publish/SKILL.md) once cert passes.** Not before. `/publish` has its own pre-publish gates and will refuse to upload an uncert'd console build.
+11. **Submit via [`/publish`](../skills/publish/SKILL.md) once cert passes.** Not before. `/publish` has its own pre-publish gates and will refuse to upload an uncert'd console build. For iOS / App Store, `/publish --target app-store` emits a manual upload checklist; gamestack never auto-uploads to App Store Connect.
 
 12. **After cert returns — invoke `/cert-pass` or accept rejection.** On pass: `/cert-pass` drops the freeze and routes to publish. On rejection: read the failure list, fix the items, increment the checklist version on file if a new one shipped, restart at step 4.
 

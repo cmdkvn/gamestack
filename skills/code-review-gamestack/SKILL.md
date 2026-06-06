@@ -1,11 +1,11 @@
 ---
 name: code-review-gamestack
-description: Senior Gameplay Engineer skill — finds runtime bugs that pass CI but blow up in production. Game-specific patterns for Unity, Godot, Unreal, GameMaker, Bevy. Catches allocation in Update(), off-thread API calls, signal/event leaks, frame-budget violations, tick-order assumptions, save-data corruption patterns. Auto-fixes the obvious. Use when reviewing game code before a playtest, before a commit, or before a merge. Named with the gamestack suffix so it doesn't collide with Claude Code's general-purpose /code-review command.
+description: Senior Gameplay Engineer skill — finds runtime bugs that pass CI but blow up in production. Game-specific patterns for Unity, Godot, Unreal, GameMaker, Bevy, iOS / Swift (SpriteKit / SceneKit / Metal / RealityKit). Catches allocation in Update(), off-thread API calls, signal/event leaks, retain cycles, frame-budget violations, tick-order assumptions, save-data corruption patterns. Auto-fixes the obvious. Use when reviewing game code before a playtest, before a commit, or before a merge. Named with the gamestack suffix so it doesn't collide with Claude Code's general-purpose /code-review command.
 ---
 
 # code-review-gamestack
 
-This skill scans for the bug families that CI doesn't catch — the ones that crash the game on a specific input sequence two weeks after launch, or silently corrupt the save file on power loss. Engine-specific patterns for Unity, Godot, Unreal, GameMaker, and Bevy. The review is rigorous, not exhaustive — five high-priority findings beat fifty bikeshed comments.
+This skill scans for the bug families that CI doesn't catch — the ones that crash the game on a specific input sequence two weeks after launch, or silently corrupt the save file on power loss. Engine-specific patterns for Unity, Godot, Unreal, GameMaker, Bevy, and iOS native (Swift / SpriteKit / SceneKit / Metal / RealityKit). The review is rigorous, not exhaustive — five high-priority findings beat fifty bikeshed comments.
 
 ## When to fire
 
@@ -33,7 +33,10 @@ Detect the engine before reviewing — the bugs you look for depend on it.
 | `*.yyp`, `*.gmx`, `*.gmproject` | **GameMaker** | GML |
 | `Cargo.toml` containing `bevy` dependency | **Bevy** | Rust |
 | `package.json` with phaser / three / pixi / babylon | **Web engine** | JS / TS |
+| `*.xcodeproj`, `*.xcworkspace`, `Package.swift` with iOS target, `*.swift` under `Sources/`, `Info.plist`, `project.pbxproj` | **iOS native** | Swift (sometimes Objective-C) |
 | Otherwise | **engine-agnostic** | review general runtime issues |
+
+When iOS native is detected, identify the rendering framework in use (SpriteKit / SceneKit / Metal / RealityKit / SwiftUI / UIKit) — it changes which bug families apply most. Multiple frameworks can coexist in one project.
 
 Note the detected engine in your opening line of the report.
 
@@ -85,7 +88,25 @@ Why it matters: GC spikes cause frame drops. Switch in particular is unforgiving
 - Cursor-locked states without an explicit unlock path on focus loss — players can't alt-tab.
 - Direct `Input.*` calls instead of the new Input System action map — fragile when remapping is added.
 
-#### Family 8 — Engine-agnostic patterns
+#### Family 8 — iOS / Swift-specific (SpriteKit / SceneKit / Metal / RealityKit / UIKit / SwiftUI)
+
+This family fires only when the engine is `iOS native`. Each sub-pattern below maps to a runtime bug class that App Review or the Crashes panel in Xcode Organizer will eventually find. Catch them in review instead.
+
+- **Retain cycles in `@escaping` closures.** Any closure capturing `self` inside an `@escaping` parameter (`URLSession`, `DispatchQueue.main.asyncAfter`, `Timer`, custom completion handlers) needs `[weak self]` or `[unowned self]`. Strong-self capture inside an escaping closure stored on a long-lived object (a scene, a view controller, a service) is the canonical iOS leak.
+- **Strong `delegate` references.** `var delegate: SomeProtocol?` should almost always be `weak var delegate: SomeProtocol?`. Strong delegate references form a retain cycle between the parent and the delegate. `weak` requires the protocol be `AnyObject`-constrained (`protocol Foo: AnyObject`).
+- **Force-unwraps (`!`) in production code paths.** Every `try!`, `as!`, IUO (`String!`), and trailing `!` on an `Optional` is a crash-on-bad-input waiting for a player. Optional-binding (`guard let`, `if let`) or default values (`??`) are the fix. The whitelist exception is `@IBOutlet` properties wired in storyboards — those legitimately use IUO.
+- **UIKit / SwiftUI on a background thread.** Any UIKit (`UIView`, `UIImageView`, anything starting with `UI`) or SwiftUI `@State` / `@Published` mutation outside the main thread is undefined behavior. Look for UI calls inside `URLSession` completion handlers, `Task.detached`, `DispatchQueue.global().async`, or any `async` function not marked `@MainActor`. Fix with `DispatchQueue.main.async { ... }`, `await MainActor.run { ... }`, or `@MainActor` annotation.
+- **`CADisplayLink` leaks.** A `CADisplayLink` retains its target. If you don't call `displayLink.invalidate()` in `deinit` (or when leaving the scene), the target is retained forever and the deinit never runs. Same applies to `CVDisplayLink` (less common in iOS, but flag it).
+- **Background task without `endBackgroundTask`.** `UIApplication.shared.beginBackgroundTask(...)` returns a token that MUST be passed to `endBackgroundTask(_:)` when the work finishes OR when the system fires the expiration handler. Missing the `endBackgroundTask` call is a watchdog-kill bug; iOS terminates the app and the player loses progress.
+- **`Timer.scheduledTimer` strong self-capture.** `Timer.scheduledTimer(withTimeInterval:repeats:block:)` retains its block target. Capture `[weak self]` inside the block. Even better: use `DispatchSourceTimer` for fine-grained lifecycle control.
+- **`NotificationCenter` observers not removed.** `NotificationCenter.default.addObserver(...)` with a selector requires a paired `removeObserver(...)` in `deinit` (or earlier). The block-based variant retains the block; capture `[weak self]` AND remove the token in `deinit`. The implicit-token form (`addObserver(forName:object:queue:using:)`) returns an `NSObjectProtocol` you must store and remove.
+- **In-app purchase receipt validated client-side.** Receipt validation in-app (parsing the receipt locally, comparing the bundle ID, calling `verifyReceipt` on Apple's URL from the device) is the canonical jailbreak-bypass vector. Validation must happen on a server you control, or via StoreKit 2's `Transaction.currentEntitlements` async stream (which is server-validated by Apple). Any `Bundle.main.appStoreReceiptURL`-based local validation in the diff is a P0 finding.
+- **`Documents` vs `Caches` directory misuse.** `FileManager.SearchPathDirectory.documentDirectory` is for user-generated content the player would expect to back up to iCloud and would be upset to lose. `.cachesDirectory` is for derived data the system can purge under storage pressure. Saving the player's save file to Caches loses the save when iOS reclaims storage; saving a downloaded asset cache to Documents inflates iCloud backup size and gets App Review complaints. Cross-reference the path with the data's character.
+- **`didReceiveMemoryWarning` not handled.** `UIApplication.didReceiveMemoryWarningNotification` (or `UIViewController.didReceiveMemoryWarning()`) is iOS asking you to free what you can before the system kills the process. A game with texture caches, audio buffers, or large scene state and no memory-warning handler ships with a P1 OOM-kill bug — usually first surfaces in Instruments Allocations during long sessions.
+- **App lifecycle: `applicationWillResignActive` / `sceneWillResignActive` not saving state.** When iOS sends the app to background, the developer has ~5 seconds to persist state before the process can be suspended (or killed under memory pressure). Saves taken in `applicationWillTerminate` are unreliable — that callback often doesn't fire before kill. Save on `WillResignActive` / `DidEnterBackground` with atomic file writes.
+- **`GameKit` / `StoreKit` lifecycle leaks.** `GKMatchmaker`, `GKLocalPlayer.local.authenticateHandler`, `SKPaymentQueue.default().add(observer:)` all install long-lived references. Remove observers (`SKPaymentQueue.default().remove(observer:)`) on teardown; clear the auth handler if the player signs out.
+
+#### Family 9 — Engine-agnostic patterns
 - Magic numbers without comment explaining intent (acceleration, timing thresholds, attack windows).
 - Hardcoded file paths that break on case-sensitive filesystems (macOS, Linux differ from Windows).
 - Mutable static state shared across scenes — survives reload, causes ghost bugs.
@@ -181,6 +202,21 @@ DIFF SCOPE:  <range of commits / unstaged changes>
 - `Query` filters: panics on conflicting access; design queries to be disjoint.
 - `Commands` are deferred to the end of the schedule — don't expect them mid-system.
 - Resource access via `Res<T>` vs `ResMut<T>` — borrow-check at runtime.
+
+### iOS native (Swift / SpriteKit / SceneKit / Metal / RealityKit)
+- `@escaping` closures: capture `[weak self]` unless the closure provably outlives nothing that owns it.
+- `var delegate: T?` → `weak var delegate: T?` (and `protocol T: AnyObject`).
+- No `try!` / `as!` / IUO outside `@IBOutlet`. `guard let` or `??` the rest.
+- UI mutation on the main thread only — `DispatchQueue.main.async { ... }` or `@MainActor`. SwiftUI `@State` and `@Published` are not thread-safe.
+- `CADisplayLink`, `Timer`, `NotificationCenter` observers: invalidate / remove in `deinit`.
+- `beginBackgroundTask` is always paired with `endBackgroundTask` — including from the expiration handler.
+- IAP receipt validation server-side (or via StoreKit 2's `Transaction.currentEntitlements`). Never client-only.
+- `Documents` = user data (backed up to iCloud). `Caches` = derived (purgeable). Don't swap.
+- Save state on `WillResignActive` / `DidEnterBackground` with atomic writes. Don't rely on `WillTerminate`.
+- `applicationDidReceiveMemoryWarning` (UIKit) / `MXMemoryMetric` signal: free caches, drop textures, downgrade scene fidelity.
+- SpriteKit: `SKAction.repeatForever` on a node keeps the action alive — call `removeAllActions()` before releasing the node reference.
+- SceneKit / RealityKit: `SCNNode` / `Entity` parent retains children; orphan a subtree by calling `removeFromParent()` before letting your reference drop, or it lives on in the scene graph.
+- Metal: `MTLCommandBuffer` retains its encoders until committed; never hold one across frames.
 
 ### Web (Phaser / Three.js / PixiJS / Babylon)
 - `requestAnimationFrame` callbacks: guard against page hidden state (`document.visibilityState`).

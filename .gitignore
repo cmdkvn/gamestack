@@ -23,12 +23,17 @@ build/
 *.tsbuildinfo
 .bun/
 
-# Engine SDK build artifacts (when added in M2/M3)
+# Engine SDK build artifacts
 engines/unity/Library/
 engines/unity/Temp/
 engines/unity/Obj/
 engines/godot/.godot/
 engines/godot/.import/
+engines/ios/.build/
+engines/ios/.swiftpm/
+engines/ios/Package.resolved
+engines/ios/*.xcodeproj
+engines/ios/DerivedData/
 
 # Test outputs
 coverage/

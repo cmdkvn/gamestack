@@ -14,7 +14,9 @@ Use when the developer says they're ready to ship a release. Trigger phrases:
 - "Ship the build"
 - "Release v1.0.0"
 - "Push to Steam"
-- `/publish [target=steam|itch|console] [version]`
+- "Submit to TestFlight"
+- "Push to App Store"
+- `/publish [target=steam|itch|app-store|testflight|console] [version]`
 
 Don't fire on uncert'd console builds, on builds with known P0 bugs, or on Friday afternoons (the skill should warn).
 
@@ -83,6 +85,7 @@ Build commands are project-specific. Use what the developer has set up:
 - **Unity:** typically `unity -batchmode -quit -projectPath . -buildTarget <Target> -executeMethod BuildScript.Build` or whatever wrapper the project provides.
 - **Godot:** `godot --headless --export-release "<preset name>" <output path>`.
 - **Web:** `npm run build` or `pnpm build`.
+- **iOS native:** `xcodebuild -scheme <Scheme> -configuration Release -archivePath build/<Game>.xcarchive archive`, then `xcodebuild -exportArchive -archivePath build/<Game>.xcarchive -exportPath build/ipa -exportOptionsPlist <path>/ExportOptions.plist`. The result is an `.ipa` ready to upload via Transporter / `altool` / `xcrun notarytool` (for mac apps; iOS uses `altool` or Xcode's Organizer).
 
 Verify the build is on disk and within size budget. Surface its path.
 
@@ -93,11 +96,51 @@ Verify the build is on disk and within size budget. Surface its path.
 | **Steam** | `steamcmd +login <user> +run_app_build <path-to-vdf> +quit` |
 | **itch.io** | `butler push <build-path> <user>/<game>:<channel>` |
 | **PS5 / Xbox / Switch** | Platform-specific partner portal (manual upload OR platform CLI if the developer has one set up) |
-| **App Store** | `xcrun altool --upload-app --type ios --file <path>` (or Transporter.app for first release) |
+| **App Store / TestFlight** | `xcrun altool --upload-app --type ios --file <path-to-ipa> --apiKey <key> --apiIssuer <issuer>` (or Transporter.app GUI for first release). **gamestack does NOT auto-upload** — surface the command and the manual checklist. |
 | **Play Store** | `gcloud beta builds submit` or the Play Console |
 | **Custom** | Use whatever upload script the developer has documented |
 
-For console / mobile partner portals, the skill **does not auto-upload** — surface the build path and the manual upload checklist. Some platforms require human-eyes review of binary metadata; never bypass that.
+For console / mobile partner portals (including App Store / Play Store), the skill **does not auto-upload** — surface the build path and the manual upload checklist. Some platforms require human-eyes review of binary metadata; never bypass that.
+
+#### iOS / App Store / TestFlight publication path
+
+When `target=app-store` or `target=testflight`, run this manual-upload checklist instead of attempting an upload:
+
+```
+APP STORE / TESTFLIGHT MANUAL UPLOAD CHECKLIST
+  1. Confirm App Store Connect record exists for the bundle ID:
+     <com.example.game>. If missing: create at https://appstoreconnect.apple.com.
+  2. Confirm Distribution signing certificate + provisioning profile are valid.
+     Check via Xcode → Settings → Accounts → Manage Certificates.
+  3. Confirm `Info.plist` has all required usage descriptions for the runtime
+     permission set:
+       - NSUserTrackingUsageDescription (if ATT used)
+       - NSCameraUsageDescription / NSPhotoLibraryUsageDescription / NSMicrophoneUsageDescription
+       - NSLocationWhenInUseUsageDescription (if used)
+  4. Confirm PrivacyInfo.xcprivacy is present in the binary AND in every
+     third-party SDK shipped.
+  5. Confirm App Store Connect "App Privacy" nutrition label questionnaire
+     is current.
+  6. Build the archive:
+     xcodebuild -scheme <Scheme> -configuration Release \
+       -archivePath build/<Game>.xcarchive archive
+  7. Export the .ipa:
+     xcodebuild -exportArchive -archivePath build/<Game>.xcarchive \
+       -exportPath build/ipa -exportOptionsPlist ExportOptions.plist
+  8. Upload via altool (CI-friendly):
+     xcrun altool --upload-app --type ios \
+       --file build/ipa/<Game>.ipa \
+       --apiKey <key> --apiIssuer <issuer>
+     Or open Transporter.app and drag the .ipa in (first-release path).
+  9. Wait for processing in App Store Connect (10-60 min typically).
+ 10. For TestFlight: enable external testing group, attach the build,
+     submit for Beta App Review (24-48 h turnaround).
+ 11. For App Store: from App Store Connect, attach the build to the planned
+     release, fill the "What's New" notes, submit for App Review (24-72 h).
+
+gamestack does NOT push to App Store Connect. This is by design — the
+metadata, screenshots, and review-info pages require human eyes.
+```
 
 ### Step 7 — tag, branch, and open the patch-notes PR
 

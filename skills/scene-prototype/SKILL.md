@@ -44,6 +44,7 @@ Mirror `/code-review-gamestack`'s detection:
 | `*.yyp`, `*.gmx` | **GameMaker** | GML object event scripts |
 | `Cargo.toml` (with `bevy`) | **Bevy** | Rust system + component definitions |
 | `package.json` (Phaser / Three / Pixi) | **Web engine** | TypeScript class + setup notes |
+| `*.xcodeproj` / `*.xcworkspace` / `Package.swift` with iOS target / `*.swift` under `Sources/` | **iOS native** | Swift class (SpriteKit `SKScene` subclass + `App.swift` entry point; SceneKit `SCNScene`; SwiftUI `View`) + setup checklist |
 | Otherwise | engine-agnostic | Pseudocode + setup checklist |
 
 State the detected engine in the opening line of the output.
@@ -108,6 +109,58 @@ games/<game>/src/<scene-name>/
 1. **Rust system + component definitions** in modules.
 2. **Plugin registration snippet** for `App::build()`.
 3. **Setup checklist** — entity spawning, asset loading.
+
+#### For iOS native (SpriteKit / SceneKit / SwiftUI / UIKit):
+1. **Swift source files** — one per logical responsibility. Detect the rendering framework first; pick the matching template:
+   - **SpriteKit (2D):** `<SceneName>Scene.swift` subclassing `SKScene`, plus `<SceneName>App.swift` providing the `@main App` entry point that hosts an `SKView` via `UIViewRepresentable` (SwiftUI) or `SKView` in a `UIViewController` (UIKit). State machine in a separate `<SceneName>State.swift` file.
+   - **SceneKit (3D):** `<SceneName>Scene.swift` building an `SCNScene` programmatically with placeholder cameras/lights, plus an `SCNView`-hosting `App.swift`.
+   - **SwiftUI-only games:** A single `<SceneName>View.swift` with `@State` / `@StateObject` for tunables, plus a `<SceneName>App.swift`.
+   - **RealityKit (AR):** `<SceneName>ARView.swift` subclassing `ARView`, plus `<SceneName>App.swift` hosting it.
+2. **Setup checklist** — Swift Package or Xcode target wiring, asset catalog references, `Info.plist` keys (`UIRequiredDeviceCapabilities`, `NSCameraUsageDescription` for AR, etc.).
+3. **No `.xcodeproj` emission** — Xcode project files are binary-adjacent and version-fragile. Emit the Swift source; the developer adds the file to their target in Xcode (or via `Package.swift`).
+
+Example skeleton (SpriteKit case):
+```
+Sources/<Target>/<scene-name>/
+├── <SceneName>App.swift          // @main App entry point + SKView host
+├── <SceneName>Scene.swift        // SKScene subclass
+├── <SceneName>State.swift        // State machine
+└── <scene-name>-setup.md         // checklist
+```
+
+Minimal `<SceneName>App.swift`:
+```swift
+import SwiftUI
+import SpriteKit
+
+@main
+struct GardenApp: App {
+    var body: some Scene {
+        WindowGroup {
+            SpriteView(scene: GardenScene(size: CGSize(width: 750, height: 1334)))
+                .ignoresSafeArea()
+        }
+    }
+}
+```
+
+Minimal `<SceneName>Scene.swift`:
+```swift
+import SpriteKit
+
+final class GardenScene: SKScene {
+    private var state: GardenState = .idle
+
+    override func didMove(to view: SKView) {
+        backgroundColor = .black
+        // TODO: spawn placeholder nodes
+    }
+
+    override func update(_ currentTime: TimeInterval) {
+        // TODO: tick state machine
+    }
+}
+```
 
 #### Engine-agnostic:
 1. Pseudocode skeleton with clearly labeled engine-binding points (`// ENGINE: load texture here`).
@@ -208,6 +261,13 @@ KNOWN GOTCHAS
 - One file per system. One module per feature area.
 - Components are POD; systems are functions taking queries.
 - Register systems in a `Plugin` impl, not directly in `main`.
+
+### iOS native (Swift / SpriteKit / SceneKit / SwiftUI)
+- Mark the App struct `@main`; one and only one `@main` per executable target.
+- For SpriteKit: subclass `SKScene`, override `didMove(to:)` for setup and `update(_:)` for ticks. Mark inspector-tuned values as `var` (Swift has no `[SerializeField]` analogue); use `@objc dynamic` if you want them KVO-observable from a debugger.
+- Don't `!`-force-unwrap in `didMove(to:)` — that's where most prototype-stage crashes live. Use `guard let` for asset loads.
+- For SwiftUI hosting: `SpriteView`, `SceneView`, and `ARViewContainer` (`UIViewRepresentable`) bridge engines into SwiftUI cleanly. Don't reach for `UIHostingController` unless you genuinely need UIKit.
+- The setup checklist should reference `Info.plist` keys the developer may need (camera, motion, photo library), but don't add them speculatively — only what the kit's TODOs imply.
 
 ## Handoff
 

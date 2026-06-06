@@ -4,6 +4,8 @@
 
 gamestack turns your AI coding agent (Claude Code, Codex, Cursor) into a coordinated set of specialists — a Creative Director, a Prototype Critic, a Senior Gameplay Engineer, a Platform Cert Officer — that you invoke as slash commands. It's a discipline scaffold for solo indie devs.
 
+Engine-agnostic. Auto-detects **Unity, Godot, Unreal, GameMaker, Bevy, native iOS (Swift / SpriteKit / SceneKit / Metal / RealityKit), and web frameworks** (Phaser, Three.js, PixiJS, Babylon).
+
 This is **early-access software (v1.0.0)**. The skill catalog is shipped; real-world validation across many projects is still being collected. The honest section below has the unvarnished status.
 
 ## What a session feels like
@@ -216,15 +218,16 @@ Every CLI is `0 = clean / 1 = regression / 2 = bad args / 127 = bun missing`. Wi
 
 ## Engine SDKs
 
-Both SDKs expose a loopback-only HTTP server you drop into a running build. `/playtest` scenarios run unchanged against either.
+Each SDK exposes a loopback-only HTTP server you drop into a running build. Same endpoints (`/state`, `/screenshot`, `/input`, `/snapshot`, `/restore`, `/breakpoint`), same JSON shapes — only the port differs. `/playtest` scenarios run unchanged across engines.
 
 | Engine | Port | Status | Verified |
 |---|---|---|---|
 | Unity (UPM package) | 7331 | v0.2.0 | End-to-end against `Bun.serve()` fake. **Live engine validation pending** — first real game using it will surface engine-side bugs. |
 | Godot 4.x (addon) | 7332 | v0.2.0 | End-to-end against `Bun.serve()` fake. Same caveat. |
+| iOS (Swift Package) | 7333 | v0.1.0 | Authored against iOS 15+ SDK with XCTest suite. Live device validation pending — `swift test` requires a full Xcode install (CLT-only environments can't link `PackageDescription`). |
 | Unreal (UPlugin) | — | post-v1 | — |
 
-See [`engines/unity/README.md`](engines/unity/README.md), [`engines/godot/README.md`](engines/godot/README.md).
+See [`engines/unity/README.md`](engines/unity/README.md), [`engines/godot/README.md`](engines/godot/README.md), [`engines/ios/README.md`](engines/ios/README.md).
 
 **Zero-SDK alternative:** if installing the engine SDK isn't worth the friction yet, run `/playtest --mode=screenshot-diff`. Full doc: [`docs/ZERO-SDK-PLAYTEST.md`](docs/ZERO-SDK-PLAYTEST.md).
 

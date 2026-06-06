@@ -2,6 +2,14 @@
 
 All notable changes land here. Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); the project follows [semver](https://semver.org/).
 
+## [Unreleased]
+
+### Added
+
+- **iOS Swift Package SDK** at `engines/ios/` (`v0.1.0`). Same contract as Unity / Godot SDKs at port 7333. `Network.framework`-backed loopback HTTP/1.1 server (no third-party dependencies), `@GameStackState("key")` property wrapper, `GameStackSnapshotable` protocol, `InputInjector.shared` subscription-model input dispatch, `BreakpointProvider.shared` tag-based pause control, `UIGraphicsImageRenderer` screenshot capture. iOS 15+ / tvOS 15+ / Mac Catalyst 15+. XCTest suite; sample SpriteKit hookup at `engines/ios/Samples/Basic/`.
+- **iOS engine support across the skill catalog.** `/code-review-gamestack` adds Swift-specific bug families (retain cycles, force unwraps, weak-delegate misses, off-main-thread UIKit updates, CADisplayLink leaks, background-task expiration, IAP receipt validation, Documents-vs-Caches misuse). `/asset-audit` adds iOS asset budgets (.xcassets, app icon sets, OTA download caps, ASTC vs PVRTC). `/cert-readiness` adds the App Store Review Guidelines + ATT + privacy manifest checklist. `/scene-prototype` emits SpriteKit + SwiftUI scaffolding. `/critique` adds iOS-specific lenses for perf (CADisplayLink, MetricKit, thermal state), a11y (VoiceOver, Dynamic Type, Reduce Motion, Smart Invert), and onboarding (ATT prompt placement, notification permission timing). `/publish` adds the TestFlight + App Store Connect upload checklist. `/gamestack` recognizes `ios` as a platform option.
+- **Documentation:** `docs/ENGINES.md` iOS section with SPM install, `docs/PLATFORMS.md` iOS platform budgets, `docs/CERT.md` App Store cert categories, `docs/ACCESSIBILITY.md` iOS accessibility API mappings.
+
 ## [1.0.0] — 2026-06-05
 
 **v1.0.0 is the early-access launch.** The 35 skills, 9 CLIs, and 2 engine SDKs in this release pass their test suite (98/98), the linter, and have documented contracts. They have **not** been validated by a real shipped commercial game using gamestack throughout. The case studies in `docs/case-studies/` describe reference Unity / Godot projects, not retrospectives of shipped titles. See [`README.md#status-honest`](README.md#status-honest) for full provenance.

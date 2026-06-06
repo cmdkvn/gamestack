@@ -1,6 +1,6 @@
 ---
 name: cert-readiness
-description: Platform Cert Officer skill — walks PS5 TRC, Xbox TCR/XR, and Switch lotcheck checklists targeting the high-failure-rate items (sleep/resume, controller disconnect, save corruption, network drop, age rating consistency). Produces a per-platform readiness report with P0 blockers, P1 strongly-recommended fixes, and a submission-readiness verdict. Use before cert submission, and after every patch that touches platform-affecting systems.
+description: Platform Cert Officer skill — walks PS5 TRC, Xbox TCR/XR, Switch lotcheck, and Apple App Store Review checklists targeting the high-failure-rate items (sleep/resume, controller disconnect, save corruption, network drop, age rating consistency, App Tracking Transparency, privacy manifest, StoreKit receipt validation). Produces a per-platform readiness report with P0 blockers, P1 strongly-recommended fixes, and a submission-readiness verdict. Use before cert submission, and after every patch that touches platform-affecting systems.
 ---
 
 # cert-readiness
@@ -14,7 +14,7 @@ Use during cert prep and after every patch in cert phase. Trigger phrases:
 - "Cert audit for <platform>"
 - "Am I ready for cert?"
 - "Pre-cert check"
-- `/cert-readiness [ps5|xbox|switch|all]`
+- `/cert-readiness [ps5|xbox|switch|ios|all]`
 
 If the developer hasn't reached the Cert production phase yet (per their CLAUDE.md), surface that — running this audit on a Production-phase build wastes effort.
 
@@ -61,6 +61,24 @@ These are public-knowledge categories. The exact bullet list in each platform's 
 | Localization | All shown strings localized for every shipped language; no clipping at long-language widths |
 | Age rating consistency | Same rating shown in eShop, in-game splash, parental control panel |
 
+### Apple App Store (iOS)
+
+App Review is policy + technical review combined. Reviews are 24–72 hours typical, but rejections are common on first submission for indies. Review Guidelines change frequently — always pull the current text from the [App Store Review Guidelines](https://developer.apple.com/app-store/review/guidelines/) the week before submission.
+
+| Category | What App Review tests |
+|---|---|
+| App Tracking Transparency (ATT) | If the app tracks the user across other apps / sites (analytics SDKs, ad attribution), `AppTrackingTransparency.requestTrackingAuthorization` must fire, and `Info.plist` must include `NSUserTrackingUsageDescription` with a player-facing reason. **Prompt placement** matters — prompting on first launch before the player sees value is a common rejection (Guideline 5.1.2). |
+| Privacy manifest (`PrivacyInfo.xcprivacy`) | Required for the app binary and for every third-party SDK starting May 2024 (Guideline 5.1.1). Missing privacy manifests fail at App Store upload. Required-Reason API declarations must list every reason the app uses categories like `UserDefaults`, `FileTimestamp`, `BootTime`, `SystemBootTime`. |
+| `Info.plist` usage descriptions | `NSPhotoLibraryUsageDescription`, `NSCameraUsageDescription`, `NSMicrophoneUsageDescription`, `NSLocationWhenInUseUsageDescription`, `NSContactsUsageDescription`, `NSMotionUsageDescription`, `NSBluetoothAlwaysUsageDescription`, `NSLocalNetworkUsageDescription` — **each must be present and player-facing** for any permission the app requests at runtime. Boilerplate ("required for app functionality") is rejected; the reason must be specific. |
+| Guideline 2.5.1 — APIs only | No private API calls, no JIT for arbitrary code, no downloaded executable code that bypasses App Review. Detect via `dlopen` on undocumented symbols, `objc_msgSend` on private selectors. Bitcode is deprecated; do not enable. |
+| Guideline 2.5.2 — self-contained | The app must function (in some form) without downloading additional executable code at runtime. On-demand resources for assets are fine; downloading game logic / scripts that change behavior is a rejection. |
+| Guideline 4 — Design quality | Crashes on launch on the reviewer's device = instant rejection. Test the build on the lowest device tier you claim to support before upload. Crash-on-launch from missing `Info.plist` keys is the single most common indie rejection. |
+| TestFlight beta gate | TestFlight requires App Store Connect setup, a tester group, a beta build with `CFBundleShortVersionString` < the planned App Store version, and an "App Information" page complete with screenshots and category. **TestFlight rejection is faster than App Store rejection** but uses much of the same checklist — use TestFlight as a dress rehearsal. |
+| StoreKit receipt validation | If the app uses IAP: validate receipts **server-side**, not on-device. Apple's `verifyReceipt` endpoint is deprecated; StoreKit 2's `Transaction.currentEntitlements` async stream is the modern path and is server-validated by Apple. Client-only validation is a P0 — both for cheating risk and for App Review (Guideline 3.1.1 expects server-validated entitlements for non-consumable IAP). |
+| Privacy nutrition labels | App Store Connect requires a complete "App Privacy" questionnaire (categories of data collected, link to data type, whether it's used for tracking). Missing or inaccurate labels are a rejection at submission. Update with every release that changes the data collection surface. |
+| 64-bit only | Required since iOS 11 (2017). Arm64 architecture only; `ARCHS` in the project should be `$(ARCHS_STANDARD)`. Any 32-bit code path will fail the upload. |
+| Cross-region listings | All regions you ship to must have prices set, localized descriptions, screenshots in each language, age rating consistent with the in-app rating splash and parental controls panel. Inconsistency is a common rejection on multi-region submissions. |
+
 ## Process
 
 ### Step 1 — confirm phase and platform
@@ -75,6 +93,7 @@ Confirm which platform(s) to audit. Default: all platforms with marker files pre
 | Unity export module for `PS5` enabled | PS5 |
 | Unity export module for `XboxOne` / `GameCoreXboxSeries` enabled | Xbox |
 | Unity export module for `Switch` enabled | Switch |
+| `*.xcodeproj`, `*.xcworkspace`, `Package.swift` with iOS target, `Info.plist` with `UIRequiredDeviceCapabilities` | iOS (App Store) |
 | Otherwise | ask the developer |
 
 ### Step 2 — pull the latest official checklist
@@ -192,6 +211,13 @@ ACTION LIST (prioritized)
 ### Switch
 - Suspend/resume is the killer item. Test by hitting the home button during every conceivable game state.
 - Localization quality affects lotcheck — clipped strings at long-language widths fail.
+
+### iOS (App Store)
+- The **ATT prompt placement** is the most-cited indie rejection in the 2024-2026 window. Don't prompt on first launch. Prompt after the player has seen what the app does and the prompt has a clear reason that maps to the `NSUserTrackingUsageDescription` text.
+- The **privacy manifest** (`PrivacyInfo.xcprivacy`) requirement bites every third-party SDK that hasn't shipped one yet. Audit every framework in `Frameworks/` and every SPM dependency. If a dependency lacks a privacy manifest, either pin to a version that has one, fork it, or remove it before submission.
+- **TestFlight is the dress rehearsal.** Run the build through TestFlight to at least one external tester before App Store submission. TestFlight catches crash-on-launch, missing `Info.plist` keys, and Bad permission-prompt UX while the cost is hours, not weeks.
+- **Privacy nutrition labels** are entered in App Store Connect, not the binary. Update them every release whose data collection surface changes (new SDK, new analytics, new IAP).
+- StoreKit 2 is the modern path. If the project is still on StoreKit 1 with `verifyReceipt` against Apple's URL, surface a P1 — Apple has not killed the endpoint yet, but the path is on borrowed time and client-only validation is a cheating risk regardless.
 
 ## Handoff
 

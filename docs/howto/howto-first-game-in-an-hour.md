@@ -98,6 +98,8 @@ The kill list is exactly what should leave at plan stage so the implementation d
 
 The Engine Builder detects the engine. Say you're in Unity. The skill produces:
 
+(If you're in Godot, you get GDScript + a `.tscn`. If you're in iOS native, you get a `GardenScene.swift` subclassing `SKScene` + a `GardenApp.swift` @main entry point. The shape is the same; the syntax matches the engine.)
+
 ```
 GENERATED FILES
   Assets/Scripts/Garden/GardenController.cs   [SerializeField] tunables for
