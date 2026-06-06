@@ -19,6 +19,8 @@ What landed:
 | Critique (consolidated) | `/critique` with 6 lenses (replaces 6 prior skills) | ✓ | Rubrics inherited from prior skills; no real-game retros |
 | Unity SDK | UPM package, loopback HTTP, `/state` `/screenshot` `/health` `/input` `/snapshot` `/restore` `/snapshots` `/breakpoint`, Samples~/Basic, EditMode tests | ✓ | Against in-process `Bun.serve()` fake. **Live engine validation pending.** |
 | Godot SDK | Full parity with Unity SDK at port 7332 | ✓ | Same caveat as Unity SDK |
+| iOS SDK (post-1.0, on `main`) | Swift Package at port 7333. `Network.framework`-backed HTTP/1.1 server, `@GameStackState` property wrapper, `GameStackSnapshotable`, `InputInjector`, `BreakpointProvider`, `UIGraphicsImageRenderer` screenshot capture. iOS 15+ / tvOS 15+ / Mac Catalyst 15+. XCTest suite + Samples/Basic | ✓ | Against XCTest harness on macOS. **Live device validation pending** (full Xcode required to link `swift test`). |
+| iOS coverage in skill catalog (post-1.0, on `main`) | Swift bug families in `/code-review-gamestack`; .xcassets / icon / OTA / ASTC budgets in `/asset-audit`; App Store Review + ATT + privacy manifest in `/cert-readiness`; SpriteKit + SwiftUI in `/scene-prototype`; iOS perf / a11y / onboarding in `/critique`; TestFlight + App Store Connect in `/publish`; `ios` engine in `/gamestack` | ✓ | Authored against the App Store Review Guidelines and the iOS 17 SDK; no shipped iOS title yet. |
 | `/playtest` SDK + offline + zero-SDK modes | Phase-aware. 6 reference scenarios. 9-primitive scenario format. | ✓ | SDK mode tested against fake. Zero-SDK + offline modes have unit tests. |
 | Ship skills | `/cert-readiness`, `/steam-page-review`, `/publish`, `/post-launch-monitor` | ✓ | Reference scenarios; no shipped game retrospective |
 | CLIs (9 total) | asset-audit, cert-checklist, steam-page-check, game-benchmark, playtest-daemon (with screenshot-diff), taste-update, model-benchmark, skill-feedback, skill-lint | ✓ | 89/89 Bun tests pass |
@@ -26,6 +28,7 @@ What landed:
 | Power tools | `/careful`, `/freeze`, `/unfreeze`, `/guard`, `/cert-freeze`, `/launch-day` | ✓ | Functional; conventions documented |
 | Multi-host | Claude Code, Codex, Cursor, OpenCode | ✓ | ✓ verified for Claude Code; Codex / Cursor / OpenCode follow the shared `_lib.sh` contract |
 | Multi-host (unverified) | Factory, Slate, Kiro, Hermes, GBrain | ✓ scripts exist | ✗ no end-to-end install confirmed in those hosts |
+| Setup ergonomics (post-1.0, on `main`) | `./setup` installs skills + CLIs by default; `--skills` / `--cli` scope to one side; `--cli-dir` overrides CLI install dir; plan-first sync exits early when in sync, articulates added/removed symlinks when not | ✓ | Smoke-tested locally; no host-portability tests yet |
 | Project state file | `gamestack/state.json` schema + read/write conventions | ✓ | Schema spec + conventions doc; integration into every skill is in progress |
 | `/gamestack` router | Front door, bootstrap, recommends 1–2 next skills | ✓ | Functional; effectiveness depends on `/skill-feedback` adoption |
 | `/skill-feedback` + CLI | Local thumbs-up/down log + aggregator | ✓ | CLI tested |
@@ -44,7 +47,7 @@ What did NOT land:
 The minimum bar for v1.1:
 
 - One real game shipped using gamestack throughout, with the post-launch retrospective published as a case study under `docs/case-studies/`.
-- Unity SDK + Godot SDK validated against that game's live build (not just `Bun.serve()` fakes).
+- Unity, Godot, or iOS SDK validated against that game's live build (not just the in-process / XCTest fakes).
 - `/skill-feedback` aggregates show at least 3 skills with >10 entries each, so rewrites are signal-driven, not vibes-driven.
 - At least one community-verified host beyond Claude Code (PRs welcome with screen recording / session transcript).
 - `state.json` integration completed across every shipped skill (audit + per-skill PR).

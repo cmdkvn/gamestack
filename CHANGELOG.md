@@ -10,6 +10,12 @@ All notable changes land here. Format follows [Keep a Changelog](https://keepach
 - **iOS engine support across the skill catalog.** `/code-review-gamestack` adds Swift-specific bug families (retain cycles, force unwraps, weak-delegate misses, off-main-thread UIKit updates, CADisplayLink leaks, background-task expiration, IAP receipt validation, Documents-vs-Caches misuse). `/asset-audit` adds iOS asset budgets (.xcassets, app icon sets, OTA download caps, ASTC vs PVRTC). `/cert-readiness` adds the App Store Review Guidelines + ATT + privacy manifest checklist. `/scene-prototype` emits SpriteKit + SwiftUI scaffolding. `/critique` adds iOS-specific lenses for perf (CADisplayLink, MetricKit, thermal state), a11y (VoiceOver, Dynamic Type, Reduce Motion, Smart Invert), and onboarding (ATT prompt placement, notification permission timing). `/publish` adds the TestFlight + App Store Connect upload checklist. `/gamestack` recognizes `ios` as a platform option.
 - **Documentation:** `docs/ENGINES.md` iOS section with SPM install, `docs/PLATFORMS.md` iOS platform budgets, `docs/CERT.md` App Store cert categories, `docs/ACCESSIBILITY.md` iOS accessibility API mappings.
 
+### Changed
+
+- **`./setup` installs skills + CLIs by default.** Previously skills were the default and CLIs required `--with-cli`. The new defaults match what most users want; `--skills` and `--cli` scope to one side when needed. `--status`, `--uninstall`, and `--check-updates` are scoped by the same flags. (PRs #4, #5.)
+- **Plan-first sync output.** `./setup` exits early with "Already in sync" when no symlinks need to change. When a change is needed, it articulates the exact added / removed symlinks before doing the work, instead of mixing planning and execution output. (PR #7.)
+- **Install-path collision + stale-symlink cleanup.** Re-running `./setup` after a `git pull` no longer leaves stale symlinks behind when a skill is renamed or deleted; the script reconciles the host's skill directory against the current checkout. (PR #3.)
+
 ## [1.0.0] — 2026-06-05
 
 **v1.0.0 is the early-access launch.** The 35 skills, 9 CLIs, and 2 engine SDKs in this release pass their test suite (98/98), the linter, and have documented contracts. They have **not** been validated by a real shipped commercial game using gamestack throughout. The case studies in `docs/case-studies/` describe reference Unity / Godot projects, not retrospectives of shipped titles. See [`README.md#status-honest`](README.md#status-honest) for full provenance.

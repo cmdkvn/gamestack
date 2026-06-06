@@ -15,7 +15,7 @@ Every skill except `/gamestack` and `/design-jam` does this:
    > "`gamestack/state.json` is from a newer gamestack version. Update gamestack or remove the file."
 4. Check `project.phase`. If the skill doesn't fit the phase, redirect:
    - Build-phase skills in `launched`: → `/post-launch-monitor` or `/patch-notes`.
-   - Polish-phase skills in `pitch` / `prototype`: → `/find-the-fun` (via `/critique --lens=fun`).
+   - Polish-phase skills in `pitch` / `prototype`: → `/critique --lens=fun`.
    - Cert skills in any phase before `cert`: explain that the skill is calibrated for cert and ask if they want to run it anyway.
 5. Read the artifact paths under `artifacts.*` that this skill depends on. If the prerequisite artifact is missing, redirect to the skill that produces it (named in the skill's "Handoff" section).
 

@@ -251,7 +251,7 @@ If a scenario is reusable across games, promote it: copy to the studio's `studio
 After playtest:
 - `/code-review-gamestack` — for the fixes proposed but not auto-applied.
 - `/bug-hunt` — for any finding that didn't have a clear root cause.
-- `/game-feel-audit` — for any P2 finding tagged "feels off."
-- `/perf-benchmark` — if any scenario surfaced perf regression.
+- `/critique --lens=feel` — for any P2 finding tagged "feels off."
+- `/critique --lens=perf` — if any scenario surfaced perf regression.
 - `/cert-readiness` (M3) — when running cert-class scenarios.
 - `/playtest` again after fixes — every fix gets re-run against its regression scenario.

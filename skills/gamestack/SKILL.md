@@ -37,7 +37,7 @@ Look for `<project>/gamestack/state.json`.
    - `package.json` with phaser / three / pixi / babylon → Web.
    - `*.xcodeproj` / `*.xcworkspace` / `Package.swift` with iOS target / `*.swift` under `Sources/` → **iOS native** (SpriteKit / SceneKit / Metal / RealityKit / SwiftUI / UIKit). Identify the rendering framework if discoverable from imports.
 3. **"Which platforms is this targeting?"** (multi-select: pc, mac, linux, switch, ps5, xbox, ios, android, web). Drives per-platform budgets and cert requirements. `ios` selection routes cert work through the App Store Review path, not console TRC/lotcheck.
-4. **"Which production phase?"** Read [`docs/PHASES.md`](../../docs/PHASES.md) if you need definitions. The six phases:
+4. **"Which production phase?"** The seven phases:
    - `pitch` — no build yet, idea-stage.
    - `prototype` — first working build, finding the fun.
    - `vertical-slice` — one polished slice of the game.

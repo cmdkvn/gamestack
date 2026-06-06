@@ -12,7 +12,7 @@ cd ~/.gamestack
 ./setup
 ```
 
-`./setup` auto-detects Claude Code (or pass `--host codex` / `--host cursor` for those). It symlinks every shipped skill into the host's discovery directory (`~/.claude/skills/<name>/`) and prints what landed.
+`./setup` auto-detects Claude Code (or pass `--host codex` / `--host cursor` for those). By default it installs **both** the skill catalog (symlinked into `~/.claude/skills/<name>/`) and the `gamestack-*` CLIs (symlinked into the first writable on-PATH directory it finds: `/opt/homebrew/bin`, `/usr/local/bin`, then `~/.local/bin`). Scope to one side with `--skills` or `--cli` if you want.
 
 (Don't clone into `~/.claude/skills/gamestack/` — the `/gamestack` router skill needs that exact path for its symlink. The repo and the install target stay separate.)
 
@@ -22,9 +22,11 @@ Sanity check:
 ./setup --status
 ```
 
-You should see ~30 skills marked `✓ linked`. Anything else, see [`docs/HOSTS.md`](../HOSTS.md).
+You should see **35 skills** marked `✓ linked` and 9 CLIs reported as installed. Anything else, see [`hosts/_README.md`](../../hosts/_README.md) for host-discovery details.
 
-The CLIs (`gamestack-skill-feedback`, `gamestack-asset-audit`, etc.) require Bun: `brew install bun` once. Skills themselves work without it.
+The CLIs (`gamestack-skill-feedback`, `gamestack-asset-audit`, etc.) require Bun: `brew install bun` once. Skills themselves work without it; the CLIs surface a friendly error if Bun is missing.
+
+Re-running `./setup` after a `git pull` is idempotent. It prints "Already in sync" when nothing needs to change, or articulates the exact symlinks it will add/remove when it does.
 
 ## 3:00 — Open your game's project (≈1 min)
 
