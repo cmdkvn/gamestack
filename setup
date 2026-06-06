@@ -20,40 +20,49 @@ export GAMESTACK_DIR
 
 HOST=""
 MODE="install"
-WITH_CLI=0
+# SELECT_SKILLS / SELECT_CLI track explicit user opt-in. If neither is set
+# after parsing, we install / uninstall / status BOTH (the default).
+SELECT_SKILLS=0
+SELECT_CLI=0
 CLI_DIR=""
 
 usage() {
   cat <<'EOF'
-Usage: ./setup [--host <name>] [--with-cli [--cli-dir <path>]] [--uninstall | --status]
+Usage: ./setup [--host <name>] [--skills | --cli] [--cli-dir <path>] [--uninstall | --status]
 
-Install gamestack skills (and optionally CLIs) into your AI agent host.
+Install gamestack skills AND CLIs by default. Use --skills or --cli to scope
+to one or the other.
 
 Options:
   --host <name>      Override host detection.
                      Supported: claude-code, codex, opencode, cursor, factory,
                      slate, kiro, hermes, gbrain
-  --with-cli         Also install the bin/gamestack-* CLIs as symlinks into a
-                     writable on-PATH directory. Auto-detects
-                     /opt/homebrew/bin, /usr/local/bin, or ~/.local/bin.
-  --cli-dir <path>   Override the CLI install directory. Implies --with-cli.
-  --uninstall        Remove gamestack skill symlinks. Combine with --with-cli
-                     to also remove CLI symlinks.
-  --status           Show install status without changing anything. With
-                     --with-cli, also show CLI status.
+  --skills           Operate on skills only. Skip CLI install/uninstall/status.
+  --cli              Operate on CLIs only. Skip skill install/uninstall/status.
+                     (Pass both --skills and --cli to be explicit; same as
+                     neither.)
+  --cli-dir <path>   Override the CLI install directory. Auto-detects
+                     /opt/homebrew/bin, /usr/local/bin, or ~/.local/bin
+                     otherwise.
+  --uninstall        Remove gamestack symlinks (scoped by --skills/--cli).
+  --status           Show install status without changing anything (scoped by
+                     --skills/--cli).
   --check-updates    Compare local gamestack commit to origin/main.
                      Local-only — no third-party network calls.
   -h, --help         Show this help.
 
 Examples:
-  ./setup                           # install skills only
-  ./setup --with-cli                # install skills + CLIs (CLI dir auto-detected)
-  ./setup --with-cli --cli-dir=~/bin
-  ./setup --status --with-cli       # show skills + CLI status
-  ./setup --uninstall --with-cli    # remove both
+  ./setup                           # install skills + CLIs (default)
+  ./setup --skills                  # install skills only
+  ./setup --cli                     # install CLIs only
+  ./setup --cli-dir=~/bin           # install both; CLIs go to ~/bin
+  ./setup --status                  # show skills + CLI status
+  ./setup --status --cli            # show CLI status only
+  ./setup --uninstall --skills      # remove skills, leave CLIs in place
+  ./setup --uninstall               # remove both
 
-After developing changes in this checkout, re-run `./setup --with-cli` to
-re-link any new skills or CLIs and clean up stale symlinks from removals.
+After developing changes in this checkout, re-run `./setup` to re-link
+anything new and clean up stale symlinks from removals.
 
 EOF
 }
@@ -88,8 +97,17 @@ while [[ $# -gt 0 ]]; do
       MODE="check-updates"
       shift
       ;;
+    --skills)
+      SELECT_SKILLS=1
+      shift
+      ;;
+    --cli)
+      SELECT_CLI=1
+      shift
+      ;;
     --with-cli)
-      WITH_CLI=1
+      # Back-compat alias from the previous release. CLIs are part of the
+      # default now, so this is a silent no-op. Removed in a future release.
       shift
       ;;
     --cli-dir)
@@ -98,12 +116,10 @@ while [[ $# -gt 0 ]]; do
         exit 1
       fi
       CLI_DIR="$2"
-      WITH_CLI=1
       shift 2
       ;;
     --cli-dir=*)
       CLI_DIR="${1#*=}"
-      WITH_CLI=1
       shift
       ;;
     *)
@@ -113,6 +129,12 @@ while [[ $# -gt 0 ]]; do
       ;;
   esac
 done
+
+# If the user didn't scope to one side, do both. This is the default behavior.
+if [[ $SELECT_SKILLS -eq 0 && $SELECT_CLI -eq 0 ]]; then
+  SELECT_SKILLS=1
+  SELECT_CLI=1
+fi
 
 if [[ "$MODE" == "check-updates" ]]; then
   # Local-only drift check: compare the current commit to origin/main.
@@ -192,9 +214,8 @@ for fn in gamestack_install gamestack_uninstall gamestack_status; do
   fi
 done
 
-if [[ $WITH_CLI -eq 1 && -z "$CLI_DIR" ]]; then
+if [[ $SELECT_CLI -eq 1 && -z "$CLI_DIR" ]]; then
   CLI_DIR="$(_gamestack_detect_cli_dir)"
-  # Expand ~ in the user-supplied path too (handled below if it came via flag).
 fi
 # Expand a leading ~ in CLI_DIR (bash doesn't tilde-expand inside variables).
 if [[ -n "$CLI_DIR" && "$CLI_DIR" == "~"* ]]; then
@@ -203,28 +224,34 @@ fi
 
 case "$MODE" in
   install)
-    echo "==> Installing gamestack skills for $HOST..."
-    gamestack_install
-    if [[ $WITH_CLI -eq 1 ]]; then
-      echo
+    if [[ $SELECT_SKILLS -eq 1 ]]; then
+      echo "==> Installing gamestack skills for $HOST..."
+      gamestack_install
+    fi
+    if [[ $SELECT_CLI -eq 1 ]]; then
+      [[ $SELECT_SKILLS -eq 1 ]] && echo
       echo "==> Installing gamestack CLIs..."
       _gamestack_install_clis_to "$CLI_DIR"
     fi
     ;;
   uninstall)
-    echo "==> Uninstalling gamestack skills for $HOST..."
-    gamestack_uninstall
-    if [[ $WITH_CLI -eq 1 ]]; then
-      echo
+    if [[ $SELECT_SKILLS -eq 1 ]]; then
+      echo "==> Uninstalling gamestack skills for $HOST..."
+      gamestack_uninstall
+    fi
+    if [[ $SELECT_CLI -eq 1 ]]; then
+      [[ $SELECT_SKILLS -eq 1 ]] && echo
       echo "==> Uninstalling gamestack CLIs..."
       _gamestack_uninstall_clis_to "$CLI_DIR"
     fi
     ;;
   status)
-    echo "==> gamestack status for $HOST:"
-    gamestack_status
-    if [[ $WITH_CLI -eq 1 ]]; then
-      echo
+    if [[ $SELECT_SKILLS -eq 1 ]]; then
+      echo "==> gamestack status for $HOST:"
+      gamestack_status
+    fi
+    if [[ $SELECT_CLI -eq 1 ]]; then
+      [[ $SELECT_SKILLS -eq 1 ]] && echo
       echo "==> gamestack CLI status:"
       _gamestack_status_clis_to "$CLI_DIR"
     fi

@@ -46,42 +46,45 @@ cd ~/.gamestack
 ./setup
 ```
 
-`./setup` auto-detects Claude Code and symlinks every shipped skill into the host's discovery path (`~/.claude/skills/<name>/`). Subsequent runs are idempotent. Then in any project directory, open Claude Code and type `/gamestack`.
+`./setup` auto-detects Claude Code and symlinks every shipped skill into the host's discovery path (`~/.claude/skills/<name>/`) **and** every `bin/gamestack-*` CLI into a writable on-PATH directory. Subsequent runs are idempotent. Then in any project directory, open Claude Code and type `/gamestack`.
 
 ```bash
-./setup --status               # what skills are installed
-./setup --status --with-cli    # also show CLI status
+./setup                        # install skills + CLIs (default)
+./setup --skills               # install skills only
+./setup --cli                  # install CLIs only
+./setup --status               # show both
+./setup --status --cli         # show only CLI status
+./setup --uninstall            # remove both
+./setup --uninstall --skills   # remove only skills (CLIs left in place)
 ./setup --check-updates        # compare local commit to origin/main
-./setup --uninstall            # remove gamestack skill symlinks
-./setup --uninstall --with-cli # also remove CLI symlinks
 ./setup --host codex           # other host (codex, cursor, opencode — verified)
                                # factory, slate, kiro, hermes, gbrain — community / unverified
 ```
 
 > **Why not clone directly into `~/.claude/skills/`?** That directory is the host's skill discovery path. gamestack ships a `/gamestack` router skill that needs to install at `~/.claude/skills/gamestack/`, which collides if the repo itself is the target. Keep the checkout separate so `./setup` can manage the symlinks cleanly.
 
-### CLIs (optional, for CI gates)
+### CLIs
 
 The CLIs (`gamestack-asset-audit`, `gamestack-skill-feedback`, etc.) require Bun: `brew install bun` once. Skills work without it.
 
-To make the CLIs invokable from anywhere on your `$PATH`, run:
+`./setup` symlinks each `bin/gamestack-*` shim into a writable on-PATH directory by default so you can invoke them from anywhere. Detection priority: `/opt/homebrew/bin` → `/usr/local/bin` → `~/.local/bin`. If none qualify, pass `--cli-dir=<path>`:
 
 ```bash
-./setup --with-cli                    # auto-detect install dir
-./setup --with-cli --cli-dir=~/bin    # explicit dir
+./setup --cli-dir=~/bin              # explicit CLI install dir
+./setup --cli --cli-dir=~/bin        # CLIs only, explicit dir
 ```
 
-`--with-cli` symlinks each `bin/gamestack-*` shim into the detected directory. Detection priority: `/opt/homebrew/bin` → `/usr/local/bin` → `~/.local/bin`, picking the first that's writable and on `$PATH`. If none qualify, pass `--cli-dir=<path>`. Without `--with-cli`, the CLIs still run when invoked via their full path under `bin/`.
+If you don't want the CLIs on `$PATH`, pass `--skills` to install only the skill catalog. The CLIs still run when invoked via their full path under `bin/`.
 
 ### Updating
 
 When new gamestack releases land, pull and re-run setup. The script removes stale symlinks (both skills and CLIs) for things that were deleted upstream and adds links for anything new:
 
 ```bash
-cd ~/.gamestack && git pull --ff-only && ./setup --with-cli
+cd ~/.gamestack && git pull --ff-only && ./setup
 ```
 
-(Drop `--with-cli` if you only want to refresh skill links.)
+Add `--skills` or `--cli` to limit the refresh to one side.
 
 `./setup --check-updates` (no `git pull`) shows whether you're behind origin/main.
 
