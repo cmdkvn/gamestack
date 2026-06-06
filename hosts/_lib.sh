@@ -139,6 +139,21 @@ _gamestack_plan_skills() {
   fi
 }
 
+# Emit TSV lines describing pending uninstall actions for skills.
+# Schema: remove\t<name>  — for skills currently linked to this checkout.
+# Anything not owned by this checkout produces no output (we leave it alone).
+_gamestack_plan_uninstall_skills() {
+  local target_dir="$1"
+  while IFS= read -r name; do
+    [[ -z "$name" ]] && continue
+    local status
+    status="$(_gamestack_skill_status "$name" "$target_dir")"
+    if [[ "$status" == "linked-here" ]]; then
+      printf 'remove\t%s\n' "$name"
+    fi
+  done < <(_gamestack_list_skills)
+}
+
 # Remove symlinks in target_dir that point into this gamestack checkout's
 # skills/ directory but whose target no longer exists (e.g. a skill that was
 # consolidated or deleted upstream). Idempotent. Never touches symlinks
@@ -328,6 +343,20 @@ _gamestack_plan_clis() {
       fi
     done < <(find "$cli_dir" -mindepth 1 -maxdepth 1 -type l -name 'gamestack-*')
   fi
+}
+
+# Emit TSV lines describing pending uninstall actions for CLIs.
+# Schema: remove\t<name>  — for CLIs currently linked to this checkout.
+_gamestack_plan_uninstall_clis() {
+  local cli_dir="$1"
+  while IFS= read -r name; do
+    [[ -z "$name" ]] && continue
+    local status
+    status="$(_gamestack_cli_status "$name" "$cli_dir")"
+    if [[ "$status" == "linked-here" ]]; then
+      printf 'remove\t%s\n' "$name"
+    fi
+  done < <(_gamestack_list_clis)
 }
 
 # Remove symlinks in cli_dir that point into this gamestack checkout's bin/

@@ -259,6 +259,51 @@ run_test test_plan_clis_detects_conflict_file
 run_test test_plan_clis_detects_skip_for_linked_elsewhere
 run_test test_plan_clis_ignores_foreign_dead_symlinks
 
+test_plan_uninstall_skills_nothing_owned_emits_nothing() {
+  local target="$HOME/.claude/skills"
+  mkdir -p "$target"
+  local output
+  output="$(_gamestack_plan_uninstall_skills "$target")"
+  assert_eq "" "$output" "nothing owned by this checkout = empty uninstall plan"
+}
+
+test_plan_uninstall_skills_emits_remove_for_each_owned() {
+  local target="$HOME/.claude/skills"
+  mkdir -p "$target"
+  local sample_name
+  sample_name="$(_gamestack_list_skills | head -1)"
+  ln -s "$GAMESTACK_DIR/skills/$sample_name" "$target/$sample_name"
+  local output
+  output="$(_gamestack_plan_uninstall_skills "$target")"
+  assert_contains "$output" "$(printf 'remove\t%s' "$sample_name")" \
+    "owned skill is planned as 'remove'"
+}
+
+test_plan_uninstall_clis_nothing_owned_emits_nothing() {
+  local cli_dir="$HOME/bin"
+  mkdir -p "$cli_dir"
+  local output
+  output="$(_gamestack_plan_uninstall_clis "$cli_dir")"
+  assert_eq "" "$output" "nothing owned by this checkout = empty CLI uninstall plan"
+}
+
+test_plan_uninstall_clis_emits_remove_for_each_owned() {
+  local cli_dir="$HOME/bin"
+  mkdir -p "$cli_dir"
+  local sample_cli
+  sample_cli="$(_gamestack_list_clis | head -1)"
+  ln -s "$GAMESTACK_DIR/bin/$sample_cli" "$cli_dir/$sample_cli"
+  local output
+  output="$(_gamestack_plan_uninstall_clis "$cli_dir")"
+  assert_contains "$output" "$(printf 'remove\t%s' "$sample_cli")" \
+    "owned CLI is planned as 'remove'"
+}
+
+run_test test_plan_uninstall_skills_nothing_owned_emits_nothing
+run_test test_plan_uninstall_skills_emits_remove_for_each_owned
+run_test test_plan_uninstall_clis_nothing_owned_emits_nothing
+run_test test_plan_uninstall_clis_emits_remove_for_each_owned
+
 # ── summary ─────────────────────────────────────────────────────────────────
 
 echo
