@@ -304,6 +304,35 @@ run_test test_plan_uninstall_skills_emits_remove_for_each_owned
 run_test test_plan_uninstall_clis_nothing_owned_emits_nothing
 run_test test_plan_uninstall_clis_emits_remove_for_each_owned
 
+test_install_to_quiet_noops_suppresses_already_linked_lines() {
+  local target="$HOME/.claude/skills"
+  mkdir -p "$target"
+  local sample_name
+  sample_name="$(_gamestack_list_skills | head -1)"
+  ln -s "$GAMESTACK_DIR/skills/$sample_name" "$target/$sample_name"
+
+  local output
+  output="$(GAMESTACK_QUIET_NOOPS=1 _gamestack_install_to "$target" 2>&1)"
+  assert_not_contains "$output" "(already linked)" \
+    "GAMESTACK_QUIET_NOOPS=1 suppresses '· already linked' lines"
+}
+
+test_install_to_default_still_prints_already_linked() {
+  local target="$HOME/.claude/skills"
+  mkdir -p "$target"
+  local sample_name
+  sample_name="$(_gamestack_list_skills | head -1)"
+  ln -s "$GAMESTACK_DIR/skills/$sample_name" "$target/$sample_name"
+
+  local output
+  output="$(_gamestack_install_to "$target" 2>&1)"
+  assert_contains "$output" "(already linked)" \
+    "default _gamestack_install_to still prints '· already linked' lines"
+}
+
+run_test test_install_to_quiet_noops_suppresses_already_linked_lines
+run_test test_install_to_default_still_prints_already_linked
+
 # ── summary ─────────────────────────────────────────────────────────────────
 
 echo

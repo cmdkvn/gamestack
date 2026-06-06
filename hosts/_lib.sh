@@ -200,7 +200,7 @@ _gamestack_install_to() {
     status="$(_gamestack_skill_status "$name" "$target_dir")"
     case "$status" in
       linked-here)
-        echo "  · $name (already linked)"
+        [[ "${GAMESTACK_QUIET_NOOPS:-0}" == "1" ]] || echo "  · $name (already linked)"
         reused=$((reused+1))
         ;;
       linked-elsewhere)
@@ -237,7 +237,8 @@ _gamestack_uninstall_to() {
         removed=$((removed+1))
         ;;
       linked-elsewhere|conflict-dir|conflict-file)
-        echo "  · $name (left in place — not owned by this gamestack checkout)"
+        [[ "${GAMESTACK_QUIET_NOOPS:-0}" == "1" ]] || \
+          echo "  · $name (left in place — not owned by this gamestack checkout)"
         untouched=$((untouched+1))
         ;;
       missing)
@@ -407,7 +408,7 @@ _gamestack_install_clis_to() {
     status="$(_gamestack_cli_status "$name" "$cli_dir")"
     case "$status" in
       linked-here)
-        echo "  · $name (already linked)"
+        [[ "${GAMESTACK_QUIET_NOOPS:-0}" == "1" ]] || echo "  · $name (already linked)"
         reused=$((reused+1))
         ;;
       linked-elsewhere)
@@ -446,7 +447,8 @@ _gamestack_uninstall_clis_to() {
         removed=$((removed+1))
         ;;
       linked-elsewhere|conflict-file)
-        echo "  · $name (left in place — not owned by this gamestack checkout)"
+        [[ "${GAMESTACK_QUIET_NOOPS:-0}" == "1" ]] || \
+          echo "  · $name (left in place — not owned by this gamestack checkout)"
         untouched=$((untouched+1))
         ;;
       missing)
