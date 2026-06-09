@@ -96,46 +96,7 @@ Open a PR (or surface a draft) for the developer to review before posting public
 
 ## Output format
 
-### Player notes
-
-```markdown
-# <Game Name> — vX.Y.Z
-
-<One-paragraph headline: the headline change, in the game's voice.>
-
-## New
-- <bullet — player-noticeable thing>
-- ...
-
-## Improved
-- ...
-
-## Fixed
-- ...
-
-## Heads up
-- ...
-
-_<Localization note. Known issues. Thank-you line if it fits the tone.>_
-```
-
-### Changelog entry
-
-```markdown
-## [vX.Y.Z] - YYYY-MM-DD
-
-### Added
-- <one-liner>
-
-### Changed
-- ...
-
-### Fixed
-- <description> (#PR / #issue)
-
-### Removed
-- ...
-```
+**Output:** writes two artifacts — player notes to `marketing/patch-notes/vX.Y.Z.md` and a changelog entry prepended to `CHANGELOG.md` — schema: see [`docs/templates/patch-notes.md`](../../docs/templates/patch-notes.md).
 
 ## What NOT to do
 

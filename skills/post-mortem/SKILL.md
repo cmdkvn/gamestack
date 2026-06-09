@@ -105,70 +105,7 @@ The 2–3 most generalizable lessons get piped into [`/learn`](../learn/SKILL.md
 
 ## Output format
 
-### Weekly retro
-
-```markdown
-# Weekly retro — YYYY-WW (<Mon date> → <Fri date>)
-
-## Shipped
-- <one-liner with PR/commit reference>
-
-## Started but didn't land
-- <item> — root cause: <one line>; differently: <one line>
-
-## Planned but didn't start
-- <item> — root cause: <one line>; differently: <one line>
-
-## Discovered
-- <bug / issue / surprise>
-
-## Surprised by
-- <something that was different than expected>
-
-## Wins
-- <specific thing that worked>
-- <earned skill: <what's easier now>>
-
-## Two things we're doing differently next week
-1. <concrete action>
-2. <concrete action>
-```
-
-### Launch retro
-
-```markdown
-# Launch post-mortem — <Game name> v<X.Y.Z>
-
-Launch date: <date>
-Window: cert-pass through +7 days
-
-## What went well
-- <specific moment>
-
-## What went poorly
-- <specific moment> — root cause: <one line>; differently: <one line>
-
-## Lucky escapes
-- <thing that nearly went badly> — root cause: <one line>; differently: <one line>
-
-## Player reception (first 72h)
-- Reviews: <count, sentiment summary>
-- Crash rate: <pct, source>
-- Refund rate: <pct, trend>
-- Top complaints: <list>
-
-## Surprises
-- <thing the dev didn't anticipate>
-
-## Three things we're doing differently next launch
-1. <concrete action>
-2. <concrete action>
-3. <concrete action>
-
-## Learnings piped to /learn
-- <lesson>
-- <lesson>
-```
+**Output:** writes to `studio/retros/YYYY-WW.md` (weekly) or `studio/retros/launch-<game>-YYYY-MM-DD.md` (launch) — schema: see [`docs/templates/post-mortem.md`](../../docs/templates/post-mortem.md).
 
 ## What NOT to do
 
