@@ -47,7 +47,7 @@ State the detected format in the opening line. If multiple are present, ask the 
 ### Step 2 — read the inputs
 
 Required:
-- **Voice cards** from `design/narrative.md` for every character in the scene.
+- **Voice cards** from `design/voice-cards.md` for every character in the scene.
 - **Beat outline** for the scene/sequence being written (either provided in the prompt or referenced in `design/narrative.md`).
 
 Optional but useful:
@@ -176,6 +176,12 @@ Write to the project's conventional dialogue directory:
 - Engine-agnostic: `games/<game>/design/dialogue/<beat>.md`
 
 If the dialogue directory doesn't exist, create it and tell the developer the convention.
+
+## Inputs and outputs
+
+**Reads:** `design/narrative.md` — schema: see [`docs/templates/narrative.md`](../../docs/templates/narrative.md).
+
+**Reads / updates:** `design/voice-cards.md` — schema: see [`docs/templates/voice-cards.md`](../../docs/templates/voice-cards.md).
 
 ## Output format
 

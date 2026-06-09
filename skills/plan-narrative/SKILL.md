@@ -81,7 +81,15 @@ If branching is more complex than the developer can QA solo, propose simplificat
 
 ### Step 7 — produce the review
 
-## Output format
+## Inputs and outputs
+
+**Reads:** `design/narrative.md` — schema: see [`docs/templates/narrative.md`](../../docs/templates/narrative.md).
+
+**Authors / updates:** `design/voice-cards.md` — schema: see [`docs/templates/voice-cards.md`](../../docs/templates/voice-cards.md).
+
+**Review output:** writes to `design/reviews/plan-narrative.md`. The review schema will be canonicalized in `docs/templates/plan-review.md` (Task 9 of this batch); until then, the inline format below applies.
+
+Review format (inline pending Task 9 — `docs/templates/plan-review.md`):
 
 ```
 VOICE CARDS
