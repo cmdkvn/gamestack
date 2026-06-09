@@ -163,7 +163,11 @@ Recommend the first 5–10 assets to produce, ordered by:
 2. **Palette confirmation pieces** — prove the palette works in context.
 3. **First playable's required assets** — what does the prototype need to look on-spec?
 
-## Output format
+## Output
+
+**Output:** writes to `design/art-bible.md` — schema: see [`docs/templates/art-bible.md`](../../docs/templates/art-bible.md).
+
+After writing the bible, emit a session summary:
 
 ```
 ART BIBLE WRITTEN: <path>

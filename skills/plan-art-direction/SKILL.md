@@ -69,7 +69,13 @@ Walk the references and any concept art the developer has produced or generated.
 
 Each flag is a candidate to either re-do the reference, replace it with a real human-made source, or commit to the AI-slop look as an intentional choice (rare but possible).
 
-## Output format
+## Inputs and outputs
+
+**Reads:** `design/art-direction.md` — schema: see [`docs/templates/art-direction.md`](../../docs/templates/art-direction.md).
+
+**Review output:** writes to `design/reviews/plan-art-direction.md`. Schema will be canonicalized in `docs/templates/plan-review.md` (Task 9 of this batch); inline format below remains active until then.
+
+Review format (inline pending Task 9 — `docs/templates/plan-review.md`):
 
 ```
 RATINGS (0-10)
