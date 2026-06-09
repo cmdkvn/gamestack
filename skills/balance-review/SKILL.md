@@ -28,6 +28,31 @@ A balanced system has:
 
 This skill audits against those four.
 
+## Review mode
+
+Honor `project.review_mode` from `gamestack/state.json` (default: `normal`). Implementation contract: [`docs/STATE.md#review-mode`](../../docs/STATE.md#review-mode).
+
+1. Check `.gamestack/scratch/review-mode-override`; read + delete if present.
+2. Otherwise read `project.review_mode` from state.json. Default `normal`.
+3. Tag every finding with `[P0]`, `[P1]`, `[P2]`, or `[taste]`.
+
+Mode controls the Monte Carlo sample size and the dominance threshold:
+
+| Mode | Monte Carlo samples | Dominant-strategy threshold | Output |
+|---|---|---|---|
+| `lean` | 100 | win-rate > 70% across most situations | Top 3 findings — typically just "the dominant strategy is X" and "the dead choices are Y and Z." No simulation breakdown. ≤5 total. |
+| `normal` | 1000 | win-rate > 60% across most situations | Full rubric (current behavior). All four lens criteria. Findings ordered by severity then by impact. |
+| `intense` | 10,000 | win-rate > 55% across most situations | Full rubric + sensitivity analysis (which 1-2 numeric edits collapse the dominance) + per-strategy variance estimates. |
+
+Severity calibration for balance:
+
+| Tag | What earns it |
+|---|---|
+| `[P0]` | A strategy that wins >80% of the time, OR an exploit that breaks the economy / progression (infinite XP, free resources) |
+| `[P1]` | A clearly dominant strategy (above threshold for the mode), OR a dead choice with no situation where it's best |
+| `[P2]` | An asymmetry that may need a tuning pass but isn't dominant; a small variance in expected outcomes |
+| `[taste]` | "The combat feels swingy" — judgment about feel, not math |
+
 ## Process
 
 ### Step 1 — locate the tables
@@ -110,6 +135,23 @@ For each proposed edit, give:
 To `playtest/balance-review/<system>-YYYY-MM-DD.md`.
 
 ## Output format
+
+### Minimal shape
+
+```
+SYSTEM AUDITED: <system name>
+MODE:           <lean | normal | intense>  (samples: <100 | 1000 | 10000>)
+THRESHOLD:      <70 | 60 | 55>%
+
+FINDINGS:
+  · [P0] <strategy name>: <one-line — e.g., "wins 84% of simulated combats">
+  · [P1] <strategy name>: dead choice — no context where it's best
+  · [P2] <metric>: <observation>
+```
+
+In `lean` mode, only `[P0]` and `[P1]` findings appear. Order findings by severity, then by simulation-impact magnitude (higher win-rate first).
+
+### Full shape
 
 ```
 SYSTEM: <which system audited>
