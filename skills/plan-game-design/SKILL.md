@@ -78,7 +78,13 @@ Tag any mechanic that doesn't survive these three questions as "dead" and propos
 
 Structured output with concrete proposed edits to the mechanics plan.
 
-## Output format
+## Inputs and outputs
+
+**Reads:** `design/mechanics.md` — schema: see [`docs/templates/mechanics.md`](../../docs/templates/mechanics.md).
+
+**Review output:** writes to `design/reviews/plan-game-design.md`. The review captures the rubric's findings (current shape: filled-in skill curve table, dead mechanics list, top findings, proposed doc edits). The review schema will be canonicalized in `docs/templates/plan-review.md` once Task 9 of the batch lands; until then, the inline format below applies.
+
+Review format (inline pending Task 9 — `docs/templates/plan-review.md`):
 
 ```
 CORE LOOP
