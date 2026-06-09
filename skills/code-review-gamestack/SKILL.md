@@ -19,6 +19,31 @@ Use when the user says any of:
 
 If no path is given, review the changes since the last commit (`git diff HEAD~1` or unstaged changes).
 
+## Review mode
+
+Honor `project.review_mode` from `gamestack/state.json` (default: `normal`). Implementation contract: [`docs/STATE.md#review-mode`](../../docs/STATE.md#review-mode).
+
+1. Check `.gamestack/scratch/review-mode-override` first; read + delete if present.
+2. Otherwise read `project.review_mode` from state.json. Default `normal`.
+3. Tag every finding with `[P0]`, `[P1]`, `[P2]`, or `[taste]` in its header line.
+
+How each mode shapes the family scan:
+
+| Mode | Which families | Per-finding output |
+|---|---|---|
+| `lean` | Family 1 (per-frame allocation), Family 2 (off-thread API calls), Family 3 (signal/event leaks) only. Max 5 findings total. | One-line summary + the line range. No suggested fix prose. |
+| `normal` | All 8 families. | Full finding: pattern matched, why it's a bug, suggested fix. Current behavior. |
+| `intense` | All 8 families + a regression-risk cross-check on each `[P0]`/`[P1]` finding: "if the suggested fix is applied as-is, what could go wrong?" Confidence rating (high/med/low). | Full finding + the cross-check + confidence. |
+
+Severity calibration for this skill:
+
+| Tag | What earns it |
+|---|---|
+| `[P0]` | Crashes the game, corrupts saves, off-thread main-API call, allocation in a hot path on a memory-constrained target (Switch/mobile) |
+| `[P1]` | Frame-budget violation, signal/event leak with long-lived owners, tick-order bug, missing await on a fire-and-forget Task |
+| `[P2]` | Magic number that should be a constant, unused private field, naming inconsistency that doesn't change behavior |
+| `[taste]` | "I'd structure this differently" — only flag if it's a maintainability concern worth raising |
+
 ## Process
 
 ### Step 1 — orient on engine
@@ -148,6 +173,27 @@ Before declaring the review done, ask yourself:
 If any were applicable and you didn't check, do another pass.
 
 ## Output format
+
+### Minimal shape
+
+A minimal report shape (the engine and mode go in the report header so the reader knows the calibration):
+
+```
+Engine: <detected>
+Mode:   <lean | normal | intense>
+
+Findings:
+  · [P0] <file>:<line> — <one-line summary>
+       <body / suggested fix in normal+>
+  · [P1] ...
+  · [P2] ...
+
+Summary: <N> [P0], <N> [P1], <N> [P2]<, <N> [taste] in normal+>
+```
+
+Findings are ordered by severity (`[P0]` first), then by file path. In `lean` mode, only `[P0]` and `[P1]` findings appear and the summary line truncates accordingly.
+
+### Full shape
 
 ```
 ENGINE:      <detected engine>
