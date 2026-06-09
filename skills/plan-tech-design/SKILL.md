@@ -150,66 +150,7 @@ If shipping to consoles, the plan should call out:
 
 **Reads:** `design/tech-design.md` — schema: see [`docs/templates/tech-design.md`](../../docs/templates/tech-design.md).
 
-**Review output:** writes to `design/reviews/plan-tech-design.md`. Schema will be canonicalized in `docs/templates/plan-review.md` (Task 9 of this batch); inline format below remains active until then.
-
-Review format (inline pending Task 9 — `docs/templates/plan-review.md`):
-
-```
-ENGINE
-  Engine + version: <stated | needs decision>
-  Breaking-change risks: <stated | identified>
-
-STATE MACHINES
-  Player: <present | proposed diagram below>
-  Enemy/AI: <present | proposed diagram below>
-  Dialog: <present | proposed diagram below>
-  Save: <present | proposed diagram below>
-  Game state: <present | proposed diagram below>
-
-  [ASCII diagrams here for any proposed]
-
-DATA FLOW
-  <Traced path with flags>
-  Concerns: <list>
-
-FRAME BUDGET
-  Per-platform targets: <stated | proposed table>
-  Concerns:
-
-SAVE FORMAT
-  Format: <stated | needs decision>
-  Version field: <yes | NO — must add>
-  Migration policy: <stated | NO — must add>
-  Atomic writes: <yes | NO — must add>
-
-ASSET PIPELINE
-  Naming convention: <stated>
-  Atlas strategy: <stated>
-  Per-platform compression: <stated | gap>
-  Source asset VCS: <stated | gap>
-
-CROSS-PLATFORM ABSTRACTION
-  - Input: <abstracted | leaked>
-  - Save: <abstracted | leaked>
-  - Achievements: <abstracted | leaked>
-  - Networking: <n/a | abstracted | leaked>
-
-TEST STRATEGY
-  <Stated, with gaps>
-
-CONSOLE-SPECIFIC
-  - Switch: <covered | gap>
-  - PS5: <covered | gap>
-  - Xbox: <covered | gap>
-
-TOP 3 TECH DESIGN RISKS
-  1.
-  2.
-  3.
-
-DESIGN DOC EDITS
-  <Specific edits to tech-design.md, including proposed state machines>
-```
+**Review output:** writes to `design/reviews/plan-tech-design.md` — schema: see [`docs/templates/plan-review.md`](../../docs/templates/plan-review.md).
 
 Offer to apply edits.
 

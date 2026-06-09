@@ -60,24 +60,11 @@ Identify what dies first. Be ruthless. Walk through the feature list. For each f
 
 Write a structured review and offer to apply specific edits to the design doc.
 
-## Output format
+## Inputs and outputs
 
-```
-MODE: <Scope-Up | Selective Expansion | Hold Scope | Reduction>
-WHY THIS MODE: <2–3 sentences on the signals you saw>
+**Reads:** `design/pitch.md` — schema: see [`docs/templates/pitch.md`](../../docs/templates/pitch.md).
 
-CRITIQUE
-  <2–4 paragraphs of substance — what's working, what isn't, what's missing>
-
-RECOMMENDATION
-  <The one or two things the developer should do next, in priority order>
-
-RISKS (if Hold Scope)  /  CUTS (if Reduction)  /  THE ONE BET (if Selective Expansion)  /  DIRECTIONS (if Scope-Up)
-  <Mode-specific output>
-
-DESIGN DOC EDITS
-  <Specific diffs to apply, or "no doc edits — write the new section yourself">
-```
+**Review output:** writes to `design/reviews/plan-creative-director.md` — schema: see [`docs/templates/plan-review.md`](../../docs/templates/plan-review.md).
 
 Then ask the developer if you should apply the edits to the design doc. Only apply if they say yes.
 

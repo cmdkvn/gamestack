@@ -87,44 +87,7 @@ If branching is more complex than the developer can QA solo, propose simplificat
 
 **Authors / updates:** `design/voice-cards.md` — schema: see [`docs/templates/voice-cards.md`](../../docs/templates/voice-cards.md).
 
-**Review output:** writes to `design/reviews/plan-narrative.md`. The review schema will be canonicalized in `docs/templates/plan-review.md` (Task 9 of this batch); until then, the inline format below applies.
-
-Review format (inline pending Task 9 — `docs/templates/plan-review.md`):
-
-```
-VOICE CARDS
-  <character>: <pass | needs three-adjective voice card | needs sample line | voice collides with X>
-  ...
-
-EXPOSITION AUDIT
-  Info-dump candidates:
-    - <beat>: <alternative delivery proposal>
-  Pacing: <reading-length budget concerns>
-
-EMOTIONAL ↔ GAMEPLAY ALIGNMENT
-  Mismatches:
-    - Beat <X>: emotional <Y> vs gameplay <Z>
-  Recommendations:
-
-BRANCHING
-  Model: <stated and assessed>
-  State tracked: <listed>
-  QA combinatorial cost: <estimate>
-  Fallback path: <present | missing>
-
-PIPELINE & TOOLING
-  Dialogue format: <stated | needs decision>
-  String externalization: <yes | NO — must address>
-  Editor's pass: <scheduled | not scheduled>
-
-TOP 3 NARRATIVE RISKS
-  1.
-  2.
-  3.
-
-DESIGN DOC EDITS
-  <Specific edits to narrative.md, or new sections to add>
-```
+**Review output:** writes to `design/reviews/plan-narrative.md` — schema: see [`docs/templates/plan-review.md`](../../docs/templates/plan-review.md).
 
 Offer to apply the edits.
 

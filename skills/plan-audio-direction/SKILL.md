@@ -108,51 +108,7 @@ Flag any missing accessibility items as top findings.
 
 **Reads:** `design/audio-direction.md` — schema: see [`docs/templates/audio-direction.md`](../../docs/templates/audio-direction.md).
 
-**Review output:** writes to `design/reviews/plan-audio-direction.md`. Schema will be canonicalized in `docs/templates/plan-review.md` (Task 9 of this batch); inline format below remains active until then.
-
-Review format (inline pending Task 9 — `docs/templates/plan-review.md`):
-
-```
-SFX TAXONOMY
-  Categories present: <list>
-  Missing: <list>
-  Style-note specificity per category: <pass | needs detail>
-
-MUSIC STRUCTURE
-  Stated: <model>
-  Composer: <named | open>
-  Adaptive system: <yes | no>
-  Concerns:
-
-MIX PRIORITY
-  Policy stated: <yes | NO — propose default>
-  Recommended policy: <list>
-
-TOOLING
-  Choice: <FMOD | Wwise | engine-native | undecided>
-  Fit with plan: <good | mismatch>
-
-LOUDNESS TARGETS
-  Stated: <yes | NO — propose defaults>
-
-DIEGETIC POLICY
-  Stated: <yes | NO — propose policy>
-
-ACCESSIBILITY CHECKLIST
-  - Subtitles default ON:           <pass | fail>
-  - Closed captions:                <pass | fail>
-  - Independent bus sliders:        <pass | fail>
-  - Mono-output option:             <pass | fail>
-  - Visual cues for off-screen audio: <pass | fail>
-
-TOP 3 AUDIO RISKS
-  1.
-  2.
-  3.
-
-DESIGN DOC EDITS
-  <Specific edits to audio-direction.md>
-```
+**Review output:** writes to `design/reviews/plan-audio-direction.md` — schema: see [`docs/templates/plan-review.md`](../../docs/templates/plan-review.md).
 
 Offer to apply edits.
 

@@ -73,35 +73,7 @@ Each flag is a candidate to either re-do the reference, replace it with a real h
 
 **Reads:** `design/art-direction.md` — schema: see [`docs/templates/art-direction.md`](../../docs/templates/art-direction.md).
 
-**Review output:** writes to `design/reviews/plan-art-direction.md`. Schema will be canonicalized in `docs/templates/plan-review.md` (Task 9 of this batch); inline format below remains active until then.
-
-Review format (inline pending Task 9 — `docs/templates/plan-review.md`):
-
-```
-RATINGS (0-10)
-  Style in one sentence:       <N> — <rationale>
-  References specificity:      <N> — <rationale>
-  Color discipline:            <N> — <rationale>
-  Silhouette readability:      <N> — <rationale>
-  Asset budget realism:        <N> — <rationale>
-  Animation language:          <N> — <rationale>
-  VFX policy:                  <N> — <rationale>
-  AI-slop resistance:          <N> — <rationale>
-
-WHAT 10 LOOKS LIKE (per under-9 dimension)
-  <dimension>: <one-sentence game-specific 10>
-
-AI-SLOP FLAGS
-  - <reference / image>: <issue> — <action>
-
-TOP 3 ART DIRECTION RISKS
-  1.
-  2.
-  3.
-
-DESIGN DOC EDITS
-  <Specific concrete edits to art-direction.md>
-```
+**Review output:** writes to `design/reviews/plan-art-direction.md` — schema: see [`docs/templates/plan-review.md`](../../docs/templates/plan-review.md).
 
 Offer to apply edits.
 
