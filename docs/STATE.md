@@ -21,7 +21,8 @@ This file is **local-only**. Nothing in gamestack uploads or transmits it. See [
     "engine": "unity | godot | unreal | gamemaker | bevy | web | unknown",
     "engine_version": "6000.0.31f1",
     "platforms": ["pc", "switch", "ps5"],
-    "phase": "pitch | prototype | vertical-slice | production | polish | cert | launched"
+    "phase": "pitch | prototype | vertical-slice | production | polish | cert | launched",
+    "review_mode": "lean | normal | intense"
   },
   "artifacts": {
     "pitch":          "design/pitch.md",
@@ -59,6 +60,7 @@ This file is **local-only**. Nothing in gamestack uploads or transmits it. See [
 | `project.engine` / `engine_version` | `/plan-tech-design`, `/scene-prototype` | Auto-detected; user overrides win. |
 | `project.platforms` | `/plan-tech-design`, `/cert-readiness` | Drives per-platform budgets in `gamestack-asset-audit`. |
 | `project.phase` | the developer (skills propose, dev confirms) | Skills tailor advice by phase. |
+| `project.review_mode` | the developer | `lean \| normal \| intense`. Defaults to `normal` if missing. Skills filter their output by this — see "Review mode" below. |
 | `artifacts.*` | the skill that produced the artifact | Relative paths from project root. Skills update on write. |
 | `recent_runs` | every skill | FIFO, max 20 entries. Used by `/gamestack` to recommend what's next. |
 | `next_recommended` | `/gamestack` | Recomputed on every `/gamestack` invocation. |
@@ -89,6 +91,37 @@ Do not overwrite fields a skill doesn't own. A `/critique --lens=fun` run does n
 ### Schema migration
 
 If `schema` is older than the current code, skills should call into a shared migrator (defined in `bin/impl/shared/state.ts`) before reading the rest. The migrator must be additive: never drop fields, only rename or default.
+
+## Review mode
+
+`project.review_mode` is the intensity dial every review-shaped skill should honor. Three levels:
+
+- **lean** — surface only `[P0]` (blockers) and `[P1]` (strongly recommended). Skip `[P2]` (nice-to-have) and `[taste]` (judgment calls). Output should be ≤5 findings; ideal for "I just want to know if this is broken" passes.
+- **normal** — full rubric. All severities surfaced. This is the default if the field is missing or unset.
+- **intense** — full rubric plus an adversarial cross-check: for each `[P0]`/`[P1]` finding, generate "what could make this a false positive?" with a confidence rating (high/med/low). Slower; intended for pre-launch passes and cert prep.
+
+### Severity tag convention
+
+Every finding in a review skill's output must carry a leading severity tag in its header line: `[P0]`, `[P1]`, `[P2]`, or `[taste]`. The tag is what the lean filter keys on. Without it, the filter degrades to "show everything," defeating the dial.
+
+| Tag | Meaning | Examples |
+|---|---|---|
+| `[P0]` | Blocker — game crashes, save corruption, cert-failing a11y, security issue | Allocation in `Update()` on Switch; off-thread main-API call; loss of write-acks |
+| `[P1]` | Strongly recommended — meaningful slice of players impacted | Hit-pause missing on a primary verb; no `[P1]`-tier GAG features; dominant strategy at >70% win-rate |
+| `[P2]` | Nice-to-have — polish, minor inconsistency | Particle pop-in at 30+ count; missing tooltip on optional UI; small balance asymmetry |
+| `[taste]` | Judgment call — no objectively right answer | "Maybe try yellow instead of orange"; "the second-act pacing could be tighter, depending on intent" |
+
+### One-shot override
+
+`/gamestack --review=<mode>` writes `<mode>` to `.gamestack/scratch/review-mode-override`. The next skill that consumes review_mode reads that file, uses the override, and **deletes the file before doing any other work**. This makes the override genuinely one-shot — if the skill fails mid-run, the override is already gone so it doesn't leak.
+
+Implementation contract for any skill that honors review_mode:
+
+1. Read `.gamestack/scratch/review-mode-override` if it exists. Capture the value. Delete the file (`rm -f` is fine; ignore "no such file" errors).
+2. If the override existed, use its value.
+3. Otherwise read `project.review_mode` from `gamestack/state.json` (default to `normal` if the field is absent).
+4. Tag every finding with one of `[P0]`/`[P1]`/`[P2]`/`[taste]`.
+5. Filter the output according to the mode (or expand it, for `intense`).
 
 ## Why a single file
 
