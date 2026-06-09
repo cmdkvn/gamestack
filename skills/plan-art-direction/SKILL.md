@@ -69,33 +69,11 @@ Walk the references and any concept art the developer has produced or generated.
 
 Each flag is a candidate to either re-do the reference, replace it with a real human-made source, or commit to the AI-slop look as an intentional choice (rare but possible).
 
-## Output format
+## Inputs and outputs
 
-```
-RATINGS (0-10)
-  Style in one sentence:       <N> — <rationale>
-  References specificity:      <N> — <rationale>
-  Color discipline:            <N> — <rationale>
-  Silhouette readability:      <N> — <rationale>
-  Asset budget realism:        <N> — <rationale>
-  Animation language:          <N> — <rationale>
-  VFX policy:                  <N> — <rationale>
-  AI-slop resistance:          <N> — <rationale>
+**Reads:** `design/art-direction.md` — schema: see [`docs/templates/art-direction.md`](../../docs/templates/art-direction.md).
 
-WHAT 10 LOOKS LIKE (per under-9 dimension)
-  <dimension>: <one-sentence game-specific 10>
-
-AI-SLOP FLAGS
-  - <reference / image>: <issue> — <action>
-
-TOP 3 ART DIRECTION RISKS
-  1.
-  2.
-  3.
-
-DESIGN DOC EDITS
-  <Specific concrete edits to art-direction.md>
-```
+**Review output:** writes to `design/reviews/plan-art-direction.md` — schema: see [`docs/templates/plan-review.md`](../../docs/templates/plan-review.md).
 
 Offer to apply edits.
 

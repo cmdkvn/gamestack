@@ -1,0 +1,99 @@
+# gamestack-gates.yml — copy-pasteable CI gates for downstream game projects
+#
+# How to use:
+#   1. Copy this file to YOUR game repo at .github/workflows/gamestack-gates.yml
+#      (drop the .example suffix).
+#   2. Pin GAMESTACK_REF below to a gamestack release tag (e.g. v1.0.0) so your
+#      gates don't drift when gamestack itself updates.
+#   3. Edit the path filters below to match your project's asset and design layout.
+#   4. Comment in/out jobs you don't need.
+#
+# Each job is independent — no shared setup step — so deleting a job won't
+# break the others. The repeated clone-and-install is the price of that
+# simplicity.
+
+name: gamestack-gates
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      steam_url:
+        description: "Steam store page URL to audit"
+        required: true
+        type: string
+
+env:
+  GAMESTACK_REF: v1.0.0  # pin to a release tag
+
+jobs:
+  asset-audit:
+    name: asset-audit
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'pull_request' ||
+      (github.event_name == 'push' && contains(github.event.head_commit.message, 'assets'))
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: project
+      - uses: actions/checkout@v4
+        with:
+          repository: cmdkvn/gamestack
+          ref: ${{ env.GAMESTACK_REF }}
+          path: gamestack
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - name: Run asset audit
+        working-directory: project
+        run: |
+          # Adjust --platforms to match the targets defined in your gamestack/state.json
+          ../gamestack/bin/gamestack-asset-audit \
+            --platforms=pc \
+            --root=.
+
+  cert-checklist:
+    name: cert-checklist
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/heads/cert/')
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: project
+      - uses: actions/checkout@v4
+        with:
+          repository: cmdkvn/gamestack
+          ref: ${{ env.GAMESTACK_REF }}
+          path: gamestack
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - name: Run cert checklist
+        working-directory: project
+        run: |
+          # Adjust --platform to whichever cert run this branch targets.
+          ../gamestack/bin/gamestack-cert-checklist \
+            --platform=ps5 \
+            --root=.
+
+  steam-page-check:
+    name: steam-page-check
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: cmdkvn/gamestack
+          ref: ${{ env.GAMESTACK_REF }}
+          path: gamestack
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - name: Check Steam page
+        run: |
+          ./gamestack/bin/gamestack-steam-page-check \
+            --url="${{ github.event.inputs.steam_url }}"

@@ -143,51 +143,7 @@ After per-platform reports, produce a single combined action list ordered by:
 
 ## Output format
 
-Per platform:
-
-```
-PLATFORM: <PS5 | Xbox | Switch>
-CHECKLIST VERSION ON FILE: <version | NOT FOUND — P0>
-BUILD: <git rev>
-
-PASS  PASS-CODE-ONLY  NEEDS-LIVE-TEST  FAIL-P0  FAIL-P1  N/A
-  N        N                N             N        N      N
-
-──────────────────────────────────────────
-CATEGORY                        VERDICT      DETAIL
-──────────────────────────────────────────
-Memory management               PASS
-PSN integration                 NEEDS_LIVE_TEST  (no playtest run in 30 days)
-Trophy implementation           FAIL_P0      Missing platinum — structure permits one
-Sleep / resume                  PASS_CODE_ONLY   Run scenario 04-cert-... before submit
-...
-
-UNIQUE-TO-GAME ITEMS
-  - Photosensitivity warning: PRESENT
-  - Offline mode for PSN sign-in: MISSING (FAIL_P1)
-```
-
-Combined action list:
-
-```
-ACTION LIST (prioritized)
-  P0 — fix before submission
-    1. <action> — <platform> — <category>
-    2. ...
-
-  P1 — strongly recommended
-    1. ...
-
-  NEEDS_LIVE_TEST — run these scenarios first
-    1. `/playtest 04-cert-controller-disconnect` on <platform>
-    2. `/playtest 05-cert-save-fuzz` on <platform>
-    3. ...
-
-  SUBMISSION READINESS PER PLATFORM
-    PS5:    READY | NEEDS_WORK | BLOCKED — <one-line reason>
-    Xbox:   ...
-    Switch: ...
-```
+**Output:** writes to `playtest/cert-readiness/<platform>-YYYY-MM-DD.md` (one file per platform) — schema: see [`docs/templates/cert-readiness.md`](../../docs/templates/cert-readiness.md).
 
 ## What NOT to do
 

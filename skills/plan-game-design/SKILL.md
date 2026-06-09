@@ -78,34 +78,11 @@ Tag any mechanic that doesn't survive these three questions as "dead" and propos
 
 Structured output with concrete proposed edits to the mechanics plan.
 
-## Output format
+## Inputs and outputs
 
-```
-CORE LOOP
-  Articulated:  <one paragraph in your words>
-  Status:       <clear | unclear | mismatched with stated pitch>
+**Reads:** `design/mechanics.md` — schema: see [`docs/templates/mechanics.md`](../../docs/templates/mechanics.md).
 
-SKILL CURVE
-  <The filled-in 6-row table from Step 3>
-  Cliffs / plateaus: <list>
-
-DEAD MECHANICS (proposed for cut)
-  - <mechanic 1>: <why it doesn't earn its place>
-  - <mechanic 2>: <why>
-
-DIFFICULTY & PROGRESSION
-  Difficulty model: <observed and gap analysis>
-  Progression pace: <observed and gap analysis>
-  Win/loss conditions: <observed and gap analysis>
-
-TOP 3 FINDINGS
-  1. <most-load-bearing change to make>
-  2.
-  3.
-
-DESIGN DOC EDITS
-  <Specific edits to mechanics.md, or "fill in Hour 10+ first">
-```
+**Review output:** writes to `design/reviews/plan-game-design.md` — schema: see [`docs/templates/plan-review.md`](../../docs/templates/plan-review.md).
 
 Offer to apply the edits to the doc on confirmation.
 

@@ -76,45 +76,11 @@ Sketch the gate graph. If it's a deep tree, the late game will be a soft-lock ri
 
 A game without planned hero shots will be hard to market. A game without rest beats will be exhausting.
 
-### Step 7 — produce the review
+## Inputs and outputs
 
-## Output format
+**Reads:** `design/level-design.md` — schema: see [`docs/templates/level-design.md`](../../docs/templates/level-design.md).
 
-```
-MACRO STRUCTURE
-  <Stated structure; confirm or push back>
-
-TENSION GRAPH
-  <Beat-by-beat or per-region table with tension / skill demand / narrative density>
-  Monotony zones: <list>
-  Spike clusters: <list>
-  Hollow middles: <list>
-
-CRITICAL PATH / SIDE CONTENT
-  Estimated ratio: <X%/Y%>
-  Concerns:
-
-NAVIGATION AUDIT
-  Spaces with unclear wayfinding:
-    - <space>: <missing signposting | sight line | breadcrumb>
-
-GATING LOGIC
-  Dependency depth: <shallow | deep | risky>
-  Soft-lock risks: <list>
-  Backtracking burden: <stated>
-
-HERO SHOTS & REST BEATS
-  Planned hero shots: <count and quality>
-  Rest beats: <present | missing>
-
-TOP 3 LEVEL DESIGN RISKS
-  1.
-  2.
-  3.
-
-DESIGN DOC EDITS
-  <Specific edits to level-design.md or per-level files>
-```
+**Review output:** writes to `design/reviews/plan-level-design.md` — schema: see [`docs/templates/plan-review.md`](../../docs/templates/plan-review.md).
 
 Offer to apply edits.
 

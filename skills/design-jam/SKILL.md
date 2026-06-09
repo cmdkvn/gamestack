@@ -65,22 +65,13 @@ This question reveals scope. A game where nothing can be cut is overscoped. A ga
 
 ## After the six questions — synthesize
 
-Produce a concise design statement. Format:
+Produce a concise design statement using the canonical pitch schema.
 
-```
-GAME:        <name, or "untitled">
-CORE VERB:   <the verb>
-LOGLINE:     <one sentence>
-PLAYER:      <specific person>
-KERNEL:      <30-second loop>
-LIKE:        <X> meets <Y>
-8-WEEK CUT:  <what survives>
-```
+**Output:** write to `design/pitch.md` (or `games/<slug>/design/pitch.md` in a multi-game repo) — schema: see [`docs/templates/pitch.md`](../../docs/templates/pitch.md).
 
-Then **write this to a file**:
-- If the current working directory matches `games/<slug>/`: write to `games/<slug>/design/pitch.md` (or update if it already exists — preserve the user's prose, replace the metadata block).
-- If at a project root with no `design/` subdirectory: write to `DESIGN.md`.
-- Otherwise: print to the chat and tell the user where to save it.
+If at a project root with no `design/` subdirectory: write to `DESIGN.md`.
+If the file already exists: preserve the user's prose, replace the metadata block.
+If neither location is clear: print to the chat and tell the user where to save it.
 
 Finally, propose **three implementation directions** as paths forward. For each:
 - An effort estimate in weeks for a solo dev.
