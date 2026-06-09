@@ -32,9 +32,9 @@ How each mode shapes the family scan:
 
 | Mode | Which families | Per-finding output |
 |---|---|---|
-| `lean` | Family 1 (per-frame allocation), Family 2 (off-thread API calls), Family 3 (signal/event leaks) only. Max 5 findings total. | One-line summary + the line range. No suggested fix prose. |
-| `normal` | All 8 families. | Full finding: pattern matched, why it's a bug, suggested fix. Current behavior. |
-| `intense` | All 8 families + a regression-risk cross-check on each `[P0]`/`[P1]` finding: "if the suggested fix is applied as-is, what could go wrong?" Confidence rating (high/med/low). | Full finding + the cross-check + confidence. |
+| `lean` | Family 1, Family 2, Family 3, AND any `[P0]`/`[P1]` findings from subsystem-specific families (8, 10, 11) when those subsystems appear in the diff. Max 5 findings total. | One-line summary + the line range. No suggested fix prose. |
+| `normal` | All 11 families. | Full finding: pattern matched, why it's a bug, suggested fix. Current behavior. |
+| `intense` | All 11 families + a regression-risk cross-check on each `[P0]`/`[P1]` finding: "if the suggested fix is applied as-is, what could go wrong?" Confidence rating (high/med/low). | Full finding + the cross-check + confidence. |
 
 Severity calibration for this skill:
 
@@ -237,8 +237,9 @@ If any were applicable and you didn't check, do another pass.
 A minimal report shape (the engine and mode go in the report header so the reader knows the calibration):
 
 ```
-Engine: <detected>
-Mode:   <lean | normal | intense>
+Engine:     <detected>
+Subsystems: <comma-separated list, e.g., "Unity Shader (3), MonoBehaviour (8)"; or "(general only)">
+Mode:       <lean | normal | intense>
 
 Findings:
   · [P0] <file>:<line> — <one-line summary>
@@ -255,6 +256,7 @@ Findings are ordered by severity (`[P0]` first), then by file path. In `lean` mo
 
 ```
 ENGINE:      <detected engine>
+SUBSYSTEMS:  <comma-separated; or "(general only)" if none detected>
 DIFF SCOPE:  <range of commits / unstaged changes>
 
 [AUTO]    N findings applied (whitelist only)
@@ -280,6 +282,7 @@ DIFF SCOPE:  <range of commits / unstaged changes>
 - Coroutines: store the handle, stop in `OnDisable`.
 - Threading: stay on the main thread for `Transform`/`GameObject`. Use the Job System for parallel CPU work.
 - `[SerializeField] private` over `public` for inspector-exposed fields.
+- **Shaders:** float for world-space positions; declare sampler state explicitly; URP/HDRP use `_BaseMap` (not `_MainTex`); no derivatives in conditional blocks; compute thread groups capped at 256 on Mali (1024 on desktop).
 
 ### Godot 4.x (GDScript or C#)
 - `_process(delta)`: no `instantiate()`, no signal connection per frame.
@@ -287,6 +290,7 @@ DIFF SCOPE:  <range of commits / unstaged changes>
 - Free vs. queue_free: prefer `queue_free()` to avoid mid-frame deletion bugs.
 - `await` semantics: a node freed mid-await crashes — guard with `if not is_instance_valid(self): return`.
 - C# bindings: dispose `Godot.Object` subclasses explicitly to avoid native-side leaks.
+- **Shaders:** explicit `render_mode`; `SCREEN_TEXTURE` is transparent-queue only; declare `precision highp float;` for mobile world-space; vertex `varying` must be written unconditionally.
 
 ### Unreal 5 (C++ / Blueprint)
 - UObject lifecycle: use `TWeakObjectPtr` for cross-actor references.
