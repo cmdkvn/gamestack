@@ -64,7 +64,39 @@ Detect the engine before reviewing — the bugs you look for depend on it.
 
 When iOS native is detected, identify the rendering framework in use (SpriteKit / SceneKit / Metal / RealityKit / SwiftUI / UIKit) — it changes which bug families apply most. Multiple frameworks can coexist in one project.
 
-Note the detected engine in your opening line of the report.
+Note the detected engine in your opening line of the report. See Step 1b for per-file subsystem detection (which may fire additional subsystem-specific families in Step 2).
+
+### Step 1b — detect subsystems within the engine
+
+Some bug families apply only to a specific subsystem within an engine — shader code, ECS systems, AR scenes, networked replication. After Step 1 determines the engine, run a per-file scan over the diff and tag each file with its subsystem (if any). The result drives which subsystem-specific families fire in Step 2.
+
+**Per-file detection rules** (apply in order; first match wins for a given file):
+
+| Signal | Detected subsystem |
+|---|---|
+| Engine is Unity AND file extension is `.shader` / `.cginc` / `.hlsl` / `.compute` | **Unity Shader** |
+| Engine is Unity AND file body contains a `Shader "` ShaderLab opener | **Unity Shader** |
+| File extension is `.gdshader` (Godot 4 native) | **Godot Shader** |
+| File extension is `.shader` AND `project.godot` is present in the repo | **Godot Shader** |
+| File body contains `shader_type spatial;` / `shader_type canvas_item;` / `shader_type particles;` / `shader_type sky;` / `shader_type fog;` (Godot 4 shader_type opener) | **Godot Shader** |
+| Engine is iOS native AND file extension is `.swift` | **iOS native** (already covered by Family 8) |
+| Otherwise | (no subsystem tag for this file — only general families apply) |
+
+After scanning every file in the diff, aggregate into a set of subsystems present. The aggregate drives which subsystem families fire in Step 2:
+
+- If "Unity Shader" is in the set → Family 10 fires, scoped to the Unity Shader files only.
+- If "Godot Shader" is in the set → Family 11 fires, scoped to the Godot Shader files only.
+- If "iOS native" is in the set → Family 8 fires (existing behavior).
+
+**Report-header line.** After the engine line, add a `Subsystems detected (this diff):` line listing each detected subsystem with the file count. Use `MonoBehaviour` as the implicit label for "Unity engine but no specific subsystem detected" files; analogous defaults for other engines (`GDScript` for Godot, `Swift app` for iOS native non-shader, etc.).
+
+Example:
+```
+Engine:    Unity 6000.0.31f1
+Subsystems detected (this diff): Unity Shader (3 files), MonoBehaviour (8 files)
+```
+
+If no subsystem is detected anywhere in the diff, write `Subsystems detected: (general only)`.
 
 ### Step 2 — scan the diff for runtime bug families
 
