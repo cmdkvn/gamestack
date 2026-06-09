@@ -1,0 +1,81 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint:
+    name: skill-lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - name: Install root deps
+        run: |
+          if [ -f bun.lock ]; then bun install --frozen-lockfile; fi
+      - name: Run skill-lint
+        run: bin/gamestack-skill-lint --warn-as-error
+
+  test:
+    name: test (${{ matrix.cli }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        cli:
+          - asset-audit
+          - cert-checklist
+          - game-benchmark
+          - model-benchmark
+          - playtest-daemon
+          - skill-feedback
+          - skill-lint
+          - steam-page-check
+          - taste-update
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - name: Install deps
+        working-directory: bin/impl
+        run: |
+          if [ -f package.json ]; then bun install --frozen-lockfile; fi
+      - name: Test
+        working-directory: bin/impl
+        run: |
+          if compgen -G "${{ matrix.cli }}/*.test.ts" > /dev/null; then
+            bun test ${{ matrix.cli }}/
+          else
+            echo "No test files found for ${{ matrix.cli }}; skipping."
+          fi
+
+  shellcheck:
+    name: shellcheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install shellcheck
+        run: sudo apt-get install -y shellcheck
+      - name: Check setup script
+        run: shellcheck setup
+      - name: Check host scripts
+        run: shellcheck hosts/*.sh
+      - name: Check CLI shims
+        run: shellcheck bin/gamestack-*
+
+  setup-sync:
+    name: setup-sync test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - name: Run setup-sync test
+        run: bash tests/setup-sync.test.sh
