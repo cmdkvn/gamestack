@@ -100,7 +100,7 @@ If no subsystem is detected anywhere in the diff, write `Subsystems detected: (g
 
 ### Step 2 — scan the diff for runtime bug families
 
-Walk the diff (file by file) and look for these patterns in order of severity:
+Walk the diff (file by file) and look for these patterns in order of severity. Subsystem-specific families (8 for iOS native, 10 for Unity Shader, 11 for Godot Shader) fire only when their corresponding subsystem appears in Step 1b's per-file detection; they apply only to the files of that subsystem.
 
 #### Family 1 — Per-frame allocation
 Worst on Switch and mobile; common on every engine.
@@ -163,6 +163,20 @@ This family fires only when the engine is `iOS native`. Each sub-pattern below m
 - **`didReceiveMemoryWarning` not handled.** `UIApplication.didReceiveMemoryWarningNotification` (or `UIViewController.didReceiveMemoryWarning()`) is iOS asking you to free what you can before the system kills the process. A game with texture caches, audio buffers, or large scene state and no memory-warning handler ships with a P1 OOM-kill bug — usually first surfaces in Instruments Allocations during long sessions.
 - **App lifecycle: `applicationWillResignActive` / `sceneWillResignActive` not saving state.** When iOS sends the app to background, the developer has ~5 seconds to persist state before the process can be suspended (or killed under memory pressure). Saves taken in `applicationWillTerminate` are unreliable — that callback often doesn't fire before kill. Save on `WillResignActive` / `DidEnterBackground` with atomic file writes.
 - **`GameKit` / `StoreKit` lifecycle leaks.** `GKMatchmaker`, `GKLocalPlayer.local.authenticateHandler`, `SKPaymentQueue.default().add(observer:)` all install long-lived references. Remove observers (`SKPaymentQueue.default().remove(observer:)`) on teardown; clear the auth handler if the player signs out.
+
+#### Family 10 — Unity Shaders (ShaderLab / HLSL / Compute)
+
+This family fires only when at least one file in the diff is detected as Unity Shader (Step 1b). Checks apply only to those shader files; standard C# files in the same diff go through Families 1-7, 9.
+
+- **`[P0]` Dynamic branching on a uniform without `static const` or `multi_compile`.** Mobile GPU compilers (Adreno, Mali) often emit both sides of a dynamic branch, killing the perf benefit. Use `static const bool USE_X = ...;` set from compile-time defines, OR split into variants via `#pragma multi_compile _ USE_X`.
+- **`[P0]` Derivatives (`ddx` / `ddy` / `fwidth`) inside a conditional block.** Behavior is undefined when control flow is non-uniform across the warp/wavefront. Move derivatives outside the conditional, or compute screen-space gradients explicitly.
+- **`[P1]` Sampler state inferred instead of declared.** Unity's auto-generated samplers (e.g., `sampler_MainTex_repeat`) depend on the `.meta` file's `wrapMode` / `filterMode`. Cross-file coupling is fragile. Declare `SamplerState sampler_MyTex` explicitly with the wrap/filter mode the shader requires.
+- **`[P1]` `_MainTex` hardcoded when the project's render pipeline is URP or HDRP.** URP uses `_BaseMap`; HDRP uses `_BaseColorMap`. A shader bound to `_MainTex` breaks `SpriteRenderer` and `MeshRenderer` integration on non-built-in pipelines. Use the pipeline-appropriate name OR `#pragma multi_compile _ UNITY_PIPELINE_URP UNITY_PIPELINE_HDRP` and alias accordingly.
+- **`[P1]` Half-precision (`half` or `fixed`) used for world-space coordinates.** `fixed` is ~7 mantissa bits, `half` is ~10. World positions need `float`. World-space `> ~1024` units shows quantization on mobile. Reserve `half` for colors, normals, and intermediates in `[-1, 1]`-ish range.
+- **`[P1]` Compute shader `[numthreads(...)]` exceeds platform max.** Mali caps workgroups at 256-512; Tegra (Switch) at 1024. Hardcoded `[numthreads(1024,1,1)]` on Switch silently fails. Either query `SystemInfo.maxComputeWorkGroupSize` at runtime and dispatch accordingly, OR add `#if UNITY_SWITCH` guard with a smaller variant.
+- **`[P1]` Missing `LOD <n>` directive on a multi-platform shader.** Without `LOD`, the fallback chain on lower-tier devices is unpredictable. Set explicit LODs (100 fallback, 200/300 higher quality).
+- **`[P2]` sRGB / linear sampling mismatch.** Texture imported as `sRGB (Color Texture)` but sampled with operations in linear space without `pow(c, 2.2)` (or vice-versa). Washed-out or overly-dark output. Comment which colorspace each sampler input expects at the top of the shader.
+- **`[P2]` `#pragma multi_compile FOO BAR` without underscore-default.** When no keyword is set, the shader silently fails to compile in some contexts. Prefer `#pragma multi_compile _ FOO BAR` so the unset case is explicit.
 
 #### Family 9 — Engine-agnostic patterns
 - Magic numbers without comment explaining intent (acceleration, timing thresholds, attack windows).
