@@ -32,9 +32,9 @@ How each mode shapes the family scan:
 
 | Mode | Which families | Per-finding output |
 |---|---|---|
-| `lean` | Family 1 (per-frame allocation), Family 2 (off-thread API calls), Family 3 (signal/event leaks) only. Max 5 findings total. | One-line summary + the line range. No suggested fix prose. |
-| `normal` | All 8 families. | Full finding: pattern matched, why it's a bug, suggested fix. Current behavior. |
-| `intense` | All 8 families + a regression-risk cross-check on each `[P0]`/`[P1]` finding: "if the suggested fix is applied as-is, what could go wrong?" Confidence rating (high/med/low). | Full finding + the cross-check + confidence. |
+| `lean` | Family 1, Family 2, Family 3, AND any `[P0]`/`[P1]` findings from subsystem-specific families (8, 10, 11) when those subsystems appear in the diff. Max 5 findings total. | One-line summary + the line range. No suggested fix prose. |
+| `normal` | All 11 families. | Full finding: pattern matched, why it's a bug, suggested fix. Current behavior. |
+| `intense` | All 11 families + a regression-risk cross-check on each `[P0]`/`[P1]` finding: "if the suggested fix is applied as-is, what could go wrong?" Confidence rating (high/med/low). | Full finding + the cross-check + confidence. |
 
 Severity calibration for this skill:
 
@@ -64,11 +64,43 @@ Detect the engine before reviewing — the bugs you look for depend on it.
 
 When iOS native is detected, identify the rendering framework in use (SpriteKit / SceneKit / Metal / RealityKit / SwiftUI / UIKit) — it changes which bug families apply most. Multiple frameworks can coexist in one project.
 
-Note the detected engine in your opening line of the report.
+Note the detected engine in your opening line of the report. See Step 1b for per-file subsystem detection (which may fire additional subsystem-specific families in Step 2).
+
+### Step 1b — detect subsystems within the engine
+
+Some bug families apply only to a specific subsystem within an engine — shader code, ECS systems, AR scenes, networked replication. After Step 1 determines the engine, run a per-file scan over the diff and tag each file with its subsystem (if any). The result drives which subsystem-specific families fire in Step 2.
+
+**Per-file detection rules** (apply in order; first match wins for a given file):
+
+| Signal | Detected subsystem |
+|---|---|
+| Engine is Unity AND file extension is `.shader` / `.cginc` / `.hlsl` / `.compute` | **Unity Shader** |
+| Engine is Unity AND file body contains a `Shader "` ShaderLab opener | **Unity Shader** |
+| File extension is `.gdshader` (Godot 4 native) | **Godot Shader** |
+| File extension is `.shader` AND `project.godot` is present in the repo | **Godot Shader** |
+| File body contains `shader_type spatial;` / `shader_type canvas_item;` / `shader_type particles;` / `shader_type sky;` / `shader_type fog;` (Godot 4 shader_type opener) | **Godot Shader** |
+| Engine is iOS native AND file extension is `.swift` | **iOS native** (already covered by Family 8) |
+| Otherwise | (no subsystem tag for this file — only general families apply) |
+
+After scanning every file in the diff, aggregate into a set of subsystems present. The aggregate drives which subsystem families fire in Step 2:
+
+- If "Unity Shader" is in the set → Family 10 fires, scoped to the Unity Shader files only.
+- If "Godot Shader" is in the set → Family 11 fires, scoped to the Godot Shader files only.
+- If "iOS native" is in the set → Family 8 fires (existing behavior).
+
+**Report-header line.** After the engine line, add a `Subsystems detected (this diff):` line listing each detected subsystem with the file count. Use `MonoBehaviour` as the implicit label for "Unity engine but no specific subsystem detected" files; analogous defaults for other engines (`GDScript` for Godot, `Swift app` for iOS native non-shader, etc.).
+
+Example:
+```
+Engine:    Unity 6000.0.31f1
+Subsystems detected (this diff): Unity Shader (3 files), MonoBehaviour (8 files)
+```
+
+If no subsystem is detected anywhere in the diff, write `Subsystems detected: (general only)`.
 
 ### Step 2 — scan the diff for runtime bug families
 
-Walk the diff (file by file) and look for these patterns in order of severity:
+Walk the diff (file by file) and look for these patterns in order of severity. Subsystem-specific families (8 for iOS native, 10 for Unity Shader, 11 for Godot Shader) fire only when their corresponding subsystem appears in Step 1b's per-file detection; they apply only to the files of that subsystem.
 
 #### Family 1 — Per-frame allocation
 Worst on Switch and mobile; common on every engine.
@@ -132,6 +164,31 @@ This family fires only when the engine is `iOS native`. Each sub-pattern below m
 - **App lifecycle: `applicationWillResignActive` / `sceneWillResignActive` not saving state.** When iOS sends the app to background, the developer has ~5 seconds to persist state before the process can be suspended (or killed under memory pressure). Saves taken in `applicationWillTerminate` are unreliable — that callback often doesn't fire before kill. Save on `WillResignActive` / `DidEnterBackground` with atomic file writes.
 - **`GameKit` / `StoreKit` lifecycle leaks.** `GKMatchmaker`, `GKLocalPlayer.local.authenticateHandler`, `SKPaymentQueue.default().add(observer:)` all install long-lived references. Remove observers (`SKPaymentQueue.default().remove(observer:)`) on teardown; clear the auth handler if the player signs out.
 
+#### Family 10 — Unity Shaders (ShaderLab / HLSL / Compute)
+
+This family fires only when at least one file in the diff is detected as Unity Shader (Step 1b). Checks apply only to those shader files; standard C# files in the same diff go through Families 1-7, 9.
+
+- **`[P0]` Dynamic branching on a uniform without `static const` or `multi_compile`.** Mobile GPU compilers (Adreno, Mali) often emit both sides of a dynamic branch, killing the perf benefit. Use `static const bool USE_X = ...;` set from compile-time defines, OR split into variants via `#pragma multi_compile _ USE_X`.
+- **`[P0]` Derivatives (`ddx` / `ddy` / `fwidth`) inside a conditional block.** Behavior is undefined when control flow is non-uniform across the warp/wavefront. Move derivatives outside the conditional, or compute screen-space gradients explicitly.
+- **`[P1]` Sampler state inferred instead of declared.** Unity's auto-generated samplers (e.g., `sampler_MainTex_repeat`) depend on the `.meta` file's `wrapMode` / `filterMode`. Cross-file coupling is fragile. Declare `SamplerState sampler_MyTex` explicitly with the wrap/filter mode the shader requires.
+- **`[P1]` `_MainTex` hardcoded when the project's render pipeline is URP or HDRP.** URP uses `_BaseMap`; HDRP uses `_BaseColorMap`. A shader bound to `_MainTex` breaks `SpriteRenderer` and `MeshRenderer` integration on non-built-in pipelines. Use the pipeline-appropriate name OR `#pragma multi_compile _ UNITY_PIPELINE_URP UNITY_PIPELINE_HDRP` and alias accordingly.
+- **`[P1]` Half-precision (`half` or `fixed`) used for world-space coordinates.** `fixed` is ~7 mantissa bits, `half` is ~10. World positions need `float`. World-space `> ~1024` units shows quantization on mobile. Reserve `half` for colors, normals, and intermediates in `[-1, 1]`-ish range.
+- **`[P1]` Compute shader `[numthreads(...)]` exceeds platform max.** Mali caps workgroups at 256-512; Tegra (Switch) at 1024. Hardcoded `[numthreads(1024,1,1)]` on Switch silently fails. Either query `SystemInfo.maxComputeWorkGroupSizeX` at runtime and dispatch accordingly, OR add `#if UNITY_SWITCH` guard with a smaller variant.
+- **`[P1]` Missing `LOD <n>` directive on a multi-platform shader.** Without `LOD`, the fallback chain on lower-tier devices is unpredictable. Set explicit LODs (100 fallback, 200/300 higher quality).
+- **`[P2]` sRGB / linear sampling mismatch.** Texture imported as `sRGB (Color Texture)` but sampled with operations in linear space without `pow(c, 2.2)` (or vice-versa). Washed-out or overly-dark output. Comment which colorspace each sampler input expects at the top of the shader.
+- **`[P2]` `#pragma multi_compile FOO BAR` without underscore-default.** When no keyword is set, the shader silently fails to compile in some contexts. Prefer `#pragma multi_compile _ FOO BAR` so the unset case is explicit.
+
+#### Family 11 — Godot Shaders (.gdshader / GLSL-ish)
+
+This family fires only when at least one file in the diff is detected as Godot Shader (Step 1b). Checks apply only to those shader files; standard GDScript / C# files in the same diff go through Families 1-7, 9.
+
+- **`[P0]` `texture()` call inside an `if` / `else` with a screen-derived or uniform condition.** Same warp-divergence rule as Unity's `ddx` / `ddy` constraint. Sample outside the branch and pick the result inside.
+- **`[P1]` Missing `render_mode` directive at the top.** Without an explicit `render_mode unshaded;` (or another), the shader inherits Godot's default lit pipeline — expensive for what's meant to be a flat shader. Be explicit.
+- **`[P1]` `SCREEN_TEXTURE` sampled in an opaque-queue material.** Godot populates `SCREEN_TEXTURE` only for transparent-queue materials; opaque materials read garbage (or last-frame). Either move the material to transparent (`render_mode unshaded, blend_mix;`) or restructure to avoid `SCREEN_TEXTURE`.
+- **`[P1]` `varying` written in only some branches of the vertex stage.** Godot 4's shading language requires every code path in the vertex shader to write to a declared `varying`. A conditional write yields undefined behavior in the fragment stage. Initialize at declaration or write unconditionally.
+- **`[P2]` `UV2` / second-color attribute referenced without a guarantee the mesh provides it.** Reading `UV2` from a `MeshInstance3D` whose mesh has only one UV channel returns zero — silent rendering bug. Document the prerequisite at the top of the shader (e.g., `// Requires mesh with UV2 channel; use ArrayMesh.add_surface_from_arrays with ARRAY_TEX_UV2`).
+- **`[P2]` Default precision not declared for mobile-targeted shaders.** Godot 4 defaults to `highp` on desktop, `mediump` on mobile. A shader needing `highp` on mobile (world positions, large UV ranges) without `precision highp float;` becomes a mobile-only artifact bug.
+
 #### Family 9 — Engine-agnostic patterns
 - Magic numbers without comment explaining intent (acceleration, timing thresholds, attack windows).
 - Hardcoded file paths that break on case-sensitive filesystems (macOS, Linux differ from Windows).
@@ -180,8 +237,9 @@ If any were applicable and you didn't check, do another pass.
 A minimal report shape (the engine and mode go in the report header so the reader knows the calibration):
 
 ```
-Engine: <detected>
-Mode:   <lean | normal | intense>
+Engine:     <detected>
+Subsystems: <comma-separated list, e.g., "Unity Shader (3), MonoBehaviour (8)"; or "(general only)">
+Mode:       <lean | normal | intense>
 
 Findings:
   · [P0] <file>:<line> — <one-line summary>
@@ -198,6 +256,7 @@ Findings are ordered by severity (`[P0]` first), then by file path. In `lean` mo
 
 ```
 ENGINE:      <detected engine>
+SUBSYSTEMS:  <comma-separated; or "(general only)" if none detected>
 DIFF SCOPE:  <range of commits / unstaged changes>
 
 [AUTO]    N findings applied (whitelist only)
@@ -223,6 +282,7 @@ DIFF SCOPE:  <range of commits / unstaged changes>
 - Coroutines: store the handle, stop in `OnDisable`.
 - Threading: stay on the main thread for `Transform`/`GameObject`. Use the Job System for parallel CPU work.
 - `[SerializeField] private` over `public` for inspector-exposed fields.
+- **Shaders:** float for world-space positions; declare sampler state explicitly; URP/HDRP use `_BaseMap` (not `_MainTex`); no derivatives in conditional blocks; compute thread groups capped at 256 on Mali (1024 on desktop).
 
 ### Godot 4.x (GDScript or C#)
 - `_process(delta)`: no `instantiate()`, no signal connection per frame.
@@ -230,6 +290,7 @@ DIFF SCOPE:  <range of commits / unstaged changes>
 - Free vs. queue_free: prefer `queue_free()` to avoid mid-frame deletion bugs.
 - `await` semantics: a node freed mid-await crashes — guard with `if not is_instance_valid(self): return`.
 - C# bindings: dispose `Godot.Object` subclasses explicitly to avoid native-side leaks.
+- **Shaders:** explicit `render_mode`; `SCREEN_TEXTURE` is transparent-queue only; declare `precision highp float;` for mobile world-space; vertex `varying` must be written unconditionally.
 
 ### Unreal 5 (C++ / Blueprint)
 - UObject lifecycle: use `TWeakObjectPtr` for cross-actor references.
