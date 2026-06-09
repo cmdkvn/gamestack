@@ -146,7 +146,13 @@ If shipping to consoles, the plan should call out:
 | PS5 | DualSense haptic + adaptive triggers; PSN trophies (platinum if structure permits); Quick Resume-like flows |
 | Xbox | Achievements; Quick Resume (arbitrary state restore); cloud saves; profile switch |
 
-## Output format
+## Inputs and outputs
+
+**Reads:** `design/tech-design.md` — schema: see [`docs/templates/tech-design.md`](../../docs/templates/tech-design.md).
+
+**Review output:** writes to `design/reviews/plan-tech-design.md`. Schema will be canonicalized in `docs/templates/plan-review.md` (Task 9 of this batch); inline format below remains active until then.
+
+Review format (inline pending Task 9 — `docs/templates/plan-review.md`):
 
 ```
 ENGINE

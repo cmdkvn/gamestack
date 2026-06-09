@@ -78,7 +78,13 @@ A game without planned hero shots will be hard to market. A game without rest be
 
 ### Step 7 — produce the review
 
-## Output format
+## Inputs and outputs
+
+**Reads:** `design/level-design.md` — schema: see [`docs/templates/level-design.md`](../../docs/templates/level-design.md).
+
+**Review output:** writes to `design/reviews/plan-level-design.md`. Schema will be canonicalized in `docs/templates/plan-review.md` (Task 9 of this batch); inline format below remains active until then.
+
+Review format (inline pending Task 9 — `docs/templates/plan-review.md`):
 
 ```
 MACRO STRUCTURE

@@ -104,7 +104,13 @@ The plan must include:
 
 Flag any missing accessibility items as top findings.
 
-## Output format
+## Inputs and outputs
+
+**Reads:** `design/audio-direction.md` — schema: see [`docs/templates/audio-direction.md`](../../docs/templates/audio-direction.md).
+
+**Review output:** writes to `design/reviews/plan-audio-direction.md`. Schema will be canonicalized in `docs/templates/plan-review.md` (Task 9 of this batch); inline format below remains active until then.
+
+Review format (inline pending Task 9 — `docs/templates/plan-review.md`):
 
 ```
 SFX TAXONOMY
