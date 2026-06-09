@@ -182,7 +182,7 @@ if [[ "$MODE" == "check-updates" ]]; then
     exit 1
   fi
   current="$(git -C "$GAMESTACK_DIR" rev-parse --short HEAD)"
-  version="$(cat "$GAMESTACK_DIR/VERSION" 2>/dev/null | tr -d '[:space:]')"
+  version="$(tr -d '[:space:]' < "$GAMESTACK_DIR/VERSION" 2>/dev/null)"
   echo "Local gamestack:  v${version:-unknown} @ ${current}"
 
   if git -C "$GAMESTACK_DIR" rev-parse --verify origin/main >/dev/null 2>&1; then
