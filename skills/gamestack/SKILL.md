@@ -41,11 +41,9 @@ If the developer's intent doesn't match any of these — e.g., they typed `/game
 Triggered by `/gamestack new`. This is the explicit version of the implicit bootstrap that happens when `/gamestack` (no args) finds no state.json.
 
 1. **Refuse if already initialized.** Check for `gamestack/state.json`. If it exists, reply: "state.json already exists at `gamestack/state.json`. To reinitialize, rename it and re-run, or use `/gamestack adopt` to rebuild state from what's on disk." Stop. Do NOT overwrite.
-2. **Walk the 4 bootstrap questions** from `## Process / Step 1` (working name, engine, platforms, phase) — same prompts, same auto-detection.
-3. **Ask the developer for `review_mode`** as a 5th question:
-   > "Review intensity? `lean` (only blockers/strongly-recommended findings), `normal` (full rubric — default), or `intense` (full rubric plus adversarial cross-checks)."
-4. **Write state.json** including the new `review_mode` field (defaulting to `normal` if the developer skips the question).
-5. **Create the scaffolding** (`gamestack/`, `design/`, `playtest/`, `.gamestack/` with the same conventions Step 1 of Process specifies).
+2. **Walk the 5 bootstrap questions** from `## Process / Step 1` (working name, engine, platforms, phase, review_mode) — same prompts, same auto-detection.
+3. **Write state.json** including the new `review_mode` field (defaulting to `normal` if the developer skips the question).
+4. **Create the scaffolding** (`gamestack/`, `design/`, `playtest/`, `.gamestack/` with the same conventions Step 1 of Process specifies).
 
 ## Adopt mode
 

@@ -26,6 +26,7 @@ Honor `project.review_mode` from `gamestack/state.json` (default: `normal`). Imp
 1. Check `.gamestack/scratch/review-mode-override` first; read + delete if present.
 2. Otherwise read `project.review_mode` from state.json. Default `normal`.
 3. Tag every finding with `[P0]`, `[P1]`, `[P2]`, or `[taste]` in its header line.
+4. Filter or expand the output per the mode table below.
 
 How each mode shapes the family scan:
 
