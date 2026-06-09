@@ -19,6 +19,90 @@ Use this skill when the developer:
 
 Also fire automatically (suggest it) at the end of any skill that produces a major artifact, so the developer can immediately see what's recommended next.
 
+## Arg parsing
+
+`/gamestack` accepts an optional first positional arg and optional flags. Parse the user's prompt for the patterns below before doing anything else.
+
+| Invocation | Behavior |
+|---|---|
+| `/gamestack` (no args) | Default — read state.json, recommend next steps. If state.json is absent, fall through to `new` mode automatically. |
+| `/gamestack new` | Explicit bootstrap. See `## New mode` below. Refuses if state.json already exists. |
+| `/gamestack adopt` | Retrofit onto an existing project. See `## Adopt mode` below. |
+| `/gamestack catalog` | Print the full skills-by-phase catalog (existing behavior). |
+| `/gamestack review=<mode>` | Persist `project.review_mode = <mode>` to state.json. `<mode>` is `lean`, `normal`, or `intense`. Acknowledge and stop (no other action). |
+| `/gamestack --review=<mode>` | One-shot override. Write `<mode>` to `.gamestack/scratch/review-mode-override`. Acknowledge and stop. The next review-aware skill the developer invokes will read and delete this file. |
+
+If multiple invocation forms are combined (e.g., `/gamestack new --review=lean`), apply the positional arg first (bootstrap), then the flag (write the scratch override at the end so it's ready for the next skill).
+
+If the developer's intent doesn't match any of these — e.g., they typed `/gamestack help` — fall back to the default behavior and gently surface the supported forms.
+
+## New mode
+
+Triggered by `/gamestack new`. This is the explicit version of the implicit bootstrap that happens when `/gamestack` (no args) finds no state.json.
+
+1. **Refuse if already initialized.** Check for `gamestack/state.json`. If it exists, reply: "state.json already exists at `gamestack/state.json`. To reinitialize, rename it and re-run, or use `/gamestack adopt` to rebuild state from what's on disk." Stop. Do NOT overwrite.
+2. **Walk the 5 bootstrap questions** from `## Process / Step 1` (working name, engine, platforms, phase, review_mode) — same prompts, same auto-detection.
+3. **Write state.json** including the new `review_mode` field (defaulting to `normal` if the developer skips the question).
+4. **Create the scaffolding** (`gamestack/`, `design/`, `playtest/`, `.gamestack/` with the same conventions Step 1 of Process specifies).
+
+## Adopt mode
+
+Triggered by `/gamestack adopt`. Retrofits gamestack onto a project that already has design docs, source code, or a build — typically a developer adding gamestack mid-development.
+
+1. **Refuse if already initialized.** Check for `gamestack/state.json`. If it exists, reply: "Already initialized. Use `/gamestack` to see next steps."
+2. **Engine detection.** Reuse the marker-file table from `## Process / Step 1`. If multiple engines' markers are present (rare; e.g., a Unity project that exports to web with a Three.js wrapper), ask the developer which is primary.
+3. **Artifact scan.** Check each canonical path; populate `artifacts.*` for files that exist.
+
+   | State field | Path |
+   |---|---|
+   | `artifacts.pitch` | `design/pitch.md` |
+   | `artifacts.design` | `design/mechanics.md` (preferred) or `design/game-design.md` (fallback) |
+   | `artifacts.narrative` | `design/narrative.md` |
+   | `artifacts.voice_cards` | `design/voice-cards.md` |
+   | `artifacts.art_direction` | `design/art-direction.md` |
+   | `artifacts.art_bible` | `design/art-bible.md` |
+   | `artifacts.tech_design` | `design/tech-design.md` |
+   | `artifacts.taste_profile` | `.gamestack/taste-profile.json` |
+
+4. **Phase inference.** Apply this decision tree in order; first match wins. The more-advanced phases are tested first so they beat less-advanced overlaps.
+
+   | Condition | Inferred phase |
+   |---|---|
+   | Engine markers + non-empty `playtest/` dir (≥2 `*.json` run files) | `production` |
+   | Engine markers + `design/tech-design.md` + `tests/` dir containing ≥1 `*.test.*` file | `vertical-slice` |
+   | Engine markers + `design/tech-design.md` (no qualifying `tests/`) | `prototype` |
+   | Engine markers, no `design/tech-design.md` | `prototype` |
+   | `design/pitch.md` exists, no engine markers | `pitch` |
+   | No engine markers AND no `design/*` files | `pitch` |
+   | Cannot determine | ask the developer |
+
+   Never auto-infer `polish`, `cert`, or `launched` — those require explicit dev confirmation.
+
+5. **Present a single confirmation summary:**
+
+   First ask the developer for the two fields that can't be detected from disk: (a) the project's working name, (b) the target platforms (multi-select). Then present the confirmation summary below with those values filled in.
+
+   ```
+   gamestack adopt — found:
+
+     Name:        <dev-provided>
+     Engine:      <detected, e.g., Unity 6000.0.31f1>
+     Platforms:   <dev-provided>
+     Phase:       <inferred> (override if wrong)
+     Artifacts:   <N> of 8 found
+       ✓ <each found path>
+       (missing: <comma-separated list of missing canonical artifact keys>)
+     Review mode: normal (default; change later with /gamestack review=<mode>)
+
+     Confirm? [yes / edit / cancel]
+   ```
+
+   If the user says `edit`, ask: "Which field? `[name | platforms | phase | review-mode]`". Walk them through that single edit, then re-present the summary. The detected `engine` is read-only — if it's wrong, the developer should cancel and re-run after correcting marker files. The `artifacts` block is also read-only (it reflects what's actually on disk).
+
+6. **On confirm, write state.json** with the confirmed values. Initialize `recent_runs` to `[]` (any prior skill runs from before adopt are not recorded). Initialize `next_recommended` to `[]` (will populate on the next `/gamestack` invocation). Create any missing convention dirs (`gamestack/`, `.gamestack/`) but **do NOT touch existing `design/` files**.
+
+7. **On cancel**, do nothing. Acknowledge and exit.
+
 ## Process
 
 ### Step 1 — locate or bootstrap `gamestack/state.json`
@@ -45,6 +129,7 @@ Look for `<project>/gamestack/state.json`.
    - `polish` — content locked, focus on feel / pacing / accessibility.
    - `cert` — submitting to PS5 / Xbox / Switch.
    - `launched` — live to players.
+5. **"Review intensity?"** `lean` / `normal` (recommended default) / `intense`. Stored as `project.review_mode`. The default `normal` means "full rubric"; `lean` filters down to `[P0]`/`[P1]` findings only; `intense` adds adversarial cross-checks. The developer can change this later with `/gamestack review=<mode>`.
 
 Write `gamestack/state.json` to the schema in [`../../docs/STATE.md`](../../docs/STATE.md). Initialize `artifacts.*` to empty strings, `recent_runs` to `[]`, `next_recommended` to `[]`.
 

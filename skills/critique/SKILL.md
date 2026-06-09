@@ -20,6 +20,28 @@ Trigger phrases per lens:
 
 If the developer asks "is my game good?" without specifying a lens, ask which kind of "good" — they're different audits.
 
+## Review mode
+
+Honor `project.review_mode` from `gamestack/state.json` (default: `normal`). The implementation contract is documented in [`docs/STATE.md#review-mode`](../../docs/STATE.md#review-mode). Summary:
+
+1. Before reading state.json, check for `.gamestack/scratch/review-mode-override`. If it exists, read its single-line value and delete the file. Use that value.
+2. Otherwise, read `project.review_mode` from state.json. Default to `normal` if absent.
+3. Tag every finding with `[P0]`, `[P1]`, `[P2]`, or `[taste]`.
+4. Filter or expand the output per the mode.
+
+Per-lens mode behavior:
+
+| Lens | lean (only [P0]/[P1]) | normal | intense (+ adversarial) |
+|---|---|---|---|
+| `--lens=fun` | Top 3 dead-mechanic flags + the single biggest fun gap | Full kernel-of-fun rubric | Full rubric + "could the kernel actually be X instead of what's stated in pitch.md?" challenge |
+| `--lens=onboarding` | Only `time-to-first-verb`, `time-to-first-decision`, and `time-to-first-reward` if they miss retention benchmarks | Full first-60-seconds rubric | Full rubric + "what if the player skips the tutorial entirely?" cross-check |
+| `--lens=feel` | Top 3 frame-feel violations (animation curves, hit-pause, input forgiveness) | Full 8-dimension rubric | Full rubric + per-dimension "what's the best-in-class reference here?" comparison |
+| `--lens=pacing` | Only monotony zones >15 minutes and hollow middles | Full tension-graph rubric | Full rubric + "does the tension graph still hold if the player plays out of order?" challenge |
+| `--lens=a11y` | Top-4 GAG violations + Xbox cert gates only | Top-4 + basic + intermediate tiers | All tiers + cognitive-load risks + per-disability-category sensitivity pass |
+| `--lens=perf` | Findings that miss frame-time budget (P99 > target) | Full FPS / frame-time / draw-call / GC / memory / scene-load report | Full report + "what's the regression risk per finding?" + per-platform extrapolation |
+
+The severity-tag convention applies regardless of lens. A `lean` perf run might say `[P0] 99th-percentile frame time 28ms on Switch (target: 16ms)`; a `normal` perf run might add `[P2] 0.1th-percentile spikes correlate with shader compile`; an `intense` run would also tag each finding with regression risk.
+
 ## Process
 
 The shared process across every lens:
@@ -42,8 +64,8 @@ PROJECT PHASE:    <phase>
 
 <lens-specific metrics block>
 
-TOP <K> FINDINGS (ordered by player-impact)
-  1. <finding>: <recommendation>
+TOP <K> FINDINGS (ordered by severity, then player-impact)
+  1. [P0|P1|P2|taste] <finding>: <recommendation>
   ...
 
 NEXT
