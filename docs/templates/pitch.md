@@ -1,6 +1,6 @@
 <!--
 artifact: pitch
-produced_by: design-jam
+authored_by: design-jam
 schema_version: 1
 when_written: "After /design-jam completes the six forcing questions and the developer confirms the pitch."
 -->

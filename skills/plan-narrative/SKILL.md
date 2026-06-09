@@ -79,8 +79,6 @@ If branching is more complex than the developer can QA solo, propose simplificat
 - Are **strings externalized** for localization from day one? (Hardcoded English = no foreign-language ship later.)
 - Is there an **editor's pass** scheduled before writing-complete?
 
-### Step 7 — produce the review
-
 ## Inputs and outputs
 
 **Reads:** `design/narrative.md` — schema: see [`docs/templates/narrative.md`](../../docs/templates/narrative.md).

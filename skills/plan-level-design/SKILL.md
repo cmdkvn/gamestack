@@ -76,8 +76,6 @@ Sketch the gate graph. If it's a deep tree, the late game will be a soft-lock ri
 
 A game without planned hero shots will be hard to market. A game without rest beats will be exhausting.
 
-### Step 7 — produce the review
-
 ## Inputs and outputs
 
 **Reads:** `design/level-design.md` — schema: see [`docs/templates/level-design.md`](../../docs/templates/level-design.md).

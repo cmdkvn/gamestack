@@ -41,9 +41,9 @@ To use one as a starting point in your game project: copy the file to the destin
 | [`audio-direction.md`](audio-direction.md) | `design/audio-direction.md` | developer | `/plan-audio-direction` | `/asset-audit`, `/critique --lens=feel` |
 | [`level-design.md`](level-design.md) | `design/level-design.md` | developer | `/plan-level-design` | `/scene-prototype`, `/dialogue-write`, `/critique --lens=pacing` |
 | [`tech-design.md`](tech-design.md) | `design/tech-design.md` | developer | `/plan-tech-design` | `/scene-prototype`, `/code-review-gamestack`, `/asset-audit` |
-| [`post-mortem.md`](post-mortem.md) | `design/post-mortems/<date>.md` | `/post-mortem` | — | `/learn` |
-| [`patch-notes.md`](patch-notes.md) | `patch-notes/<version>.md` | `/patch-notes` | — | release pipeline (`/publish`) |
-| [`cert-readiness.md`](cert-readiness.md) | `cert/<platform>.md` | `/cert-readiness` | — | `/publish`, `/cert-freeze` |
+| [`post-mortem.md`](post-mortem.md) | `studio/retros/YYYY-WW.md` | `/post-mortem` | — | `/learn` |
+| [`patch-notes.md`](patch-notes.md) | `marketing/patch-notes/vX.Y.Z.md` | `/patch-notes` | — | release pipeline (`/publish`) |
+| [`cert-readiness.md`](cert-readiness.md) | `playtest/cert-readiness/<platform>-YYYY-MM-DD.md` | `/cert-readiness` | — | `/publish`, `/cert-freeze` |
 | [`plan-review.md`](plan-review.md) | `design/reviews/plan-<discipline>.md` | every `/plan-*` skill | — | `/autoplan`, `/post-mortem` |
 
 ## Note on placement
