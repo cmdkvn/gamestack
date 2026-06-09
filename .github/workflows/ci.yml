@@ -65,7 +65,7 @@ jobs:
       - name: Check setup script
         run: shellcheck setup
       - name: Check host scripts
-        run: shellcheck hosts/*.sh
+        run: shellcheck -s bash hosts/*.sh
       - name: Check CLI shims
         run: shellcheck bin/gamestack-*
 
