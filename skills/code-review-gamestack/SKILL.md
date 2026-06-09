@@ -178,6 +178,17 @@ This family fires only when at least one file in the diff is detected as Unity S
 - **`[P2]` sRGB / linear sampling mismatch.** Texture imported as `sRGB (Color Texture)` but sampled with operations in linear space without `pow(c, 2.2)` (or vice-versa). Washed-out or overly-dark output. Comment which colorspace each sampler input expects at the top of the shader.
 - **`[P2]` `#pragma multi_compile FOO BAR` without underscore-default.** When no keyword is set, the shader silently fails to compile in some contexts. Prefer `#pragma multi_compile _ FOO BAR` so the unset case is explicit.
 
+#### Family 11 — Godot Shaders (.gdshader / GLSL-ish)
+
+This family fires only when at least one file in the diff is detected as Godot Shader (Step 1b). Checks apply only to those shader files; standard GDScript / C# files in the same diff go through Families 1-7, 9.
+
+- **`[P0]` `texture()` call inside an `if` / `else` with a screen-derived or uniform condition.** Same warp-divergence rule as Unity's `ddx` / `ddy` constraint. Sample outside the branch and pick the result inside.
+- **`[P1]` Missing `render_mode` directive at the top.** Without an explicit `render_mode unshaded;` (or another), the shader inherits Godot's default lit pipeline — expensive for what's meant to be a flat shader. Be explicit.
+- **`[P1]` `SCREEN_TEXTURE` sampled in an opaque-queue material.** Godot populates `SCREEN_TEXTURE` only for transparent-queue materials; opaque materials read garbage (or last-frame). Either move the material to transparent (`render_mode unshaded, blend_mix;`) or restructure to avoid `SCREEN_TEXTURE`.
+- **`[P1]` `varying` written in only some branches of the vertex stage.** Godot 4's shading language requires every code path in the vertex shader to write to a declared `varying`. A conditional write yields undefined behavior in the fragment stage. Initialize at declaration or write unconditionally.
+- **`[P2]` `UV2` / second-color attribute referenced without a guarantee the mesh provides it.** Reading `UV2` from a `MeshInstance3D` whose mesh has only one UV channel returns zero — silent rendering bug. Document the prerequisite at the top of the shader (e.g., `// Requires mesh with UV2 channel; use ArrayMesh.add_surface_from_arrays with ARRAY_TEX_UV2`).
+- **`[P2]` Default precision not declared for mobile-targeted shaders.** Godot 4 defaults to `highp` on desktop, `mediump` on mobile. A shader needing `highp` on mobile (world positions, large UV ranges) without `precision highp float;` becomes a mobile-only artifact bug.
+
 #### Family 9 — Engine-agnostic patterns
 - Magic numbers without comment explaining intent (acceleration, timing thresholds, attack windows).
 - Hardcoded file paths that break on case-sensitive filesystems (macOS, Linux differ from Windows).
