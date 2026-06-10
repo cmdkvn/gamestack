@@ -257,6 +257,13 @@ for cmd in git ln find basename; do
   fi
 done
 
+# CLIs need bun at runtime (skills don't). Warn at install time instead of letting the
+# first CLI invocation die with exit 127.
+if [[ $SELECT_CLI -eq 1 && "$MODE" == "install" ]] && ! command -v bun >/dev/null 2>&1; then
+  echo "warning: bun not found — the gamestack-* CLIs need it at runtime." >&2
+  echo "  Skills work without it. To use the CLIs:  brew install bun  (or see https://bun.sh)" >&2
+fi
+
 # Load the host's implementation.
 # shellcheck source=/dev/null
 source "$HOST_SCRIPT"
