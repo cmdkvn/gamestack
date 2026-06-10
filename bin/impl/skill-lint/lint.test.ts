@@ -12,6 +12,9 @@ beforeAll(() => {
   // Set up a minimal gamestack-like layout.
   mkdirSync(join(scratchRoot, "skills"), { recursive: true });
   mkdirSync(join(scratchRoot, "skills", "playtest", "scenarios"), { recursive: true });
+  mkdirSync(join(scratchRoot, "docs", "templates"), { recursive: true });
+  // Seed one real template so positive-case lookups succeed.
+  writeFileSync(join(scratchRoot, "docs", "templates", "pitch.md"), "# pitch template\n");
 });
 
 afterAll(() => {
@@ -138,5 +141,32 @@ describe("runLint", () => {
     expect(lenient.passed).toBe(true);
     expect(strict.passed).toBe(false);
     deleteSkill("warns-only");
+  });
+
+  test("catches link to non-existent template", () => {
+    writeSkill(
+      "template-linker",
+      `---\nname: template-linker\ndescription: links to a template.\n---\n\n# template-linker\n\n## When to fire\nnow.\n## Process\nstuff.\n## Output\nWrite to design/nonexistent.md — schema: see [\`docs/templates/nonexistent.md\`](../../docs/templates/nonexistent.md).\n## Related\nlinks.\n`,
+    );
+    const r = runLint({ gamestackRoot: scratchRoot });
+    const offending = r.findings.filter(
+      (f) => f.rule === "templates/link-target-exists" && f.path.includes("template-linker"),
+    );
+    expect(offending.length).toBe(1);
+    expect(offending[0]?.detail).toContain("nonexistent");
+    deleteSkill("template-linker");
+  });
+
+  test("template link to existing pitch.md produces no finding", () => {
+    writeSkill(
+      "good-template-linker",
+      `---\nname: good-template-linker\ndescription: links to a real template.\n---\n\n# good-template-linker\n\n## When to fire\nnow.\n## Process\nstuff.\n## Output\nWrite to design/pitch.md — schema: see [\`docs/templates/pitch.md\`](../../docs/templates/pitch.md).\n## Related\nlinks.\n`,
+    );
+    const r = runLint({ gamestackRoot: scratchRoot });
+    const offending = r.findings.filter(
+      (f) => f.rule === "templates/link-target-exists" && f.path.includes("good-template-linker"),
+    );
+    expect(offending.length).toBe(0);
+    deleteSkill("good-template-linker");
   });
 });
