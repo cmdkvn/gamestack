@@ -52,7 +52,7 @@ If the phase doesn't match a default, ask the developer to point at a scenario f
 
 If the developer explicitly passed `--mode=screenshot-diff` or `--offline`, skip the probe and use the chosen mode.
 
-Otherwise, probe the SDK at the default port (Unity: 7331, Godot: 7332):
+Otherwise, probe the SDK at the default port (Unity: 7331, Godot: 7332, web: 7334 — the web SDK has no in-engine server, so `gamestack-web-bridge` must be running and the game open in a browser before the probe will answer):
 
 ```bash
 curl -sf -m 2 http://localhost:7331/health

@@ -35,7 +35,7 @@ Options:
   --wait-timeout <s>      (screenshot-diff) Seconds to wait for a new PNG per step.
                           Default: 120.
   --endpoint <url>        (sdk mode) Override scenario.endpoint.
-  --engine <unity|godot>  (sdk mode) Sets default port (7331 / 7332).
+  --engine <unity|godot|web>  (sdk mode) Sets default port (7331 / 7332 / 7334).
   --run-dir <path>        Where to write run.json + screenshots
                           (default: <project>/playtest/playtest-<scenario>-<ts>/).
   --project <path>        Project root (default: cwd).
@@ -130,7 +130,7 @@ async function main(argv: string[]): Promise<number> {
   if (parsed.has("continue-on-failure")) scenario.continue_on_failure = true;
 
   const engineRaw = parsed.get("engine");
-  const engine = engineRaw && (engineRaw === "unity" || engineRaw === "godot") ? engineRaw : "unity";
+  const engine = engineRaw && (engineRaw === "unity" || engineRaw === "godot" || engineRaw === "web") ? engineRaw : "unity";
 
   const projectRoot = resolve(common.project);
 
