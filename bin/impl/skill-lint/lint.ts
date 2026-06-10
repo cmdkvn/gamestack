@@ -58,7 +58,10 @@ export function runLint(input: LintInput): LintReport {
   }
 
   lintNoReadmeInClaudeDirs(input.gamestackRoot, findings);
-  lintCrossLinks(skillDirs, input.gamestackRoot, findings);
+  const docsToCheck = collectDocsToCheck(input.gamestackRoot, skillDirs);
+  const templateNames = listTemplates(input.gamestackRoot);
+  lintCrossLinks(skillDirs, input.gamestackRoot, findings, docsToCheck);
+  lintTemplateLinks(docsToCheck, templateNames, input.gamestackRoot, findings);
 
   const counts: Record<Severity, number> = { ERROR: 0, WARN: 0, INFO: 0 };
   for (const f of findings) counts[f.severity] += 1;
@@ -251,6 +254,16 @@ function lintNoReadmeInClaudeDirs(root: string, findings: LintFinding[]): void {
   }
 }
 
+function listTemplates(root: string): Set<string> {
+  const dir = join(root, "docs", "templates");
+  if (!existsSync(dir)) return new Set();
+  return new Set(
+    readdirSync(dir)
+      .filter((f) => f.endsWith(".md") && f !== "README.md")
+      .map((f) => f.replace(/\.md$/, "")),
+  );
+}
+
 function collectDocsToCheck(root: string, skillDirs: string[]): string[] {
   const docs: string[] = [];
   pushIfExists(docs, join(root, "docs", "skills.md"));
@@ -275,12 +288,15 @@ function collectDocsToCheck(root: string, skillDirs: string[]): string[] {
   return docs;
 }
 
-function lintCrossLinks(skillDirs: string[], root: string, findings: LintFinding[]): void {
+function lintCrossLinks(
+  skillDirs: string[],
+  root: string,
+  findings: LintFinding[],
+  docsToCheck: string[],
+): void {
   const skillNames = new Set(skillDirs.map((d) => basename(d)));
   const skillPathRe = /\(\.\.\/skills\/([a-z0-9-]+)\/SKILL\.md\)/g;
   const skillsDoubleHopRe = /\(\.\.\/\.\.\/skills\/([a-z0-9-]+)\/SKILL\.md\)/g;
-
-  const docsToCheck = collectDocsToCheck(root, skillDirs);
 
   for (const doc of docsToCheck) {
     let text: string;
@@ -303,6 +319,38 @@ function lintCrossLinks(skillDirs: string[], root: string, findings: LintFinding
       }
     }
     re.lastIndex = 0;
+  }
+}
+
+function lintTemplateLinks(
+  docsToCheck: string[],
+  templateNames: Set<string>,
+  root: string,
+  findings: LintFinding[],
+): void {
+  const TEMPLATE_LINK_RE =
+    /\(\.{1,2}(?:\/\.\.)?\/docs\/templates\/([a-z0-9-]+)\.md(?:#[^)]*)?\)/g;
+
+  for (const doc of docsToCheck) {
+    let text: string;
+    try {
+      text = readFileSync(doc, "utf8");
+    } catch {
+      continue;
+    }
+    TEMPLATE_LINK_RE.lastIndex = 0;
+    let m: RegExpExecArray | null;
+    while ((m = TEMPLATE_LINK_RE.exec(text)) !== null) {
+      const target = m[1];
+      if (target && !templateNames.has(target)) {
+        findings.push({
+          severity: "ERROR",
+          path: relative(root, doc),
+          rule: "templates/link-target-exists",
+          detail: `link points to docs/templates/${target}.md but no such template exists`,
+        });
+      }
+    }
   }
 }
 
