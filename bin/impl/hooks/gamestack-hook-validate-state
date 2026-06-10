@@ -24,13 +24,15 @@ fi
 ENGINES='["unity","godot","unreal","gamemaker","bevy","web","unknown"]'
 PHASES='["pitch","prototype","vertical-slice","production","polish","cert","launched"]'
 MODES='["lean","normal","intense"]'
+LEVELS='["beginner","intermediate","expert"]'
 
-errors="$(jq -r --argjson engines "$ENGINES" --argjson phases "$PHASES" --argjson modes "$MODES" '
+errors="$(jq -r --argjson engines "$ENGINES" --argjson phases "$PHASES" --argjson modes "$MODES" --argjson levels "$LEVELS" '
   [
     (if .schema != 1 then "schema must be 1 (got \(.schema // "missing"))" else empty end),
     (if (.project.engine | IN($engines[])) | not then "project.engine must be one of \($engines | join("|")) (got \(.project.engine // "missing"))" else empty end),
     (if (.project.phase  | IN($phases[]))  | not then "project.phase must be one of \($phases | join("|")) (got \(.project.phase  // "missing"))" else empty end),
-    (if (.project.review_mode != null) and ((.project.review_mode | IN($modes[])) | not) then "project.review_mode must be one of \($modes | join("|")) (got \(.project.review_mode))" else empty end)
+    (if (.project.review_mode != null) and ((.project.review_mode | IN($modes[])) | not) then "project.review_mode must be one of \($modes | join("|")) (got \(.project.review_mode))" else empty end),
+    (if (.project.experience != null) and ((.project.experience | IN($levels[])) | not) then "project.experience must be one of \($levels | join("|")) (got \(.project.experience))" else empty end)
   ] | .[]
 ' "$FILE_PATH")"
 

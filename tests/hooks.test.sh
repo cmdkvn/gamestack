@@ -11,6 +11,8 @@
 #   8. setup --uninstall --hooks-for removes symlinks + cleans settings
 #   9. setup --uninstall --hooks-for preserves user's pre-existing hooks
 #  10. setup --status --hooks-for reports installation state
+#  11. validate-state rejects bad-enum experience
+#  12. validate-state accepts valid experience
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -314,6 +316,53 @@ _assert_exit 0 "$rc" "setup --status --hooks-for"
 _assert_contains "gamestack-hook-session-start" "$out" "status mentions session-start hook"
 _assert_contains "gamestack-hook-validate-state" "$out" "status mentions validate-state hook"
 _assert_contains "settings.local.json" "$out" "status mentions settings file"
+
+# ---------------------------------------------------------------------------
+# Scenario 11 — validate-state rejects bad-enum experience
+# ---------------------------------------------------------------------------
+echo "--- validate-state: rejects bad-enum experience"
+mkdir -p "$SCRATCH/p11/gamestack"
+cat > "$SCRATCH/p11/gamestack/state.json" <<'EOF'
+{
+  "schema": 1,
+  "project": {
+    "name": "Test",
+    "engine": "web",
+    "phase": "prototype",
+    "experience": "noob"
+  }
+}
+EOF
+set +e
+out="$(echo "{\"tool_input\":{\"file_path\":\"$SCRATCH/p11/gamestack/state.json\"}}" | "$HOOK_VALIDATE" 2>&1)"
+rc=$?
+set -e
+_assert_exit 1 "$rc" "validate-state on bad-enum experience"
+_assert_contains "project.experience must be one of" "$out" "validate-state bad-enum experience message"
+_assert_contains "noob" "$out" "validate-state bad-enum experience mentions offending value"
+
+# ---------------------------------------------------------------------------
+# Scenario 12 — validate-state accepts a valid experience value
+# ---------------------------------------------------------------------------
+echo "--- validate-state: accepts valid experience"
+mkdir -p "$SCRATCH/p12/gamestack"
+cat > "$SCRATCH/p12/gamestack/state.json" <<'EOF'
+{
+  "schema": 1,
+  "project": {
+    "name": "Test",
+    "engine": "web",
+    "phase": "prototype",
+    "experience": "beginner"
+  }
+}
+EOF
+set +e
+out="$(echo "{\"tool_input\":{\"file_path\":\"$SCRATCH/p12/gamestack/state.json\"}}" | "$HOOK_VALIDATE" 2>&1)"
+rc=$?
+set -e
+_assert_exit 0 "$rc" "validate-state on valid experience"
+_assert_empty "$out" "validate-state on valid experience (no output)"
 
 # ---------------------------------------------------------------------------
 # Result
