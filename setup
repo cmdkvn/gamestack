@@ -25,6 +25,7 @@ MODE="install"
 SELECT_SKILLS=0
 SELECT_CLI=0
 CLI_DIR=""
+HOOKS_FOR=""
 
 usage() {
   cat <<'EOF'
@@ -44,6 +45,9 @@ Options:
   --cli-dir <path>   Override the CLI install directory. Auto-detects
                      /opt/homebrew/bin, /usr/local/bin, or ~/.local/bin
                      otherwise.
+  --hooks-for <path> Install end-user hooks (session-start, validate-state)
+                     into <path>/.claude/settings.local.json. Symlinks the
+                     hook scripts into the CLI dir. Requires jq.
   --uninstall        Remove gamestack symlinks (scoped by --skills/--cli).
   --status           Show install status without changing anything (scoped by
                      --skills/--cli).
@@ -60,6 +64,7 @@ Examples:
   ./setup --status --cli            # show CLI status only
   ./setup --uninstall --skills      # remove skills, leave CLIs in place
   ./setup --uninstall               # remove both
+  ./setup --hooks-for ~/mygame      # install hooks into a project (CLIs auto-link)
 
 ./setup is idempotent. Re-run it any time (for example after `git pull`)
 to sync ~/.claude with this checkout. It detects drift, prints what will
@@ -158,6 +163,18 @@ while [[ $# -gt 0 ]]; do
       ;;
     --cli-dir=*)
       CLI_DIR="${1#*=}"
+      shift
+      ;;
+    --hooks-for)
+      if [[ $# -lt 2 ]]; then
+        echo "error: --hooks-for requires a value" >&2
+        exit 1
+      fi
+      HOOKS_FOR="$2"
+      shift 2
+      ;;
+    --hooks-for=*)
+      HOOKS_FOR="${1#*=}"
       shift
       ;;
     *)
@@ -260,6 +277,68 @@ if [[ -n "$CLI_DIR" && "$CLI_DIR" == "~"* ]]; then
   CLI_DIR="${HOME}${CLI_DIR:1}"
 fi
 
+# ---------------------------------------------------------------------------
+# Hook install / uninstall / status helpers (Batch E1).
+#
+# Hook scripts live in bin/impl/hooks/. They're symlinked into CLI_DIR
+# alongside the gamestack-* CLIs, and wired into the user's
+# <project>/.claude/settings.local.json so Claude Code picks them up.
+# ---------------------------------------------------------------------------
+
+_gamestack_install_hooks() {
+  local cli_dir="$1"
+  local project_dir="$2"
+
+  if [[ -z "$cli_dir" ]]; then
+    echo "error: --hooks-for requires --cli-dir or a detected CLI dir" >&2
+    return 1
+  fi
+  if ! command -v jq >/dev/null 2>&1; then
+    echo "error: jq is required for --hooks-for (install: brew install jq)" >&2
+    return 1
+  fi
+
+  mkdir -p "$cli_dir"
+  for hook in gamestack-hook-session-start gamestack-hook-validate-state; do
+    ln -sf "$GAMESTACK_DIR/bin/impl/hooks/$hook" "$cli_dir/$hook"
+  done
+
+  local settings="$project_dir/.claude/settings.local.json"
+  mkdir -p "$(dirname "$settings")"
+  [[ -f "$settings" ]] || echo '{}' > "$settings"
+
+  local ss="$cli_dir/gamestack-hook-session-start"
+  local vs="$cli_dir/gamestack-hook-validate-state"
+  local tmp
+  tmp="$(mktemp)"
+  trap 'rm -f "$tmp"' RETURN
+
+  jq --arg ss "$ss" --arg vs "$vs" '
+    .hooks //= {} |
+    .hooks.SessionStart = (
+      (.hooks.SessionStart // [])
+      | map(select((.hooks // []) | all(.command != $ss)))
+      | . + [{
+          "matcher": "startup|resume|clear",
+          "hooks": [{"type": "command", "command": $ss}]
+        }]
+    ) |
+    .hooks.PostToolUse = (
+      (.hooks.PostToolUse // [])
+      | map(select((.hooks // []) | all(.command != $vs)))
+      | . + [{
+          "matcher": "Edit|Write|MultiEdit",
+          "hooks": [{"type": "command", "command": $vs}]
+        }]
+    )
+  ' "$settings" > "$tmp"
+  mv "$tmp" "$settings"
+
+  echo "==> Installed hooks into $project_dir/.claude/settings.local.json"
+  echo "    - gamestack-hook-session-start  → $ss"
+  echo "    - gamestack-hook-validate-state → $vs"
+}
+
 case "$MODE" in
   install)
     # Compute the plan(s) for the selected scopes. Both are captured up front so
@@ -273,7 +352,7 @@ case "$MODE" in
       clis_plan="$(_gamestack_plan_clis "$CLI_DIR")"
     fi
 
-    if [[ -z "$skills_plan" && -z "$clis_plan" ]]; then
+    if [[ -z "$skills_plan" && -z "$clis_plan" && -z "$HOOKS_FOR" ]]; then
       echo "==> Checking gamestack install for $HOST..."
       summary=""
       if [[ $SELECT_SKILLS -eq 1 ]]; then
@@ -292,25 +371,31 @@ case "$MODE" in
       exit 0
     fi
 
-    echo "==> gamestack would apply these changes for $HOST:"
-    echo
-    if [[ -n "$skills_plan" ]]; then
-      printf '%s\n' "$skills_plan" | _gamestack_render_plan_section "Skills"
-    fi
-    if [[ -n "$clis_plan" ]]; then
-      [[ -n "$skills_plan" ]] && echo
-      printf '%s\n' "$clis_plan" | _gamestack_render_plan_section "CLIs"
-    fi
-    echo
-    echo "==> Applying..."
+    if [[ -n "$skills_plan" || -n "$clis_plan" ]]; then
+      echo "==> gamestack would apply these changes for $HOST:"
+      echo
+      if [[ -n "$skills_plan" ]]; then
+        printf '%s\n' "$skills_plan" | _gamestack_render_plan_section "Skills"
+      fi
+      if [[ -n "$clis_plan" ]]; then
+        [[ -n "$skills_plan" ]] && echo
+        printf '%s\n' "$clis_plan" | _gamestack_render_plan_section "CLIs"
+      fi
+      echo
+      echo "==> Applying..."
 
-    export GAMESTACK_QUIET_NOOPS=1
-    if [[ $SELECT_SKILLS -eq 1 ]]; then
-      gamestack_install
+      export GAMESTACK_QUIET_NOOPS=1
+      if [[ $SELECT_SKILLS -eq 1 ]]; then
+        gamestack_install
+      fi
+      if [[ $SELECT_CLI -eq 1 && -n "$CLI_DIR" ]]; then
+        [[ $SELECT_SKILLS -eq 1 ]] && echo
+        _gamestack_install_clis_to "$CLI_DIR"
+      fi
     fi
-    if [[ $SELECT_CLI -eq 1 && -n "$CLI_DIR" ]]; then
-      [[ $SELECT_SKILLS -eq 1 ]] && echo
-      _gamestack_install_clis_to "$CLI_DIR"
+    if [[ -n "$HOOKS_FOR" ]]; then
+      [[ -n "$skills_plan" || -n "$clis_plan" ]] && echo
+      _gamestack_install_hooks "$CLI_DIR" "$HOOKS_FOR"
     fi
     ;;
   uninstall)
