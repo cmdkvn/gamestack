@@ -14,6 +14,7 @@ gamestack/bin/gamestack-playtest-daemon --help
 The daemon requires the gamestack engine SDK to be running inside the target game build:
 - Unity SDK at `http://localhost:7331` (default)
 - Godot SDK at `http://localhost:7332`
+- Web SDK (`gamestack-web-bridge`) at `http://localhost:7334`
 
 ## Usage
 
@@ -39,7 +40,7 @@ gamestack-playtest-daemon --scenario scenarios/05-cert-save-fuzz.json --format j
 |---|---|---|
 | `--scenario <path>` | — required — | JSON scenario file. |
 | `--endpoint <url>` | scenario.endpoint or derived | Override the SDK endpoint. |
-| `--engine <unity\|godot>` | `unity` | Sets default port (7331 vs 7332) when no endpoint is set. |
+| `--engine <unity\|godot\|web>` | `unity` | Sets default port (7331 / 7332 / 7334) when no endpoint is set. |
 | `--run-dir <path>` | derived | Where to write `run.json` + screenshots. |
 | `--project <path>` | `$PWD` | Project root used to derive `--run-dir` if not set. |
 | `--format <md\|json\|both>` | `md` | Output format for the summary report. |
