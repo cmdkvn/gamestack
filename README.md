@@ -23,6 +23,7 @@ You:    /autoplan                        # runs all the plan-* skills in sequenc
 
 You:    /scene-prototype "first verb"    # emits Unity C# / Godot GDScript scaffolding
 You:    /build-feature "first verb"      # implements the verb — code, not TODOs
+You:    /source-assets                   # swaps placeholder rects for licensed art + audio
 You:    /critique --lens=fun             # is the kernel of fun present?
 
 You:    /code-review-gamestack           # gameplay-engineer rubric — surfaces, doesn't auto-fix
@@ -118,7 +119,7 @@ Solo indie devs shipping single-player narrative / arcade / puzzle / platforming
 
 If you're building hyper-casual, live-service, or multiplayer games, the discipline-scaffold skills (design, code review, accessibility, cert) still apply; the specialized skills you'd want (matchmaking design, retention metric review, server-cost balancing) aren't shipped yet.
 
-## Skills (v1.0.0)
+## Skills
 
 The catalog is **37 skills**. Pick whichever fits your phase — `/gamestack` will suggest 1–2 if you're not sure.
 
@@ -241,7 +242,7 @@ Every CLI is `0 = clean / 1 = regression / 2 = bad args / 127 = bun missing`. Wi
 
 ## Engine SDKs
 
-Each SDK exposes a loopback-only HTTP server you drop into a running build. Same endpoints (`/state`, `/screenshot`, `/input`, `/snapshot`, `/restore`, `/breakpoint`), same JSON shapes — only the port differs. `/playtest` scenarios run unchanged across engines.
+Each SDK exposes a loopback-only HTTP server you drop into a running build (for web, the `gamestack-web-bridge` process hosts it beside the browser). Same eight endpoints (`/health`, `/state`, `/screenshot`, `/input`, `/snapshot`, `/snapshots`, `/restore`, `/breakpoint`), same JSON shapes — only the port differs. `/playtest` scenarios run unchanged across engines.
 
 | Engine | Port | Status | Verified |
 |---|---|---|---|
@@ -308,7 +309,7 @@ If you want to share feedback with the maintainer, run `gamestack-skill-feedback
 
 - The 37 skills, 10 CLIs, and 4 engine SDKs in this repo are **functionally shipped** — they pass the test suite (`bun test` = 112 / 112), the linter (`gamestack-skill-lint`), and have documented contracts.
 - They have **not been validated end-to-end by a real shipped game using gamestack throughout**. The case studies in [`docs/case-studies/`](docs/case-studies/) walk reference Unity / Godot projects; they are not retrospectives of a shipped commercial title.
-- Engine SDKs are validated against an in-process `Bun.serve()` fake. The first real Unity / Godot game using them will surface engine-side bugs the fake doesn't catch.
+- Engine SDKs are validated against in-process fakes plus their own unit suites. The first real game using each one will surface engine-side bugs the fakes don't catch.
 - Six of the nine hosts (factory, slate, kiro, hermes, gbrain, plus partial cursor) have **unverified** install scripts. They follow the shared contract; nobody has run them in their respective AI agents and confirmed a skill fired.
 - The Pitch → Plan → Build → Review → Playtest → Ship → Reflect *narrative* is a useful menu shape, but real solo dev work is iterative and chaotic. The skill catalog is a menu, not a path. `/gamestack` exists to make this explicit.
 

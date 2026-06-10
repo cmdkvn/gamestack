@@ -14,9 +14,11 @@ See [README.md](../README.md) for the user-facing pitch.
 gamestack/
 ├── setup                          # install script (entry point for users)
 ├── skills/<name>/SKILL.md         # skill definitions — the meat of the project
+├── skills/_state-conventions.md   # shared state.json read/write + experience-posture contract
 ├── hosts/<name>.sh                # per-AI-agent host install logic
-├── engines/<unity|godot>/         # engine SDKs (post-M0)
-├── bin/                           # standalone CLIs (post-M0)
+├── engines/<unity|godot|ios|web>/ # engine SDKs — one 8-endpoint contract, four implementations
+├── bin/                           # CLI shims (Bun runtime); implementations in bin/impl/
+├── tests/                         # bash integration tests (setup sync, hooks)
 ├── docs/                          # deep-dive references
 └── .claude/                       # this file + repo dev settings
 ```
@@ -26,7 +28,7 @@ gamestack/
 1. Skills are markdown files with YAML frontmatter (`name`, `description`). Both fields matter:
    - `name` is the slash-command name and the discovery key for same-name overrides.
    - `description` is read by Claude's skill-selection mechanism. Keep it specific. Lead with the verbs the user would type.
-2. Skills shouldn't import / depend on other gamestack skills — each is self-contained markdown.
+2. Skills shouldn't import / depend on other gamestack skills — each is self-contained markdown. The one shared contract is [`skills/_state-conventions.md`](../skills/_state-conventions.md): how to read/write `gamestack/state.json`, and the `project.experience` posture dial (`beginner` flips `[PROPOSE]` → `[AUTO]`-with-explanation, defines jargon, narrates editor steps). Skills reference it; they don't restate it.
 3. Skill content is prompt context for Claude when the skill fires. Be precise about: when to use, the process to follow, what NOT to do, and the output format.
 4. Test a skill by symlinking it into `~/.claude/skills/<name>/` and opening a fresh Claude Code session that would naturally trigger it.
 
