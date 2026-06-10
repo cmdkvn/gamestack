@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>gamestack web SDK — basic sample</title>
+  <style>
+    body { font-family: monospace; background: #11141b; color: #e8e8e8; margin: 2rem; }
+    canvas { border: 1px solid #3a4154; display: block; margin-top: 1rem; }
+    code { color: #5ec26a; }
+  </style>
+</head>
+<body>
+  <h1>gamestack web SDK — basic sample</h1>
+  <p>
+    Arrow keys move the square. Right edge scores; left edge hurts.
+    Serve this directory (<code>python3 -m http.server</code>), run
+    <code>gamestack-web-bridge</code> in another terminal, then try
+    <code>curl http://127.0.0.1:7334/health</code>.
+  </p>
+  <canvas id="game" width="400" height="240"></canvas>
+  <script type="module" src="./sample-gamestack-hookup.js"></script>
+</body>
+</html>
