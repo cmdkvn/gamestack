@@ -36,6 +36,8 @@ Conventions live in [`.claude/CLAUDE.md`](.claude/CLAUDE.md) (which is read by C
 
 ## Testing locally
 
+**Prerequisites:** [`bun`](https://bun.sh) for the TypeScript CLIs and tests; [`jq`](https://jqlang.org/) for the `validate-skill-change` PostToolUse hook (`brew install jq` on macOS, `apt-get install jq` on Debian/Ubuntu).
+
 | Want to check... | Run this |
 |---|---|
 | Skill frontmatter, cross-links, sections | `bin/gamestack-skill-lint --warn-as-error` |
