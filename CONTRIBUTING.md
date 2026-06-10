@@ -46,7 +46,7 @@ Conventions live in [`.claude/CLAUDE.md`](.claude/CLAUDE.md) (which is read by C
 | Setup script idempotency | `bash tests/setup-sync.test.sh` |
 | End-user hook install / uninstall | `bash tests/hooks.test.sh` |
 
-Behavioral skill tests (scenario fixtures + a runner) are planned — see [docs/PLAN.md](docs/PLAN.md). Until then, skills are validated by reading them and trying them.
+Skills are validated by `gamestack-skill-lint` (frontmatter integrity, recommended sections, cross-link existence, template-link existence) and by manual reading + trying. A behavioral test runner was considered during the maturity roadmap and explicitly deselected — see [PR #12](https://github.com/cmdkvn/gamestack/pull/12) for the rationale.
 
 ## Commit format
 

@@ -37,6 +37,7 @@ gamestack/
 - **No emojis** in skill content unless the user is going to see them in a deliberate UI moment.
 - **Be skeptical, not flattering** in the voice of each skill. Skills are senior practitioners, not cheerleaders.
 - **Test changes against the dogfood install:** if you've edited a skill, the symlinked install picks it up live — confirm Claude can still invoke it correctly.
+- **Dogfood lint hook:** `gamestack-skill-lint --warn-as-error` re-runs automatically (PostToolUse hook in `.claude/settings.json` → `bin/impl/skill-lint/validate-skill-change.sh`) when Claude edits a `skills/*/SKILL.md` or a `docs/templates/*.md`. Drift surfaces in-loop rather than waiting for CI. Requires `jq` (see [`CONTRIBUTING.md`](../CONTRIBUTING.md)).
 
 ## When developing a new skill
 
