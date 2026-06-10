@@ -64,7 +64,7 @@ Not "implement jump physics." If you can't write the sentence, the feature is to
 Write the gameplay code: input handling, state changes, collision, and at least one piece of player feedback (the thing moves, flashes, or makes a sound — a mechanic with no feedback is untestable by a human).
 
 - Respect `design/tech-design.md` conventions throughout.
-- Placeholder assets are fine — colored rects, primitive meshes, generated beeps. Note every placeholder explicitly so `/source-assets` can replace them later.
+- Placeholder assets are fine — colored rects, primitive meshes, generated beeps. Note every placeholder explicitly so [`/source-assets`](../source-assets/SKILL.md) can replace them later.
 - Match the codebase's existing patterns. This skill extends the build; it doesn't restyle it.
 
 ### Step 5 — editor steps
@@ -155,7 +155,7 @@ NEXT
 - **Never change design docs.** If the design is wrong or ambiguous, surface it; the design is input, not output.
 - **Never skip verification or the review pass.** Not for "trivial" features, not when short on context. A report without VERIFICATION output (or an explicit PENDING with developer steps) is an invalid run.
 - **Don't leave the build broken.** If verification fails and can't be fixed this run, say so plainly and revert. A clean build with one less feature beats a broken build with one more.
-- **No binary asset emission** (textures, audio files, prefab YAML, .uasset). Placeholders are code-generated primitives; real assets come from `/source-assets`.
+- **No binary asset emission** (textures, audio files, prefab YAML, .uasset). Placeholders are code-generated primitives; real assets come from [`/source-assets`](../source-assets/SKILL.md).
 
 ## Engine-specific guidance
 
@@ -187,5 +187,5 @@ After `/build-feature`:
 - [`/code-review-gamestack`](../code-review-gamestack/SKILL.md) — a deeper standalone pass before commit/merge; Step 7's rubric pass is the floor, not the ceiling.
 - [`/playtest`](../playtest/SKILL.md) — drive the build for real once the feature (or a few) is in.
 - [`/critique --lens=fun`](../critique/SKILL.md) — after 2–3 features, check the kernel: is the verb actually fun, or just implemented?
-- `/source-assets` — replace the placeholders noted in the output.
+- [`/source-assets`](../source-assets/SKILL.md) — replace the placeholders noted in the output.
 - `/build-feature` again — the next mechanic from `design/mechanics.md`.

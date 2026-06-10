@@ -209,6 +209,20 @@ Recommends B. Names the next playtester: someone who has finished Sekiro.
 
 ---
 
+### `/source-assets` — Asset Wrangler
+
+> Finds, licenses, and imports art / audio / fonts so placeholders become real assets — CC0-first sourcing, AI generation routed through `/art-shotgun`, every file ledgered in `assets/ATTRIBUTION.md`.
+
+**When to fire.** The build is full of colored rectangles and silence and nobody on the team makes assets. Typically mid-prototype onward, and always before shipping anything containing assets you didn't make. Starts from the PLACEHOLDERS list a recent `/build-feature` run emitted when one exists; otherwise scans the build for stand-ins.
+
+**The lens.** License hygiene is the spine; pretty is second. An ugly game ships — a game built on assets you can't legally distribute doesn't. Sourcing runs cheapest-legal first: known-good free packs (Kenney CC0 is the default answer; one pack family over ten sources, or the game looks like a ransom note), then AI generation via `/art-shotgun` for bespoke pieces, then commission at realistic indie rates. Every imported file gets a row in `assets/ATTRIBUTION.md` — source URL, author, license, fetch date — with AI-generated assets marked for storefront disclosure. The trap list is explicit: anything-NC bars commercial use even for a free game with a tip jar; SA is legally murky for adaptations, skip; "free for personal use" means not free for a shipped game; "royalty free" is not a license.
+
+**What a session looks like.** A platformer prototype needs nine assets: player sprites, a tileset, four SFX, a music loop, a UI font. Kenney's platformer pack covers sprites + tiles + SFX (CC0, one consistent style), FreePD covers the loop, Google Fonts the UI face. The skill names every URL, verifies each license line on the actual pack page, writes nine ledger rows, and emits per-engine import steps (Point filtering for pixel art, ogg+m4a pairs for web audio). The title capsule has no pack answer — routed to `/art-shotgun` under STILL MISSING.
+
+**Related.** [`/build-feature`](../skills/build-feature/SKILL.md) produces the PLACEHOLDERS lists this skill consumes. [`/art-shotgun`](../skills/art-shotgun/SKILL.md) for the bespoke pieces no pack covers. [`/asset-audit`](../skills/asset-audit/SKILL.md) once imports land — they now count against per-platform budgets and the naming convention. [`/critique --lens=feel`](../skills/critique/SKILL.md) after — real assets change how the game feels.
+
+---
+
 ### `/scene-prototype` — Engine Builder
 
 > Detects the engine and emits a script skeleton plus setup checklist — Unity C# component, Godot .tscn + GDScript, Unreal class stub, Bevy systems.
@@ -220,6 +234,20 @@ Recommends B. Names the next playtester: someone who has finished Sekiro.
 **What a session looks like.** Detects Unity from `Assets/` + `ProjectSettings/`. Writes `LighthouseScene/LighthouseController.cs` (entry orchestrator with `[SerializeField] private` tunables under `[Header]` groups), `LighthouseConfig.cs` (ScriptableObject), `LighthouseState.cs` (state machine), and `lighthouse-setup.md` listing the GameObject hierarchy to build and the inspector wiring. Ends with the developer's next five steps and known Unity gotchas (IL2CPP stripping, `Resources.Load` path differences).
 
 **Related.** [`/plan-tech-design`](../skills/plan-tech-design/SKILL.md) when the architectural conventions the kit should honor don't yet exist. [`/code-review-gamestack`](../skills/code-review-gamestack/SKILL.md) once the kit is filled in. [`/critique --lens=feel`](../skills/critique/SKILL.md) once the scene runs and the question is whether it feels right.
+
+---
+
+### `/build-feature` — Gameplay Engineer
+
+> Implements one planned mechanic end-to-end — input, state, collision, feedback — verified to compile and run, then routed through review and playtest. The design→playable bridge.
+
+**When to fire.** A mechanic exists on paper but not in the build: "implement the jump," "make enemies chase the player." The most common entry point is a `/scene-prototype` kit full of clean TODOs. One feature per invocation — the unit of work is the smallest playable increment, not "the combat system."
+
+**The lens.** A feature is done when a player can do the thing, not when the code looks right. Three tests, in order: playable (a one-sentence, player-observable definition of done, written before any code), verified (the engine's check command actually ran and its real output is in the report — "it should work" is not a permitted end state), reviewed (the diff goes through the `/code-review-gamestack` rubric before handback). Placeholder assets are fine, and every one is named in a PLACEHOLDERS list for `/source-assets` to replace. If verification fails and can't be fixed this run, the run reverts — a clean build with one less feature beats a broken build with one more.
+
+**What a session looks like.** `/build-feature "planting"` on a Godot farming prototype. Reads `design/mechanics.md`, finds the scene-prototype kit's TODO, writes DONE = "Pressing E on tilled soil plants a seed that sprouts after 10 seconds." Implements the input action, a soil state machine, and a green-rectangle sprout with a placeholder pop sound; `godot --headless --check-only` passes; the rubric pass catches a signal connected in both `_ready()` and `_enter_tree()` and fixes it. Output ends with a four-step manual playtest script (including "press E on untilled soil — nothing should happen") and `NEXT: watering`.
+
+**Related.** [`/scene-prototype`](../skills/scene-prototype/SKILL.md) produces the scaffolding this skill fills — run it first if there's no scene at all. [`/code-review-gamestack`](../skills/code-review-gamestack/SKILL.md) for the deeper standalone pass before merge. [`/source-assets`](../skills/source-assets/SKILL.md) replaces the placeholders the output names. [`/critique --lens=fun`](../skills/critique/SKILL.md) after two or three features — is the verb fun, or just implemented?
 
 ---
 
