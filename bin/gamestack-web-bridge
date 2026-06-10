@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+# gamestack-web-bridge — loopback HTTP bridge for the gamestack web SDK
+#
+# Hosts the eight gamestack endpoints (/health /state /screenshot /input
+# /snapshot /snapshots /restore /breakpoint) on 127.0.0.1 and forwards each
+# request over a WebSocket to a browser game running the web SDK client
+# (engines/web/src/gamestack-client.js). Default port 7334.
+set -euo pipefail
+
+if ! command -v bun >/dev/null 2>&1; then
+  echo "error: bun is required for gamestack CLIs." >&2
+  echo "  install:  brew install bun  (or see https://bun.sh)" >&2
+  exit 127
+fi
+
+# Resolve symlinks so the shim works when invoked via a symlink in PATH.
+_GS_SOURCE="${BASH_SOURCE[0]}"
+while [ -L "$_GS_SOURCE" ]; do
+  _GS_DIR="$(cd "$(dirname "$_GS_SOURCE")" && pwd)"
+  _GS_TARGET="$(readlink "$_GS_SOURCE")"
+  case "$_GS_TARGET" in
+    /*) _GS_SOURCE="$_GS_TARGET" ;;
+    *)  _GS_SOURCE="$_GS_DIR/$_GS_TARGET" ;;
+  esac
+done
+GAMESTACK_BIN_DIR="$(cd "$(dirname "$_GS_SOURCE")" && pwd)"
+exec bun run "$GAMESTACK_BIN_DIR/impl/web-bridge/index.ts" "$@"

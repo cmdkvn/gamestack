@@ -22,7 +22,8 @@ This file is **local-only**. Nothing in gamestack uploads or transmits it. See [
     "engine_version": "6000.0.31f1",
     "platforms": ["pc", "switch", "ps5"],
     "phase": "pitch | prototype | vertical-slice | production | polish | cert | launched",
-    "review_mode": "lean | normal | intense"
+    "review_mode": "lean | normal | intense",
+    "experience": "beginner | intermediate | expert"
   },
   "artifacts": {
     "pitch":          "design/pitch.md",
@@ -61,6 +62,7 @@ This file is **local-only**. Nothing in gamestack uploads or transmits it. See [
 | `project.platforms` | `/plan-tech-design`, `/cert-readiness` | Drives per-platform budgets in `gamestack-asset-audit`. |
 | `project.phase` | the developer (skills propose, dev confirms) | Skills tailor advice by phase. |
 | `project.review_mode` | the developer | `lean \| normal \| intense`. Defaults to `normal` if missing. Skills filter their output by this — see "Review mode" below. |
+| `project.experience` | the developer (set at bootstrap; change with `/gamestack experience=<level>`) | Optional. Missing ⇒ `expert` (pre-experience-axis behavior). Skills adjust posture — see "Experience level" below. |
 | `artifacts.*` | the skill that produced the artifact | Relative paths from project root. Skills update on write. |
 | `recent_runs` | every skill | FIFO, max 20 entries. Used by `/gamestack` to recommend what's next. |
 | `next_recommended` | `/gamestack` | Recomputed on every `/gamestack` invocation. |
@@ -107,6 +109,7 @@ After install, every `Edit` / `Write` / `MultiEdit` Claude does on `<project>/ga
 - `project.engine` is in the engine enum.
 - `project.phase` is in the phase enum.
 - `project.review_mode` (if present) is in the review-mode enum.
+- `project.experience` (if present) is in the experience enum.
 
 A failure emits one stderr line per problem and returns non-zero, so Claude sees the error in the tool-result envelope and self-corrects.
 
@@ -142,6 +145,18 @@ Implementation contract for any skill that honors review_mode:
 3. Otherwise read `project.review_mode` from `gamestack/state.json` (default to `normal` if the field is absent).
 4. Tag every finding with one of `[P0]`/`[P1]`/`[P2]`/`[taste]`.
 5. Filter the output according to the mode (or expand it, for `intense`).
+
+## Experience level
+
+`project.experience` is the posture dial that controls how skills communicate with the developer. Three levels:
+
+- **beginner** — the developer may never have used a game engine or written much code.
+  - Define game-dev jargon in plain language the first time it appears in output (or link `docs/GLOSSARY.md`). Don't gate progress on vocabulary.
+  - Skills that default to `[PROPOSE]` flip to **`[AUTO]`-with-explanation**: apply the change, then explain what changed and why in one or two sentences per change. Never hand a beginner a diff and ask them to apply it — they can't evaluate it, and the review/playtest skills are the safety net instead.
+  - Any step that happens in an engine editor GUI gets a narrated, click-by-click walkthrough ("In Godot: Scene → New Scene → ..."). Never assume editor familiarity.
+  - Prefer sensible defaults over questions. Ask only when the answer is taste.
+- **intermediate** — ships software, new to games. Define game-dev-specific jargon. Keep `[PROPOSE]` defaults; they can read a diff.
+- **expert** — current behavior, the default when the field is missing so existing projects don't change behavior.
 
 ## Why a single file
 

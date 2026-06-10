@@ -22,6 +22,7 @@ You:    /plan-art-direction              # rates 0–10 across 8 dimensions
 You:    /autoplan                        # runs all the plan-* skills in sequence
 
 You:    /scene-prototype "first verb"    # emits Unity C# / Godot GDScript scaffolding
+You:    /build-feature "first verb"      # implements the verb — code, not TODOs
 You:    /critique --lens=fun             # is the kernel of fun present?
 
 You:    /code-review-gamestack           # gameplay-engineer rubric — surfaces, doesn't auto-fix
@@ -92,6 +93,8 @@ Add `--skills` or `--cli` to limit the refresh to one side.
 
 Full first-session walkthrough: [`docs/howto/first-30-minutes.md`](docs/howto/first-30-minutes.md).
 
+If anything fails: [`docs/TROUBLESHOOTING.md`](docs/TROUBLESHOOTING.md). New to the jargon: [`docs/GLOSSARY.md`](docs/GLOSSARY.md).
+
 ### End-user hooks (optional)
 
 After `setup` installs skills + CLIs, you can opt in to Claude Code hooks that:
@@ -111,13 +114,13 @@ Requires `jq` (`brew install jq` on macOS, `apt-get install jq` on Debian/Ubuntu
 
 ## Who this is for
 
-Solo indie devs shipping single-player narrative / arcade / puzzle / platforming games for PC, console, mobile, or web. Engine-agnostic — skills detect Unity, Godot, Unreal, GameMaker, Bevy, or web frameworks and tailor advice accordingly.
+Solo indie devs shipping single-player narrative / arcade / puzzle / platforming games for PC, console, mobile, or web. Engine-agnostic — skills detect Unity, Godot, Unreal, GameMaker, Bevy, or web frameworks and tailor advice accordingly. New to game dev entirely? Answer `beginner` when `/gamestack` asks, and the catalog shifts posture: it implements and explains instead of proposing diffs, and suggests starting with a web game so there's no engine to learn first.
 
 If you're building hyper-casual, live-service, or multiplayer games, the discipline-scaffold skills (design, code review, accessibility, cert) still apply; the specialized skills you'd want (matchmaking design, retention metric review, server-cost balancing) aren't shipped yet.
 
 ## Skills (v1.0.0)
 
-The catalog is **35 skills**. Pick whichever fits your phase — `/gamestack` will suggest 1–2 if you're not sure.
+The catalog is **37 skills**. Pick whichever fits your phase — `/gamestack` will suggest 1–2 if you're not sure.
 
 ### Front door
 
@@ -151,7 +154,9 @@ The catalog is **35 skills**. Pick whichever fits your phase — `/gamestack` wi
 |---|---|
 | [`/art-bible`](skills/art-bible/SKILL.md) | Palette, naming, silhouettes, vignettes, animation language, hand-off checklist. |
 | [`/art-shotgun`](skills/art-shotgun/SKILL.md) | 4–6 prompt variants per round; pairs with `gamestack-taste-update`. |
+| [`/source-assets`](skills/source-assets/SKILL.md) | Finds + licenses art/audio/fonts (CC0 packs, AI-gen via `/art-shotgun`, ATTRIBUTION.md ledger). |
 | [`/scene-prototype`](skills/scene-prototype/SKILL.md) | Engine-detected script + setup checklist (Unity C#, Godot `.tscn` + GDScript, Unreal class stub). |
+| [`/build-feature`](skills/build-feature/SKILL.md) | Implements a planned mechanic end-to-end — code, verification, review handoff. The design→playable bridge. |
 | [`/dialogue-write`](skills/dialogue-write/SKILL.md) | First-pass dialogue from beats + voice cards (Yarn / Ink / Dialogic / engine-native). |
 
 ### Review
@@ -226,6 +231,7 @@ Skills are interactive. The CLIs wrap the mechanical checks for CI gates.
 | [`gamestack-steam-page-check`](bin/impl/steam-page-check/README.md) | Capsule dims, trailer length, description hook, tags, screenshots. |
 | [`gamestack-game-benchmark`](bin/impl/game-benchmark/README.md) | Polls engine SDK `/state` for perf metrics; diffs vs baseline. |
 | [`gamestack-playtest-daemon`](bin/impl/playtest-daemon/README.md) | Broker for `/playtest`. SDK + screenshot-diff modes. |
+| [`gamestack-web-bridge`](bin/impl/web-bridge/README.md) | HTTP↔WebSocket bridge for the web SDK — hosts the 8 endpoints on 7334. |
 | [`gamestack-taste-update`](bin/impl/taste-update/README.md) | Persists `/art-shotgun` per-axis approvals with time-decay. |
 | [`gamestack-model-benchmark`](bin/impl/model-benchmark/README.md) | Prompt suite across several Claude models; pick winner. Local-only. |
 | [`gamestack-skill-feedback`](bin/impl/skill-feedback/README.md) | Aggregates the `/skill-feedback` log. |
@@ -242,9 +248,10 @@ Each SDK exposes a loopback-only HTTP server you drop into a running build. Same
 | Unity (UPM package) | 7331 | v0.2.0 | End-to-end against `Bun.serve()` fake. **Live engine validation pending** — first real game using it will surface engine-side bugs. |
 | Godot 4.x (addon) | 7332 | v0.2.0 | End-to-end against `Bun.serve()` fake. Same caveat. |
 | iOS (Swift Package) | 7333 | v0.1.0 | Authored against iOS 15+ SDK with XCTest suite. Live device validation pending — `swift test` requires a full Xcode install (CLT-only environments can't link `PackageDescription`). |
+| Web (browser client + bridge) | 7334 | v0.1.0 | End-to-end against a fake client in bun tests. Same live-validation caveat. |
 | Unreal (UPlugin) | — | post-v1 | — |
 
-See [`engines/unity/README.md`](engines/unity/README.md), [`engines/godot/README.md`](engines/godot/README.md), [`engines/ios/README.md`](engines/ios/README.md).
+See [`engines/unity/README.md`](engines/unity/README.md), [`engines/godot/README.md`](engines/godot/README.md), [`engines/ios/README.md`](engines/ios/README.md), [`engines/web/README.md`](engines/web/README.md).
 
 **Zero-SDK alternative:** if installing the engine SDK isn't worth the friction yet, run `/playtest --mode=screenshot-diff`. Full doc: [`docs/ZERO-SDK-PLAYTEST.md`](docs/ZERO-SDK-PLAYTEST.md).
 
@@ -276,6 +283,7 @@ gamestack is **local-only**. None of the following leave your machine:
 - `.gamestack/taste-profile.json` — `/art-shotgun` preference data.
 - `.gamestack/skill-feedback.jsonl` — thumbs-up / thumbs-down on skill outputs.
 - `design/`, `playtest/`, `playtest/screenshots/`, `playtest/baseline/` — all artifacts.
+- `assets/ATTRIBUTION.md` — the `/source-assets` license ledger.
 - Engine SDK HTTP servers bind to **loopback only** (`127.0.0.1`) and refuse non-loopback clients.
 
 The skills and CLIs do not transmit telemetry to gamestack maintainers or any third party. The only external network calls anywhere in gamestack are:
@@ -294,11 +302,11 @@ If you want to share feedback with the maintainer, run `gamestack-skill-feedback
 - **Solo-viable.** Every skill is something one person can use without a team. CLIs cover the mechanical parts in CI.
 - **Honest over flattering.** Skills push back. The right answer to "is this fun?" when it isn't is *"no, here's why, here's what to try next."*
 - **Don't generate what a human can decide.** gamestack doesn't auto-write your design doc, dialogue, or trailer copy. It structures the questions and remembers what you chose.
-- **Default to `[PROPOSE]`, not `[AUTO]`.** Solo devs have no second reviewer to catch a bad auto-fix. The skill surfaces the diff; the developer applies it.
+- **Default to `[PROPOSE]`, not `[AUTO]`.** Solo devs have no second reviewer to catch a bad auto-fix. The skill surfaces the diff; the developer applies it. (`experience: beginner` is the deliberate exception — the review and playtest skills become the second reviewer; see [`docs/STATE.md`](docs/STATE.md).)
 
 ## Status (honest)
 
-- The 35 skills, 9 CLIs, and 2 engine SDKs in this repo are **functionally shipped** — they pass the test suite (`bun test` = 98 / 98), the linter (`gamestack-skill-lint`), and have documented contracts.
+- The 37 skills, 10 CLIs, and 4 engine SDKs in this repo are **functionally shipped** — they pass the test suite (`bun test` = 112 / 112), the linter (`gamestack-skill-lint`), and have documented contracts.
 - They have **not been validated end-to-end by a real shipped game using gamestack throughout**. The case studies in [`docs/case-studies/`](docs/case-studies/) walk reference Unity / Godot projects; they are not retrospectives of a shipped commercial title.
 - Engine SDKs are validated against an in-process `Bun.serve()` fake. The first real Unity / Godot game using them will surface engine-side bugs the fake doesn't catch.
 - Six of the nine hosts (factory, slate, kiro, hermes, gbrain, plus partial cursor) have **unverified** install scripts. They follow the shared contract; nobody has run them in their respective AI agents and confirmed a skill fired.

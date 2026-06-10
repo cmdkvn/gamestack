@@ -122,8 +122,9 @@ Default to one more round if no clear winner. Default to finalizing if the devel
 
 When the developer locks a choice:
 1. Save the final prompt + output to `games/<name>/assets/<subject>-final.png` (or wherever the asset belongs).
-2. Update `design/art-bible.md` with a note referencing this exploration's outcome if the choice teaches the bible something new.
-3. Surface taste preferences for future rounds: append to `taste.json` so the next `/art-shotgun` invocation starts from these defaults.
+2. Add a row to `assets/ATTRIBUTION.md` for every generated asset that lands in the project, marked AI-generated with the tool and prompt date, per [`/source-assets`](../source-assets/SKILL.md). Storefront AI-disclosure (Steam asks at submission) depends on these marks later.
+3. Update `design/art-bible.md` with a note referencing this exploration's outcome if the choice teaches the bible something new.
+4. Surface taste preferences for future rounds: append to `taste.json` so the next `/art-shotgun` invocation starts from these defaults.
 
 ## Output format
 

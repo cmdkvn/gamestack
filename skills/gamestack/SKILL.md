@@ -30,9 +30,10 @@ Also fire automatically (suggest it) at the end of any skill that produces a maj
 | `/gamestack adopt` | Retrofit onto an existing project. See `## Adopt mode` below. |
 | `/gamestack catalog` | Print the full skills-by-phase catalog (existing behavior). |
 | `/gamestack review=<mode>` | Persist `project.review_mode = <mode>` to state.json. `<mode>` is `lean`, `normal`, or `intense`. Acknowledge and stop (no other action). |
+| `/gamestack experience=<level>` | Persist `project.experience = <level>` to state.json. `<level>` is `beginner`, `intermediate`, or `expert`. Acknowledge and stop (no other action). |
 | `/gamestack --review=<mode>` | One-shot override. Write `<mode>` to `.gamestack/scratch/review-mode-override`. Acknowledge and stop. The next review-aware skill the developer invokes will read and delete this file. |
 
-If multiple invocation forms are combined (e.g., `/gamestack new --review=lean`), apply the positional arg first (bootstrap), then the flag (write the scratch override at the end so it's ready for the next skill).
+If multiple invocation forms are combined (e.g., `/gamestack new --review=lean`), apply the positional arg first (bootstrap), then the flag (write the scratch override at the end so it's ready for the next skill). `experience=<level>` doesn't compose with `new` — bootstrap collects experience as question 1; the sub-command exists to change it later.
 
 If the developer's intent doesn't match any of these — e.g., they typed `/gamestack help` — fall back to the default behavior and gently surface the supported forms.
 
@@ -41,7 +42,7 @@ If the developer's intent doesn't match any of these — e.g., they typed `/game
 Triggered by `/gamestack new`. This is the explicit version of the implicit bootstrap that happens when `/gamestack` (no args) finds no state.json.
 
 1. **Refuse if already initialized.** Check for `gamestack/state.json`. If it exists, reply: "state.json already exists at `gamestack/state.json`. To reinitialize, rename it and re-run, or use `/gamestack adopt` to rebuild state from what's on disk." Stop. Do NOT overwrite.
-2. **Walk the 5 bootstrap questions** from `## Process / Step 1` (working name, engine, platforms, phase, review_mode) — same prompts, same auto-detection.
+2. **Walk the 6 bootstrap questions (experience first)** from `## Process / Step 1` (experience, working name, engine, platforms, phase, review_mode) — same prompts, same auto-detection, including the Beginner bootstrap switch when the developer answers `beginner`.
 3. **Write state.json** including the new `review_mode` field (defaulting to `normal` if the developer skips the question).
 4. **Create the scaffolding** (`gamestack/`, `design/`, `playtest/`, `.gamestack/` with the same conventions Step 1 of Process specifies).
 
@@ -80,7 +81,7 @@ Triggered by `/gamestack adopt`. Retrofits gamestack onto a project that already
 
 5. **Present a single confirmation summary:**
 
-   First ask the developer for the two fields that can't be detected from disk: (a) the project's working name, (b) the target platforms (multi-select). Then present the confirmation summary below with those values filled in.
+   First ask the developer for the three fields that can't be detected from disk: (a) the project's working name, (b) the target platforms (multi-select), (c) experience level. Then present the confirmation summary below with those values filled in.
 
    ```
    gamestack adopt — found:
@@ -89,6 +90,7 @@ Triggered by `/gamestack adopt`. Retrofits gamestack onto a project that already
      Engine:      <detected, e.g., Unity 6000.0.31f1>
      Platforms:   <dev-provided>
      Phase:       <inferred> (override if wrong)
+     Experience:  <dev-provided>
      Artifacts:   <N> of 8 found
        ✓ <each found path>
        (missing: <comma-separated list of missing canonical artifact keys>)
@@ -97,7 +99,7 @@ Triggered by `/gamestack adopt`. Retrofits gamestack onto a project that already
      Confirm? [yes / edit / cancel]
    ```
 
-   If the user says `edit`, ask: "Which field? `[name | platforms | phase | review-mode]`". Walk them through that single edit, then re-present the summary. The detected `engine` is read-only — if it's wrong, the developer should cancel and re-run after correcting marker files. The `artifacts` block is also read-only (it reflects what's actually on disk).
+   If the user says `edit`, ask: "Which field? `[name | platforms | phase | experience | review-mode]`". Walk them through that single edit, then re-present the summary. The detected `engine` is read-only — if it's wrong, the developer should cancel and re-run after correcting marker files. The `artifacts` block is also read-only (it reflects what's actually on disk).
 
 6. **On confirm, write state.json** with the confirmed values. Initialize `recent_runs` to `[]` (any prior skill runs from before adopt are not recorded). Initialize `next_recommended` to `[]` (will populate on the next `/gamestack` invocation). Create any missing convention dirs (`gamestack/`, `.gamestack/`) but **do NOT touch existing `design/` files**.
 
@@ -111,8 +113,19 @@ Look for `<project>/gamestack/state.json`.
 
 **If absent**, you bootstrap it now. Ask the developer:
 
-1. **"What is this project's working name?"** (slug derived as kebab-case)
-2. **"Which engine?"** (Unity / Godot / Unreal / GameMaker / Bevy / iOS native / web / unknown). Auto-detect from marker files first; ask only if ambiguous:
+1. **"Have you built games before?"**
+   - "No, or barely — walk me through everything" → `experience: "beginner"`
+   - "I ship software, but games are new to me" → `experience: "intermediate"`
+   - "I've built or shipped games" → `experience: "expert"`
+
+   This is the posture dial for every other skill (see
+   [`_state-conventions.md`](../_state-conventions.md)). For `beginner`, the rest of
+   bootstrap switches from asking to suggesting — see "Beginner bootstrap" below.
+
+If the answer is `beginner`, stop asking here — questions 2–6 are handled as suggestions in "Beginner bootstrap" below.
+
+2. **"What is this project's working name?"** (slug derived as kebab-case)
+3. **"Which engine?"** (Unity / Godot / Unreal / GameMaker / Bevy / iOS native / web / unknown). Auto-detect from marker files first; ask only if ambiguous:
    - `Assets/`, `ProjectSettings/` → Unity.
    - `project.godot`, `*.tscn` → Godot.
    - `*.uproject` → Unreal.
@@ -120,8 +133,9 @@ Look for `<project>/gamestack/state.json`.
    - `Cargo.toml` with `bevy` dependency → Bevy.
    - `package.json` with phaser / three / pixi / babylon → Web.
    - `*.xcodeproj` / `*.xcworkspace` / `Package.swift` with iOS target / `*.swift` under `Sources/` → **iOS native** (SpriteKit / SceneKit / Metal / RealityKit / SwiftUI / UIKit). Identify the rendering framework if discoverable from imports.
-3. **"Which platforms is this targeting?"** (multi-select: pc, mac, linux, switch, ps5, xbox, ios, android, web). Drives per-platform budgets and cert requirements. `ios` selection routes cert work through the App Store Review path, not console TRC/lotcheck.
-4. **"Which production phase?"** The seven phases:
+
+4. **"Which platforms is this targeting?"** (multi-select: pc, mac, linux, switch, ps5, xbox, ios, android, web). Drives per-platform budgets and cert requirements. `ios` selection routes cert work through the App Store Review path, not console TRC/lotcheck.
+5. **"Which production phase?"** The seven phases:
    - `pitch` — no build yet, idea-stage.
    - `prototype` — first working build, finding the fun.
    - `vertical-slice` — one polished slice of the game.
@@ -129,9 +143,9 @@ Look for `<project>/gamestack/state.json`.
    - `polish` — content locked, focus on feel / pacing / accessibility.
    - `cert` — submitting to PS5 / Xbox / Switch.
    - `launched` — live to players.
-5. **"Review intensity?"** `lean` / `normal` (recommended default) / `intense`. Stored as `project.review_mode`. The default `normal` means "full rubric"; `lean` filters down to `[P0]`/`[P1]` findings only; `intense` adds adversarial cross-checks. The developer can change this later with `/gamestack review=<mode>`.
+6. **"Review intensity?"** `lean` / `normal` (recommended default) / `intense`. Stored as `project.review_mode`. The default `normal` means "full rubric"; `lean` filters down to `[P0]`/`[P1]` findings only; `intense` adds adversarial cross-checks. The developer can change this later with `/gamestack review=<mode>`.
 
-Write `gamestack/state.json` to the schema in [`../../docs/STATE.md`](../../docs/STATE.md). Initialize `artifacts.*` to empty strings, `recent_runs` to `[]`, `next_recommended` to `[]`.
+Write `gamestack/state.json` to the schema in [`../../docs/STATE.md`](../../docs/STATE.md). Set `project.experience` from question 1's answer. Initialize `artifacts.*` to empty strings, `recent_runs` to `[]`, and `next_recommended` to `[]`.
 
 Create the convention scaffolding:
 
@@ -149,6 +163,28 @@ Use `mkdir -p` and `touch` for the empty files. Don't overwrite anything that al
 
 **If present**, parse it. Verify `schema` is 1. If not, surface a schema-mismatch message and ask the developer to update gamestack.
 
+### Beginner bootstrap
+
+When the developer answers `beginner`, every remaining question becomes a suggestion to
+confirm, not an open choice. One confirmation beats five decisions.
+
+- **Name:** suggest the project directory's basename, kebab-cased. "Call it `my-game`?"
+- **Engine:** if marker files exist, use them. If multiple engines' markers are present, suggest the most likely primary (largest source tree) and confirm — don't present the disambiguation question. If none exist, recommend **web**:
+  > "I'd start with a web game (HTML5 — runs in your browser). No engine to install,
+  > I can write all of the code, and you'll have something playable today. Engines like
+  > Godot or Unity are a great second project — they need their editor learned before
+  > anything shows up on screen. Web OK?"
+  Record `engine: "web"` on confirm. If they name another engine, honor it.
+- **Platforms:** default `["web"]` for a web engine, `["pc"]` otherwise. Mention it can
+  change later; don't present the nine-option multi-select.
+- **Phase:** infer, don't ask. No code and no design docs → `pitch`. Use the adopt-mode
+  inference table if there's existing work. State the inference in one plain sentence
+  ("You're at the idea stage — gamestack calls that `pitch`.").
+- **Review intensity:** skip the question. Default `normal`. They can discover
+  `/gamestack review=<mode>` later.
+
+After writing state.json, close with ONE next step, not two: if the inferred phase is `pitch`, that's `/design-jam` — "six questions that turn your idea into a one-page pitch." Otherwise pick the single top recommendation from Step 3's table and explain it in one plain sentence.
+
 ### Step 2 — orient on recent activity
 
 Read `recent_runs` (most recent 5 entries). Note:
@@ -165,9 +201,9 @@ Recommendations are phase-driven. Apply this table; pick the 1–2 most-relevant
 | Phase | Likely next skills (in priority order) |
 |---|---|
 | `pitch` | `/design-jam` (if no pitch), then `/plan-creative-director`, `/plan-game-design`, `/plan-art-direction`, `/plan-narrative`. |
-| `prototype` | `/critique --lens=fun` (kernel check), `/code-review-gamestack` (before commit), `/scene-prototype` (if expanding scope). |
+| `prototype` | `/build-feature` (next unimplemented mechanic from the design), `/critique --lens=fun` (kernel check), `/code-review-gamestack` (before commit), `/scene-prototype` (new scene scaffold), `/source-assets` (placeholder art/audio still in the build). |
 | `vertical-slice` | `/critique --lens=onboarding`, `/critique --lens=pacing`, `/balance-review`, `/playtest`. |
-| `production` | `/playtest`, `/critique --lens=pacing`, `/asset-audit`, `/code-review-gamestack` per merge. |
+| `production` | `/playtest`, `/critique --lens=pacing`, `/asset-audit`, `/source-assets` (assets still missing or unlicensed), `/code-review-gamestack` per merge. |
 | `polish` | `/critique --lens=feel`, `/critique --lens=onboarding`, `/critique --lens=a11y`, `/critique --lens=perf`. |
 | `cert` | `/cert-readiness`, `/critique --lens=a11y`, `/critique --lens=perf`, `/asset-audit`. Recommend `/cert-freeze` for discipline. For `ios` targets, the cert path is App Store Review (ATT prompt, privacy manifest, StoreKit 2 receipt validation, TestFlight dress rehearsal) — `/cert-readiness ios` walks it. |
 | `launched` | `/post-launch-monitor` daily; `/patch-notes` per patch; `/post-mortem` weekly + after launch. |
@@ -197,6 +233,8 @@ Catalog (long version): docs/skills.md
 ```
 
 Update `next_recommended` in `state.json` with the same two suggestions and write back per [`_state-conventions.md`](../_state-conventions.md).
+
+If `experience` is `beginner`, append a one-sentence plain-language explanation of what each recommended skill does and why it's next — the names alone are jargon. For `expert`, the table format above is enough.
 
 ### Step 5 — if asked, expand
 

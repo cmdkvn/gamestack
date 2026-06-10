@@ -18,13 +18,13 @@ import {
   validateScenario,
 } from "../shared/scenario.ts";
 
-const DEFAULT_PORTS: Record<string, number> = { unity: 7331, godot: 7332 };
+const DEFAULT_PORTS: Record<string, number> = { unity: 7331, godot: 7332, web: 7334 };
 
 export interface DaemonOptions {
   scenario: Scenario;
   runDir: string;
   endpoint?: string;
-  engine?: "unity" | "godot";
+  engine?: "unity" | "godot" | "web";
   /** Override the HttpClient (used by tests). */
   client?: HttpClient;
   /** Optional override clock + sleep — used by tests to avoid real waits. */

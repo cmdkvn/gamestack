@@ -22,7 +22,7 @@ Sanity check:
 ./setup --status
 ```
 
-You should see **35 skills** marked `✓ linked` and 9 CLIs reported as installed. Anything else, see [`hosts/_README.md`](../../hosts/_README.md) for host-discovery details.
+You should see **37 skills** marked `✓ linked` and 10 CLIs reported as installed. Anything else, see [`hosts/_README.md`](../../hosts/_README.md) for host-discovery details, or [`docs/TROUBLESHOOTING.md`](../TROUBLESHOOTING.md) for the common failures.
 
 The CLIs (`gamestack-skill-feedback`, `gamestack-asset-audit`, etc.) require Bun: `brew install bun` once. Skills themselves work without it; the CLIs surface a friendly error if Bun is missing.
 
@@ -49,7 +49,7 @@ In your Claude Code session, type:
 What you'll see:
 
 1. The skill notices you don't have `gamestack/state.json` and offers to bootstrap.
-2. It asks four questions: working name, engine (with auto-detection from marker files), platforms, and production phase.
+2. It asks a short series of questions, starting with your experience level (beginner / intermediate / expert — this sets how much the skills explain vs. assume), then working name, engine (with auto-detection from marker files), platforms, and production phase.
 3. It writes `gamestack/state.json` and creates the scaffolding (`design/`, `playtest/`, `.gamestack/`).
 4. It prints two recommended next steps.
 
@@ -69,6 +69,8 @@ Next steps (pick one):
 ```
 
 The router is now your standing entry point. Any time you're not sure what to do next, type `/gamestack`.
+
+> **Never built a game?** Answer `beginner` to the first question and accept the web suggestion — no engine to install or learn. From there, `/design-jam` then `/build-feature` gets you a playable verb in the browser, with the skills implementing and explaining as they go.
 
 ## 7:00 — `/design-jam` (≈15 min)
 

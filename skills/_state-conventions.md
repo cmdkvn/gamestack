@@ -4,6 +4,29 @@ This file is read by every gamestack skill. It defines the contract for reading 
 
 This file is **not a skill** — it has no frontmatter, no slash command, and `gamestack-skill-lint` skips it. It exists so the skills don't have to duplicate the same five paragraphs of state-handling instructions.
 
+## Experience level
+
+`project.experience` (`beginner | intermediate | expert`; missing ⇒ `expert`) is the
+posture dial. Read it on entry alongside `phase` and `review_mode`. These posture rules
+apply to **every skill** whenever `project.experience` is known — including `/gamestack`
+and `/design-jam`; the on-entry exemption for those two skills is only about not requiring
+`state.json` to exist, not about ignoring the posture rules if it does.
+
+- **beginner** — the developer may never have used a game engine or written much code.
+  1. Define game-dev jargon in plain language the first time it appears in your output
+     (or link `docs/GLOSSARY.md`). Don't gate progress on vocabulary.
+  2. Skills that default to `[PROPOSE]` flip to **`[AUTO]`-with-explanation**: apply the
+     change, then explain what changed and why in one or two sentences per change. Never
+     hand a beginner a diff and ask them to apply it — they can't evaluate it, and the
+     review/playtest skills are the safety net instead.
+  3. Any step that happens in an engine editor GUI gets a narrated, click-by-click
+     walkthrough ("In Godot: Scene → New Scene → ..."). Never assume editor familiarity.
+  4. Prefer sensible defaults over questions. Ask only when the answer is taste.
+- **intermediate** — ships software, new to games. Define game-dev-specific jargon.
+  Keep `[PROPOSE]` defaults; they can read a diff.
+- **expert** — pre-experience-axis behavior, unchanged. This is the default when the
+  field is missing, so existing projects don't change behavior.
+
 ## On entry
 
 Every skill except `/gamestack` and `/design-jam` does this:
@@ -17,7 +40,8 @@ Every skill except `/gamestack` and `/design-jam` does this:
    - Build-phase skills in `launched`: → `/post-launch-monitor` or `/patch-notes`.
    - Polish-phase skills in `pitch` / `prototype`: → `/critique --lens=fun`.
    - Cert skills in any phase before `cert`: explain that the skill is calibrated for cert and ask if they want to run it anyway.
-5. Read the artifact paths under `artifacts.*` that this skill depends on. If the prerequisite artifact is missing, redirect to the skill that produces it (named in the skill's "Handoff" section).
+5. Read `project.experience` (default `expert` if absent). Apply the posture rules from the "Experience level" section for the rest of this skill's output.
+6. Read the artifact paths under `artifacts.*` that this skill depends on. If the prerequisite artifact is missing, redirect to the skill that produces it (named in the skill's "Handoff" section).
 
 ## On exit
 

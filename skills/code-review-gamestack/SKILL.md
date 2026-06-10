@@ -213,6 +213,8 @@ Tag every finding with one of:
 
 If you're unsure whether a finding qualifies for `[AUTO]`, it doesn't. Default `[PROPOSE]`.
 
+**Experience posture.** Read `project.experience` per [`_state-conventions.md`](../_state-conventions.md). `beginner` flips `[PROPOSE]` to `[AUTO]`-with-explanation: apply `[P0]`–`[P2]` fixes, then explain each in one sentence — a beginner can't apply a diff, so handing them one is handing them nothing. `[taste]` findings are never auto-applied. `intermediate` / `expert`: unchanged, `[PROPOSE]` stays the default.
+
 Group findings by file. For each finding give:
 - File and line number.
 - The pattern that triggered the flag (e.g., `Family 1: per-frame allocation`).

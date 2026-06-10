@@ -272,7 +272,8 @@ KNOWN GOTCHAS
 ## Handoff
 
 After scene-prototype:
-- Developer assembles the kit per the setup checklist.
+- Developer assembles the kit per the setup checklist (for `experience: beginner`, the checklist is narrated click-by-click — see [_state-conventions.md](../_state-conventions.md)).
+- [`/build-feature`](../build-feature/SKILL.md) — fill the kit's TODOs with the first real mechanic. This is the default next step.
 - `/code-review-gamestack` — once the kit is filled in, review the new code.
 - `/playtest` (M2) — once the scene is playable, drive it via the engine SDK for a real check.
 - `/scene-prototype` again — for the next scene.
