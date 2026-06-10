@@ -44,6 +44,7 @@ Conventions live in [`.claude/CLAUDE.md`](.claude/CLAUDE.md) (which is read by C
 | A CLI's behavior | `cd bin/impl/<cli> && bun test` |
 | Symlink integrity after `./setup` | `./setup --status` |
 | Setup script idempotency | `bash tests/setup-sync.test.sh` |
+| End-user hook install / uninstall | `bash tests/hooks.test.sh` |
 
 Behavioral skill tests (scenario fixtures + a runner) are planned — see [docs/PLAN.md](docs/PLAN.md). Until then, skills are validated by reading them and trying them.
 

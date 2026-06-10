@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+# gamestack-hook-validate-state — PostToolUse hook for gamestack/state.json edits.
+# Validates schema + required-field enums so Claude sees malformed values
+# (typos, wrong phase names) the moment they're introduced.
+set -euo pipefail
+
+if ! command -v jq >/dev/null 2>&1; then
+  echo "error: jq is required for gamestack-hook-validate-state (install: brew install jq)" >&2
+  exit 1
+fi
+
+FILE_PATH="$(jq -r '.tool_input.file_path // empty')"
+
+case "$FILE_PATH" in
+  */gamestack/state.json) ;;
+  *) exit 0 ;;
+esac
+
+if ! jq empty "$FILE_PATH" >/dev/null 2>&1; then
+  echo "error: gamestack/state.json is not valid JSON" >&2
+  exit 1
+fi
+
+ENGINES='["unity","godot","unreal","gamemaker","bevy","web","unknown"]'
+PHASES='["pitch","prototype","vertical-slice","production","polish","cert","launched"]'
+MODES='["lean","normal","intense"]'
+
+errors="$(jq -r --argjson engines "$ENGINES" --argjson phases "$PHASES" --argjson modes "$MODES" '
+  [
+    (if .schema != 1 then "schema must be 1 (got \(.schema // "missing"))" else empty end),
+    (if (.project.engine | IN($engines[])) | not then "project.engine must be one of \($engines | join("|")) (got \(.project.engine // "missing"))" else empty end),
+    (if (.project.phase  | IN($phases[]))  | not then "project.phase must be one of \($phases | join("|")) (got \(.project.phase  // "missing"))" else empty end),
+    (if (.project.review_mode != null) and ((.project.review_mode | IN($modes[])) | not) then "project.review_mode must be one of \($modes | join("|")) (got \(.project.review_mode))" else empty end)
+  ] | .[]
+' "$FILE_PATH")"
+
+if [ -n "$errors" ]; then
+  echo "error: gamestack/state.json failed validation:" >&2
+  while IFS= read -r line; do
+    printf '  - %s\n' "$line" >&2
+  done <<< "$errors"
+  exit 1
+fi
+exit 0

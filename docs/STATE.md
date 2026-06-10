@@ -92,6 +92,26 @@ Do not overwrite fields a skill doesn't own. A `/critique --lens=fun` run does n
 
 If `schema` is older than the current code, skills should call into a shared migrator (defined in `bin/impl/shared/state.ts`) before reading the rest. The migrator must be additive: never drop fields, only rename or default.
 
+### Validation hook
+
+End-user gamestack projects can install `gamestack-hook-validate-state` via:
+
+```bash
+./setup --hooks-for <project-dir> --cli-dir <writable-on-path-dir>
+```
+
+After install, every `Edit` / `Write` / `MultiEdit` Claude does on `<project>/gamestack/state.json` triggers a validation pass:
+
+- The file parses as JSON.
+- `schema == 1`.
+- `project.engine` is in the engine enum.
+- `project.phase` is in the phase enum.
+- `project.review_mode` (if present) is in the review-mode enum.
+
+A failure emits one stderr line per problem and returns non-zero, so Claude sees the error in the tool-result envelope and self-corrects.
+
+See `setup --help` for `--hooks-for` flag details and `setup --status --hooks-for <project-dir>` to inspect install state.
+
 ## Review mode
 
 `project.review_mode` is the intensity dial every review-shaped skill should honor. Three levels:

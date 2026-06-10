@@ -68,6 +68,8 @@ jobs:
         run: shellcheck -s bash hosts/*.sh
       - name: Check CLI shims
         run: shellcheck bin/gamestack-*
+      - name: Check hook scripts
+        run: shellcheck bin/impl/hooks/*
 
   setup-sync:
     name: setup-sync test
