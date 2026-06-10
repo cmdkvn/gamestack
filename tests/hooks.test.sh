@@ -8,7 +8,9 @@
 #   5. setup --hooks-for install creates symlinks + settings entries
 #   6. setup --hooks-for re-run is idempotent
 #   7. setup --hooks-for preserves user's existing hooks
-# (uninstall/status scenarios added in the next commit.)
+#   8. setup --uninstall --hooks-for removes symlinks + cleans settings
+#   9. setup --uninstall --hooks-for preserves user's pre-existing hooks
+#  10. setup --status --hooks-for reports installation state
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -223,6 +225,95 @@ gs_cmd="$(jq -r '.hooks.SessionStart[].hooks[].command' "$settings" | grep 'game
 if [ -z "$gs_cmd" ]; then
   _fail "setup --hooks-for: gamestack SessionStart hook not installed when user had one"
 fi
+
+# ---------------------------------------------------------------------------
+# Scenario 8 — setup --uninstall --hooks-for removes symlinks + cleans settings
+# ---------------------------------------------------------------------------
+echo "--- setup --uninstall --hooks-for: removes everything"
+PROJECT="$SCRATCH/p4"
+CLI_DIR_2="$SCRATCH/cli2"
+mkdir -p "$PROJECT" "$CLI_DIR_2"
+# install first
+"$REPO_ROOT/setup" --cli --hooks-for "$PROJECT" --cli-dir "$CLI_DIR_2" >/dev/null 2>&1
+# now uninstall
+set +e
+out="$("$REPO_ROOT/setup" --cli --uninstall --hooks-for "$PROJECT" --cli-dir "$CLI_DIR_2" 2>&1)"
+rc=$?
+set -e
+_assert_exit 0 "$rc" "setup --uninstall --hooks-for"
+
+if [ -L "$CLI_DIR_2/gamestack-hook-session-start" ]; then
+  _fail "uninstall: session-start symlink still present"
+fi
+if [ -L "$CLI_DIR_2/gamestack-hook-validate-state" ]; then
+  _fail "uninstall: validate-state symlink still present"
+fi
+
+settings="$PROJECT/.claude/settings.local.json"
+if [ -f "$settings" ]; then
+  ss_present="$(jq '.hooks.SessionStart // empty' "$settings")"
+  pt_present="$(jq '.hooks.PostToolUse // empty' "$settings")"
+  if [ -n "$ss_present" ]; then
+    _fail "uninstall: SessionStart key still in settings.local.json"
+  fi
+  if [ -n "$pt_present" ]; then
+    _fail "uninstall: PostToolUse key still in settings.local.json"
+  fi
+fi
+
+# ---------------------------------------------------------------------------
+# Scenario 9 — uninstall preserves user's pre-existing hooks
+# ---------------------------------------------------------------------------
+echo "--- setup --uninstall --hooks-for: preserves user's hooks"
+PROJECT="$SCRATCH/p5"
+CLI_DIR_3="$SCRATCH/cli3"
+mkdir -p "$PROJECT/.claude" "$CLI_DIR_3"
+cat > "$PROJECT/.claude/settings.local.json" <<'EOF'
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup",
+        "hooks": [{"type": "command", "command": "/usr/local/bin/user-banner.sh"}]
+      }
+    ]
+  }
+}
+EOF
+# install gamestack hooks on top of user's hooks
+"$REPO_ROOT/setup" --cli --hooks-for "$PROJECT" --cli-dir "$CLI_DIR_3" >/dev/null 2>&1
+# uninstall
+set +e
+out="$("$REPO_ROOT/setup" --cli --uninstall --hooks-for "$PROJECT" --cli-dir "$CLI_DIR_3" 2>&1)"
+rc=$?
+set -e
+_assert_exit 0 "$rc" "uninstall with user hooks present"
+settings="$PROJECT/.claude/settings.local.json"
+user_cmd="$(jq -r '.hooks.SessionStart[].hooks[].command' "$settings" 2>/dev/null | grep '/usr/local/bin/user-banner.sh' || true)"
+if [ -z "$user_cmd" ]; then
+  _fail "uninstall: user's SessionStart hook lost"
+fi
+gs_cmd="$(jq -r '.hooks.SessionStart[]?.hooks[]?.command' "$settings" 2>/dev/null | grep 'gamestack-hook-session-start' || true)"
+if [ -n "$gs_cmd" ]; then
+  _fail "uninstall: gamestack SessionStart hook still present"
+fi
+
+# ---------------------------------------------------------------------------
+# Scenario 10 — setup --status --hooks-for reports installation state
+# ---------------------------------------------------------------------------
+echo "--- setup --status --hooks-for: reports state"
+PROJECT="$SCRATCH/p6"
+CLI_DIR_4="$SCRATCH/cli4"
+mkdir -p "$PROJECT" "$CLI_DIR_4"
+"$REPO_ROOT/setup" --cli --hooks-for "$PROJECT" --cli-dir "$CLI_DIR_4" >/dev/null 2>&1
+set +e
+out="$("$REPO_ROOT/setup" --cli --status --hooks-for "$PROJECT" --cli-dir "$CLI_DIR_4" 2>&1)"
+rc=$?
+set -e
+_assert_exit 0 "$rc" "setup --status --hooks-for"
+_assert_contains "gamestack-hook-session-start" "$out" "status mentions session-start hook"
+_assert_contains "gamestack-hook-validate-state" "$out" "status mentions validate-state hook"
+_assert_contains "settings.local.json" "$out" "status mentions settings file"
 
 # ---------------------------------------------------------------------------
 # Result
