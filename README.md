@@ -92,6 +92,23 @@ Add `--skills` or `--cli` to limit the refresh to one side.
 
 Full first-session walkthrough: [`docs/howto/first-30-minutes.md`](docs/howto/first-30-minutes.md).
 
+### End-user hooks (optional)
+
+After `setup` installs skills + CLIs, you can opt in to Claude Code hooks that:
+
+- Print a one-line project status banner at every SessionStart (engine, phase, review_mode, recent-run count).
+- Validate `gamestack/state.json` after Claude edits it (schema check + enum validation; catches malformed `phase` / `engine` values before downstream skills choke).
+
+To install:
+
+```bash
+./setup --hooks-for /path/to/your/game-project
+```
+
+This writes per-user hook config to `<project>/.claude/settings.local.json` (not the committed `.claude/settings.json`) and symlinks the hook scripts into your CLI install dir. Re-run any time to refresh; `./setup --uninstall --hooks-for <project>` removes them.
+
+Requires `jq` (`brew install jq` on macOS, `apt-get install jq` on Debian/Ubuntu).
+
 ## Who this is for
 
 Solo indie devs shipping single-player narrative / arcade / puzzle / platforming games for PC, console, mobile, or web. Engine-agnostic — skills detect Unity, Godot, Unreal, GameMaker, Bevy, or web frameworks and tailor advice accordingly.
