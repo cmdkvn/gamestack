@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+# gamestack-hook-session-start — SessionStart banner.
+# Emits a one-line project summary so Claude has phase / engine / review_mode
+# context for the user's first turn without reading state.json itself.
+set -euo pipefail
+
+STATE="${CLAUDE_PROJECT_DIR:-$PWD}/gamestack/state.json"
+
+if [ ! -f "$STATE" ]; then
+  echo "gamestack: no state.json yet — run /gamestack new (or adopt for existing projects)."
+  exit 0
+fi
+
+if ! command -v jq >/dev/null 2>&1; then
+  echo "gamestack: (jq missing — banner unavailable)"
+  exit 0
+fi
+
+engine="$(jq -r '.project.engine // "unknown"' "$STATE" 2>/dev/null || echo unknown)"
+phase="$(jq -r '.project.phase // "unknown"' "$STATE" 2>/dev/null || echo unknown)"
+mode="$(jq -r '.project.review_mode // "normal"' "$STATE" 2>/dev/null || echo normal)"
+runs="$(jq -r '(.recent_runs // []) | length' "$STATE" 2>/dev/null || echo 0)"
+echo "gamestack: ${engine} | phase=${phase} | review_mode=${mode} | ${runs} recent runs"
