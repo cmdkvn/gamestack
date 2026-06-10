@@ -161,6 +161,8 @@ playtest/                ← created lazily by /critique, /playtest
 
 Use `mkdir -p` and `touch` for the empty files. Don't overwrite anything that already exists.
 
+**If present**, parse it. Verify `schema` is 1. If not, surface a schema-mismatch message and ask the developer to update gamestack.
+
 ### Beginner bootstrap
 
 When the developer answers `beginner`, every remaining question becomes a suggestion to
@@ -182,8 +184,6 @@ confirm, not an open choice. One confirmation beats five decisions.
   `/gamestack review=<mode>` later.
 
 After writing state.json, close with ONE next step, not two: if the inferred phase is `pitch`, that's `/design-jam` — "six questions that turn your idea into a one-page pitch." Otherwise pick the single top recommendation from Step 3's table and explain it in one plain sentence.
-
-**If present**, parse it. Verify `schema` is 1. If not, surface a schema-mismatch message and ask the developer to update gamestack.
 
 ### Step 2 — orient on recent activity
 

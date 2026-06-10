@@ -42,6 +42,10 @@ The time elapsed since the previous frame. Multiply movement and timers by it so
 
 One instruction from the game to the graphics card: "draw this." Each call has fixed overhead, so a frame with thousands of them slows down even when each thing drawn is simple. Reducing draw calls (by batching things together) is a standard performance fix.
 
+## Experience level
+
+The `project.experience` dial in `gamestack/state.json`: `beginner`, `intermediate`, or `expert`. It controls how every skill communicates with the developer. **beginner** — skills explain changes in plain language, apply fixes automatically with narrated editor steps, and link here for jargon instead of assuming familiarity. **intermediate** — jargon is defined once; the developer can read a diff. **expert** — pre-axis behavior, unchanged. Set at bootstrap; change later with `/gamestack experience=<level>`.
+
 ## Frame budget
 
 The time the game has to compute each frame: 16.7 milliseconds at 60 frames per second. Everything — physics, AI, drawing, audio — shares that budget. Exceed it and the frame is late, which the player perceives as stutter.
@@ -76,17 +80,21 @@ Pacing is how a game alternates intensity and rest over time. A tension graph pl
 
 ## Phase
 
-gamestack tracks every project through seven phases, stored in `gamestack/state.json`:
+gamestack tracks every project through seven phases, stored in `gamestack/state.json` as `project.phase`:
 
-- **Pitch** — deciding what the game is; nothing built yet.
-- **Plan** — locking design, art, audio, and tech direction on paper.
-- **Build** — writing the code and assembling the scenes.
-- **Review** — checking the work: code review, balance, asset audits.
-- **Playtest** — running the actual build and watching what happens.
-- **Ship** — store page, certification, release.
-- **Reflect** — patch notes, retros, lessons carried to the next cycle.
+- **pitch** — deciding what the game is; no build yet.
+- **prototype** — first working build, finding the fun.
+- **vertical-slice** — one polished slice of the game finished to shipping quality.
+- **production** — most of the content being built.
+- **polish** — content locked, focus on feel, pacing, and accessibility.
+- **cert** — submitting to PS5 / Xbox / Switch / App Store.
+- **launched** — live to players.
 
-Real work loops through these constantly; the phases are a menu, not a conveyor belt.
+The developer advances the phase explicitly via `/gamestack`; skills never silently change it. See also: **Pipeline**.
+
+## Pipeline
+
+The skill-pipeline names — Pitch, Plan, Build, Review, Playtest, Ship, Reflect — describe the *workflow arc* that gamestack skills follow, not the production phases stored in `state.json`. The arc is a menu, not a conveyor belt; most projects loop through Build → Review → Playtest many times before reaching Ship. See **Phase** for the seven values actually stored in `state.json`.
 
 ## Placeholder (programmer art)
 

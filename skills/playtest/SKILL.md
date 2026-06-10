@@ -1,6 +1,6 @@
 ---
 name: playtest
-description: QA Lead skill — drives a real Unity / Godot build via the gamestack engine SDK. Phase-aware (Prototype / Vertical Slice / Production / Polish / Cert / Launched). Reads game state via GET /state, injects input via POST /input, captures screenshots via POST /screenshot, save-fuzzes via POST /snapshot + /restore, and pauses at semantic checkpoints via POST /breakpoint. Files atomic bug fixes with regression scenarios. Degrades gracefully to offline static-analysis when the SDK is not installed. Use whenever you have a build that needs to be exercised end-to-end.
+description: QA Lead skill — drives a real Unity / Godot / iOS / web build via the gamestack engine SDK. Phase-aware (Prototype / Vertical Slice / Production / Polish / Cert / Launched). Reads game state via GET /state, injects input via POST /input, captures screenshots via POST /screenshot, save-fuzzes via POST /snapshot + /restore, and pauses at semantic checkpoints via POST /breakpoint. Files atomic bug fixes with regression scenarios. Degrades gracefully to offline static-analysis when the SDK is not installed. Use whenever you have a build that needs to be exercised end-to-end.
 ---
 
 # playtest
@@ -52,7 +52,7 @@ If the phase doesn't match a default, ask the developer to point at a scenario f
 
 If the developer explicitly passed `--mode=screenshot-diff` or `--offline`, skip the probe and use the chosen mode.
 
-Otherwise, probe the SDK at the default port (Unity: 7331, Godot: 7332, web: 7334 — the web SDK has no in-engine server, so `gamestack-web-bridge` must be running and the game open in a browser before the probe will answer):
+Otherwise, probe the SDK at the default port (Unity: 7331, Godot: 7332, iOS: 7333, web: 7334 — the web SDK has no in-engine server, so `gamestack-web-bridge` must be running and the game open in a browser before the probe will answer):
 
 ```bash
 curl -sf -m 2 http://localhost:7331/health

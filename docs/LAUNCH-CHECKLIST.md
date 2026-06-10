@@ -98,7 +98,7 @@ cd bin/impl && bun install && bun test
 bunx tsc --noEmit
 
 # 4. Setup must install cleanly to the default host.
-cd ../.. && ./setup --status   # should show 38 skills linked
+cd ../.. && ./setup --status   # should show 37 skills linked
 ```
 
 If any of those four fail, v1.0 has regressed — investigate before any subsequent release.

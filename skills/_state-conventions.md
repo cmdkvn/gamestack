@@ -7,7 +7,10 @@ This file is **not a skill** — it has no frontmatter, no slash command, and `g
 ## Experience level
 
 `project.experience` (`beginner | intermediate | expert`; missing ⇒ `expert`) is the
-posture dial. Read it on entry alongside `phase` and `review_mode`.
+posture dial. Read it on entry alongside `phase` and `review_mode`. These posture rules
+apply to **every skill** whenever `project.experience` is known — including `/gamestack`
+and `/design-jam`; the on-entry exemption for those two skills is only about not requiring
+`state.json` to exist, not about ignoring the posture rules if it does.
 
 - **beginner** — the developer may never have used a game engine or written much code.
   1. Define game-dev jargon in plain language the first time it appears in your output

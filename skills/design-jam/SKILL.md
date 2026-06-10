@@ -19,6 +19,8 @@ Use this skill when the user says any of:
 
 Do NOT use this skill mid-implementation. If the developer is past prototype and looking for polish or critique, use `/critique --lens=fun` or (post-M2) one of the playtest skills.
 
+If `gamestack/state.json` exists, read `project.experience` and honor the posture rules in [`_state-conventions.md`](../_state-conventions.md). For `beginner`, the six questions still run in full — that's the value — but when you push back on a weak answer, explain the *reason* in plain language rather than assuming the developer knows what a "core verb" or a "logline" is; link [docs/GLOSSARY.md](../../docs/GLOSSARY.md) the first time you use any term defined there. Never leave a beginner holding a piece of jargon with no definition.
+
 ## Process — six forcing questions, one at a time
 
 Ask the six questions below **one at a time**, in order. Wait for the developer's answer before moving on. Push back on weak answers. Each question is designed to expose a different failure mode in early game ideas, and skipping one will let that failure mode through.
