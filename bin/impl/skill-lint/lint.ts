@@ -251,29 +251,36 @@ function lintNoReadmeInClaudeDirs(root: string, findings: LintFinding[]): void {
   }
 }
 
+function collectDocsToCheck(root: string, skillDirs: string[]): string[] {
+  const docs: string[] = [];
+  pushIfExists(docs, join(root, "docs", "skills.md"));
+  pushIfExists(docs, join(root, "docs", "ROLES.md"));
+  pushIfExists(docs, join(root, "docs", "ENGINES.md"));
+  pushIfExists(docs, join(root, "docs", "CERT.md"));
+  pushIfExists(docs, join(root, "docs", "ACCESSIBILITY.md"));
+  pushIfExists(docs, join(root, "docs", "PLATFORMS.md"));
+  pushIfExists(docs, join(root, "docs", "templates", "README.md"));
+
+  const howtoDir = join(root, "docs", "howto");
+  if (existsSync(howtoDir)) {
+    for (const f of readdirSync(howtoDir)) {
+      if (f.endsWith(".md")) docs.push(join(howtoDir, f));
+    }
+  }
+
+  for (const skillDir of skillDirs) {
+    docs.push(join(skillDir, "SKILL.md"));
+  }
+
+  return docs;
+}
+
 function lintCrossLinks(skillDirs: string[], root: string, findings: LintFinding[]): void {
   const skillNames = new Set(skillDirs.map((d) => basename(d)));
   const skillPathRe = /\(\.\.\/skills\/([a-z0-9-]+)\/SKILL\.md\)/g;
   const skillsDoubleHopRe = /\(\.\.\/\.\.\/skills\/([a-z0-9-]+)\/SKILL\.md\)/g;
 
-  const docsToCheck: string[] = [];
-  pushIfExists(docsToCheck, join(root, "docs", "skills.md"));
-  pushIfExists(docsToCheck, join(root, "docs", "ROLES.md"));
-  pushIfExists(docsToCheck, join(root, "docs", "ENGINES.md"));
-  pushIfExists(docsToCheck, join(root, "docs", "CERT.md"));
-  pushIfExists(docsToCheck, join(root, "docs", "ACCESSIBILITY.md"));
-  pushIfExists(docsToCheck, join(root, "docs", "PLATFORMS.md"));
-
-  const howtoDir = join(root, "docs", "howto");
-  if (existsSync(howtoDir)) {
-    for (const f of readdirSync(howtoDir)) {
-      if (f.endsWith(".md")) docsToCheck.push(join(howtoDir, f));
-    }
-  }
-
-  for (const skillDir of skillDirs) {
-    docsToCheck.push(join(skillDir, "SKILL.md"));
-  }
+  const docsToCheck = collectDocsToCheck(root, skillDirs);
 
   for (const doc of docsToCheck) {
     let text: string;
